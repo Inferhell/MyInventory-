@@ -11,4 +11,10 @@ public interface UserService {
     Optional<User> findByEmail(String email);
 
     List<User> getAllUsers();
+
+    void changePassword(
+        String email,
+        String currentPassword,
+        String newPassword
+);
 }

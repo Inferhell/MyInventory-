@@ -38,4 +38,37 @@ public class UserServiceImpl implements UserService {
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
+   @Override
+public void changePassword(
+        String email,
+        String currentPassword,
+        String newPassword) {
+
+    if (newPassword.length() < 8) {
+        throw new RuntimeException(
+                "La nueva contraseña debe tener al menos 8 caracteres"
+        );
+    }
+
+    User user = userRepository.findByEmail(email)
+            .orElseThrow(() ->
+                    new RuntimeException("Usuario no encontrado"));
+
+    boolean matches = passwordEncoder.matches(
+            currentPassword,
+            user.getPassword()
+    );
+
+    if (!matches) {
+        throw new RuntimeException(
+                "La contraseña actual es incorrecta"
+        );
+    }
+
+    user.setPassword(
+            passwordEncoder.encode(newPassword)
+    );
+
+    userRepository.save(user);
+}
 }

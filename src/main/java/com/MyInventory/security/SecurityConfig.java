@@ -27,7 +27,8 @@ public class SecurityConfig {
 
                         .requestMatchers("/supervisor")
                         .hasAnyRole("ADMIN", "SUPERVISOR")
-
+                        
+                        
                         .requestMatchers("/employee")
                         .hasAnyRole(
                                 "ADMIN",
