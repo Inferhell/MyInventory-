@@ -8,6 +8,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.http.HttpMethod;
 
 @Configuration
 @RequiredArgsConstructor
@@ -26,15 +27,47 @@ public class SecurityConfig {
                         .hasRole("ADMIN")
 
                         .requestMatchers("/supervisor")
-                        .hasAnyRole("ADMIN", "SUPERVISOR")
-                        
-                        
+                        .hasAnyRole(
+                                "ADMIN",
+                                "SUPERVISOR"
+                        )
+
                         .requestMatchers("/employee")
                         .hasAnyRole(
                                 "ADMIN",
                                 "SUPERVISOR",
                                 "EMPLOYEE"
                         )
+
+                        .requestMatchers("/users/**")
+                        .hasRole("ADMIN")
+
+                        // ===== CATEGORÍAS =====
+
+                        .requestMatchers(HttpMethod.POST, "/categories")
+                        .hasAnyRole(
+                                "ADMIN",
+                                "SUPERVISOR"
+                        )
+
+                        .requestMatchers(HttpMethod.GET, "/categories/**")
+                        .hasAnyRole(
+                                "ADMIN",
+                                "SUPERVISOR",
+                                "EMPLOYEE"
+                        )
+
+                        .requestMatchers(HttpMethod.PUT, "/categories/**")
+                        .hasAnyRole(
+                                "ADMIN",
+                                "SUPERVISOR"
+                        )
+
+                        .requestMatchers(HttpMethod.PATCH, "/categories/**")
+                        .hasRole("ADMIN")
+
+                        .requestMatchers("/change-password")
+                        .authenticated()
 
                         .anyRequest()
                         .authenticated()
@@ -54,5 +87,4 @@ public class SecurityConfig {
 
         return config.getAuthenticationManager();
     }
-    
 }

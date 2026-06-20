@@ -1,20 +1,35 @@
 package com.myinventory.service;
 
-import com.myinventory.model.User;
 import java.util.List;
 import java.util.Optional;
 
-public interface UserService {
+import com.myinventory.dto.CreateUserRequest;
+import com.myinventory.dto.UpdateUserRequest;
+import com.myinventory.dto.UserResponse;
+import com.myinventory.model.User;
 
-    User createUser(User user);
+public interface UserService {
 
     Optional<User> findByEmail(String email);
 
-    List<User> getAllUsers();
-
     void changePassword(
-        String email,
-        String currentPassword,
-        String newPassword
-);
+            String email,
+            String currentPassword,
+            String newPassword
+    );
+
+    List<UserResponse> getAllUsers();
+
+    UserResponse getUserById(Long id);
+
+    UserResponse createUser(
+            CreateUserRequest request
+    );
+
+    UserResponse updateUser(
+            Long id,
+            UpdateUserRequest request
+    );
+
+    void disableUser(Long id);
 }
