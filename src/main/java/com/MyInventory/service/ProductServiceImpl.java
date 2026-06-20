@@ -1,6 +1,8 @@
 package com.myinventory.service;
 
 
+import com.myinventory.dto.CreateProductRequest;
+import com.myinventory.dto.ProductResponse;
 import com.myinventory.model.Product;
 import com.myinventory.repository.ProductRepository;
 import org.springframework.stereotype.Service;
@@ -11,15 +13,34 @@ import java.util.List;
 public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
+    
 
     public ProductServiceImpl(ProductRepository productRepository) {
         this.productRepository = productRepository;
     }
     
     @Override
-    public Product save(Product product) {
-        return productRepository.save(product);
-    }
+public ProductResponse save(CreateProductRequest request) {
+
+    Product product = Product.builder()
+            .name(request.getName())
+            .description(request.getDescription())
+            .price(request.getPrice())
+            .stock(request.getStock())
+            .active(true)
+            .build();
+
+    Product saved = productRepository.save(product);
+
+    return ProductResponse.builder()
+            .id(saved.getId())
+            .name(saved.getName())
+            .description(saved.getDescription())
+            .price(saved.getPrice())
+            .stock(saved.getStock())
+            .active(saved.isActive())
+            .build();
+}
 
     @Override
     public List<Product> findAll() {
@@ -27,9 +48,11 @@ public class ProductServiceImpl implements ProductService {
 }
 
     @Override
-    public Product findById(Long id) {
-        return productRepository.findById(id).orElse(null);
-    }
+public Product findById(Long id) {
+    return productRepository
+            .findByIdAndActiveTrue(id)
+            .orElse(null);
+}
 
     @Override
     public Product update(Long id, Product product) {

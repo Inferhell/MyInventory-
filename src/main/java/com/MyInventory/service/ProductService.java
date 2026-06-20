@@ -1,13 +1,14 @@
 package com.myinventory.service;
 
+import com.myinventory.dto.CreateProductRequest;
+import com.myinventory.dto.ProductResponse;
 import com.myinventory.model.Product;
 
 import java.util.List;
 
 public interface ProductService {
 
-    Product save(Product product);
-
+ProductResponse save(CreateProductRequest request);
     List<Product> findAll();
 
     Product findById(Long id);

@@ -1,8 +1,13 @@
 package com.myinventory.controller;
 
+import com.myinventory.dto.CreateProductRequest;
+import com.myinventory.dto.ProductResponse;
 import com.myinventory.model.Product;
 import com.myinventory.service.ProductService;
+
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 import java.util.List;
 
@@ -18,9 +23,11 @@ public class ProductController {
 
     
     @PostMapping
-    public Product save(@RequestBody Product product){
-        return productService.save(product);
-    }
+public ProductResponse save(
+       @Valid @RequestBody CreateProductRequest request){
+
+    return productService.save(request);
+}
 
     @GetMapping
     public List<Product> findAll(){
@@ -28,9 +35,28 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    public Product findById(@PathVariable Long id){
-        return productService.findById(id);
+    public ResponseEntity<Product> findById(@PathVariable Long id){
+
+    Product product = productService.findById(id);
+
+    if(product == null){
+         return ResponseEntity.notFound().build();
     }
-    
+
+     return ResponseEntity.ok(product);
+    }
+    @PutMapping("/{id}")
+    public Product update(
+        @PathVariable Long id,
+        @RequestBody Product product) {
+
+    return productService.update(id, product);
+}
+
+    @PatchMapping("/{id}/disable")
+    public void disable(@PathVariable Long id) {
+
+    productService.disable(id);
+}
 
 }

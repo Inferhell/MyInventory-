@@ -68,10 +68,60 @@ public class SecurityConfig {
 
                         // ===== PRODUCTOS =====
 
-                        .requestMatchers("/products/**")
+                        .requestMatchers(HttpMethod.POST, "/products")
+                        .hasAnyRole(
+                         "ADMIN",
+                         "SUPERVISOR"
+                        )       
+
+                        .requestMatchers(HttpMethod.GET, "/products/**")
+                        .hasAnyRole(
+                         "ADMIN",
+                         "SUPERVISOR",
+                        "EMPLOYEE"
+                        )
+
+                        .requestMatchers(HttpMethod.PUT, "/products/**")
+                        .hasAnyRole(
+                        "ADMIN",
+                        "SUPERVISOR"
+                        )
+
+                        .requestMatchers(HttpMethod.PATCH, "/products/**")
+                        .hasRole("ADMIN")
+
+                        // ===== PROVEEDORES =====
+
+                        .requestMatchers(HttpMethod.POST, "/suppliers")
+                        .hasAnyRole(
+                        "ADMIN",
+                        "SUPERVISOR"
+                        )
+
+                        .requestMatchers(HttpMethod.GET, "/suppliers/**")
+                        .hasAnyRole(
+                        "ADMIN",
+                        "SUPERVISOR",
+                        "EMPLOYEE"
+                        )
+
+                        .requestMatchers(HttpMethod.PUT, "/suppliers/**")
+                        .hasAnyRole(
+                        "ADMIN",
+                        "SUPERVISOR"
+                        )
+
+                        .requestMatchers(HttpMethod.PATCH, "/suppliers/**")
+                        .hasRole("ADMIN")
+
+                        // ===== MOVIMIENTOS =====
+
+                        .requestMatchers("/movements/**")
                         .permitAll()
+                        // ===== DASHBOARD =====
 
-
+                        .requestMatchers(HttpMethod.GET, "/dashboard")
+                        .permitAll()
 
                         .requestMatchers("/change-password")
                         .authenticated()
