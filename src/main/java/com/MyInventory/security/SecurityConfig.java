@@ -66,6 +66,13 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PATCH, "/categories/**")
                         .hasRole("ADMIN")
 
+                        // ===== PRODUCTOS =====
+
+                        .requestMatchers("/products/**")
+                        .permitAll()
+
+
+
                         .requestMatchers("/change-password")
                         .authenticated()
 
