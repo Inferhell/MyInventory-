@@ -3,6 +3,7 @@ package com.myinventory.service;
 import com.myinventory.dto.CreateUserRequest;
 import com.myinventory.dto.UpdateUserRequest;
 import com.myinventory.dto.UserResponse;
+import com.myinventory.exception.ResourceNotFoundException;
 import com.myinventory.model.User;
 import com.myinventory.repository.UserRepository;
 
@@ -54,36 +55,52 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserResponse> getAllUsers() {
+        public List<UserResponse> getAllUsers() {
 
-        return userRepository.findAll()
-                .stream()
-                .map(this::toResponse)
-                .toList();
-    }
+    return userRepository.findAll()
+            .stream()
+            .map(this::toResponse)
+            .toList();
+}
 
 @Override
 public UserResponse getUserById(Long id) {
 
-    User user = userRepository.findById(id)
-            .orElseThrow(() ->
-                    new RuntimeException(
-                            "Usuario no encontrado"
-                    ));
+   User user = userRepository.findById(id)
+        .orElseThrow(() ->
+                new ResourceNotFoundException(
+                        "Usuario no encontrado"
+                ));
 
     return toResponse(user);
 }
 
-  @Override
+   @Override
+public void enableUser(Long id) {
+
+    User user =
+            userRepository.findById(id)
+            .orElseThrow(() ->
+                new ResourceNotFoundException(
+                    "Usuario no encontrado"
+                )
+            );
+
+                user.setActive(true);
+
+    userRepository.save(user);
+}             
+@Override
 public UserResponse updateUser(
         Long id,
         UpdateUserRequest request) {
 
-    User user = userRepository.findById(id)
-            .orElseThrow(() ->
-                    new RuntimeException(
-                            "Usuario no encontrado"
-                    ));
+    User user = userRepository
+        .findByIdAndActiveTrue(id)
+        .orElseThrow(() ->
+                new ResourceNotFoundException(
+                        "Usuario activo no encontrado"
+                ));
 
     Optional<User> existingUser =
             userRepository.findByEmail(request.email());
@@ -91,7 +108,7 @@ public UserResponse updateUser(
     if (existingUser.isPresent()
             && !existingUser.get().getId().equals(id)) {
 
-        throw new RuntimeException(
+        throw new IllegalArgumentException(
                 "El email ya está en uso"
         );
     }
@@ -99,9 +116,9 @@ public UserResponse updateUser(
     user.setName(request.name());
     user.setEmail(request.email());
     user.setRole(request.role());
-    user.setActive(request.active());
 
-    User updatedUser = userRepository.save(user);
+    User updatedUser =
+            userRepository.save(user);
 
     return toResponse(updatedUser);
 }
@@ -110,15 +127,16 @@ public UserResponse updateUser(
     public void disableUser(Long id) {
 
         User user = userRepository.findById(id)
-                .orElseThrow(() ->
-                        new RuntimeException(
-                                "Usuario no encontrado"
-                        ));
+        .orElseThrow(() ->
+                new ResourceNotFoundException(
+                        "Usuario no encontrado"
+                ));
 
         user.setActive(false);
 
         userRepository.save(user);
     }
+    
 
     @Override
     public void changePassword(
@@ -127,14 +145,20 @@ public UserResponse updateUser(
             String newPassword) {
 
         if (newPassword.length() < 8) {
-            throw new RuntimeException(
-                    "La nueva contraseña debe tener al menos 8 caracteres"
-            );
-        }
+    throw new RuntimeException(
+            "La nueva contraseña debe tener al menos 8 caracteres"
+    );
+}
+
+if (currentPassword.equals(newPassword)) {
+    throw new RuntimeException(
+            "La nueva contraseña debe ser diferente a la actual"
+    );
+}
 
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() ->
-                        new RuntimeException(
+                        new ResourceNotFoundException(
                                 "Usuario no encontrado"
                         ));
 
@@ -163,7 +187,9 @@ public UserResponse updateUser(
                 user.getName(),
                 user.getEmail(),
                 user.getRole(),
-                user.isActive()
+                user.isActive(),
+                user.getCreatedAt(),
+                user.getUpdatedAt()
         );
     }
 }

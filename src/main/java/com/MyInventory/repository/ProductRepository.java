@@ -16,8 +16,12 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     boolean existsByName(String name);
 
     List<Product> findByActiveTrue();
+    
+    Long countByActiveTrue();
 
     Optional<Product> findByIdAndActiveTrue(Long id);
+
+    
 
     @Query("""
             SELECT COALESCE(SUM(p.stock),0)

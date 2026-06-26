@@ -2,12 +2,13 @@ package com.myinventory.controller;
 
 import com.myinventory.dto.CreateProductRequest;
 import com.myinventory.dto.ProductResponse;
-import com.myinventory.model.Product;
+import com.myinventory.dto.UpdateProductRequest;
 import com.myinventory.service.ProductService;
+
+import jakarta.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import jakarta.validation.Valid;
 
 import java.util.List;
 
@@ -17,46 +18,61 @@ public class ProductController {
 
     private final ProductService productService;
 
-    public ProductController(ProductService productService){
+    public ProductController(
+            ProductService productService) {
+
         this.productService = productService;
     }
 
-    
     @PostMapping
-public ProductResponse save(
-       @Valid @RequestBody CreateProductRequest request){
+    public ProductResponse create(
+            @Valid
+            @RequestBody
+            CreateProductRequest request) {
 
-    return productService.save(request);
-}
+        return productService.create(request);
+    }
 
     @GetMapping
-    public List<Product> findAll(){
-        return productService.findAll();
+    public List<ProductResponse> getAll() {
+
+        return productService.getAll();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Product> findById(@PathVariable Long id){
+    public ResponseEntity<ProductResponse> getById(
+            @PathVariable Long id) {
 
-    Product product = productService.findById(id);
+        ProductResponse product =
+                productService.getById(id);
 
-    if(product == null){
-         return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(product);
     }
 
-     return ResponseEntity.ok(product);
-    }
     @PutMapping("/{id}")
-    public Product update(
-        @PathVariable Long id,
-        @RequestBody Product product) {
+    public ProductResponse update(
+            @PathVariable Long id,
+            @Valid
+            @RequestBody
+            UpdateProductRequest request) {
 
-    return productService.update(id, product);
-}
+        return productService.update(
+                id,
+                request
+        );
+    }
 
     @PatchMapping("/{id}/disable")
-    public void disable(@PathVariable Long id) {
+    public void disable(
+            @PathVariable Long id) {
 
-    productService.disable(id);
-}
+        productService.disable(id);
+    }
 
+    @PatchMapping("/{id}/enable")
+    public void enable(
+            @PathVariable Long id) {
+
+        productService.enable(id);
+    }
 }

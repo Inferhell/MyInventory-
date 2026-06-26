@@ -1,5 +1,7 @@
 package com.myinventory.dto;
 
+import java.time.LocalDateTime;
+
 public record CategoryResponse(
 
         Long id,
@@ -8,7 +10,11 @@ public record CategoryResponse(
 
         String description,
 
-        boolean active
+        boolean active,
+
+        LocalDateTime createdAt,
+
+        LocalDateTime updatedAt
 
 ) {
 }

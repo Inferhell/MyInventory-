@@ -10,13 +10,12 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Supplier {
+public class Supplier extends BaseEntity {
 
-    @Id
+     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
     private String name;
 
     private String phone;
@@ -27,5 +26,4 @@ public class Supplier {
 
     @Builder.Default
     private boolean active = true;
-
 }

@@ -3,6 +3,7 @@ package com.myinventory.service;
 import com.myinventory.dto.CategoryResponse;
 import com.myinventory.dto.CreateCategoryRequest;
 import com.myinventory.dto.UpdateCategoryRequest;
+import com.myinventory.exception.ResourceNotFoundException;
 import com.myinventory.model.Category;
 import com.myinventory.repository.CategoryRepository;
 
@@ -18,104 +19,145 @@ public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
 
-  @Override
-public List<CategoryResponse> getAllCategories() {
+    @Override
+    public List<CategoryResponse> getAllCategories() {
 
-    return categoryRepository.findAll()
-            .stream()
-            .map(category -> new CategoryResponse(
-                    category.getId(),
-                    category.getName(),
-                    category.getDescription(),
-                    category.isActive()
-            ))
-            .toList();
-}
+        return categoryRepository.findAll()
+                .stream()
+                .map(this::toResponse)
+                .toList();
+    }
 
     @Override
-public CategoryResponse getCategoryById(Long id) {
+    public CategoryResponse getCategoryById(Long id) {
 
-    Category category = categoryRepository.findById(id)
-            .orElseThrow(() ->
-                    new RuntimeException(
-                            "Categoría no encontrada"
-                    ));
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Categoría no encontrada"
+                        )
+                );
 
-    return new CategoryResponse(
-            category.getId(),
-            category.getName(),
-            category.getDescription(),
-            category.isActive()
-    );
-}
+        return toResponse(category);
+    }
 
-   @Override
-public CategoryResponse createCategory(
-        CreateCategoryRequest request) {
+    @Override
+    public CategoryResponse createCategory(
+            CreateCategoryRequest request
+    ) {
 
-    if (categoryRepository.existsByName(
-            request.name())) {
+        String name = request.name().trim();
 
-        throw new RuntimeException(
-                "La categoría ya existe"
+        if (categoryRepository.existsByName(name)) {
+
+            throw new RuntimeException(
+                    "La categoría ya existe"
+            );
+        }
+
+        Category category = Category.builder()
+                .name(name)
+                .description(normalizeDescription(
+                        request.description()
+                ))
+                .active(true)
+                .build();
+
+        Category savedCategory =
+                categoryRepository.save(category);
+
+        return toResponse(savedCategory);
+    }
+
+    @Override
+    public CategoryResponse updateCategory(
+            Long id,
+            UpdateCategoryRequest request
+    ) {
+
+        Category category = categoryRepository.findByIdAndActiveTrue(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Categoría no encontrada o inactiva"
+                        )
+                );
+
+        String name = request.name().trim();
+
+        if (categoryRepository.existsByNameAndIdNot(
+                name,
+                id
+        )) {
+
+            throw new RuntimeException(
+                    "La categoría ya existe"
+            );
+        }
+
+        category.setName(name);
+
+        category.setDescription(
+                normalizeDescription(
+                        request.description()
+                )
+        );
+
+        Category updatedCategory =
+                categoryRepository.save(category);
+
+        return toResponse(updatedCategory);
+    }
+
+    @Override
+    public void disableCategory(Long id) {
+
+        Category category = categoryRepository.findByIdAndActiveTrue(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Categoría no encontrada o inactiva"
+                        )
+                );
+
+        category.setActive(false);
+
+        categoryRepository.save(category);
+    }
+
+    @Override
+    public void enableCategory(Long id) {
+
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Categoría no encontrada"
+                        )
+                );
+
+        category.setActive(true);
+
+        categoryRepository.save(category);
+    }
+
+    private CategoryResponse toResponse(Category category) {
+
+        return new CategoryResponse(
+                category.getId(),
+                category.getName(),
+                category.getDescription(),
+                category.isActive(),
+                category.getCreatedAt(),
+                category.getUpdatedAt()
         );
     }
 
-    Category category = Category.builder()
-            .name(request.name())
-            .description(request.description())
-            .build();
+    private String normalizeDescription(
+            String description
+    ) {
 
-    Category savedCategory =
-            categoryRepository.save(category);
+        if (description == null) {
+            return "";
+        }
 
-    return new CategoryResponse(
-            savedCategory.getId(),
-            savedCategory.getName(),
-            savedCategory.getDescription(),
-            savedCategory.isActive()
-    );
-}
-
-    @Override
-public CategoryResponse updateCategory(
-        Long id,
-        UpdateCategoryRequest request) {
-
-    Category category = categoryRepository.findById(id)
-            .orElseThrow(() ->
-                    new RuntimeException(
-                            "Categoría no encontrada"
-                    ));
-
-    category.setName(request.name());
-    category.setDescription(request.description());
-    category.setActive(request.active());
-
-    Category updatedCategory =
-            categoryRepository.save(category);
-
-    return new CategoryResponse(
-            updatedCategory.getId(),
-            updatedCategory.getName(),
-            updatedCategory.getDescription(),
-            updatedCategory.isActive()
-    );
-}
-
-    @Override
-public void disableCategory(Long id) {
-
-    Category category = categoryRepository.findById(id)
-            .orElseThrow(() ->
-                    new RuntimeException(
-                            "Categoría no encontrada"
-                    ));
-
-    category.setActive(false);
-
-    categoryRepository.save(category);
-}
-
-    
+        return description.trim();
+    }
 }

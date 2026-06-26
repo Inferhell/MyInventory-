@@ -1,10 +1,8 @@
 package com.myinventory.model;
 
-import com.myinventory.model.MovementType;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "movements")
@@ -13,7 +11,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Movement {
+public class Movement extends BaseEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,5 +32,6 @@ public class Movement {
 
     private String observation;
 
-    private LocalDateTime createdAt;
+
+    
 }

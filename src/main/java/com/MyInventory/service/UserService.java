@@ -12,24 +12,23 @@ public interface UserService {
 
     Optional<User> findByEmail(String email);
 
-    void changePassword(
-            String email,
-            String currentPassword,
-            String newPassword
-    );
+    UserResponse createUser(
+            CreateUserRequest request);
 
     List<UserResponse> getAllUsers();
 
     UserResponse getUserById(Long id);
 
-    UserResponse createUser(
-            CreateUserRequest request
-    );
-
     UserResponse updateUser(
             Long id,
-            UpdateUserRequest request
-    );
+            UpdateUserRequest request);
 
     void disableUser(Long id);
+
+    void enableUser(Long id);
+
+    void changePassword(
+            String email,
+            String currentPassword,
+            String newPassword);
 }

@@ -7,9 +7,7 @@ public record UpdateCategoryRequest(
         @NotBlank(message = "El nombre es obligatorio")
         String name,
 
-        String description,
-
-        boolean active
+        String description
 
 ) {
 }

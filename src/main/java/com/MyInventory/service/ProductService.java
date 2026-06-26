@@ -2,21 +2,24 @@ package com.myinventory.service;
 
 import com.myinventory.dto.CreateProductRequest;
 import com.myinventory.dto.ProductResponse;
-import com.myinventory.model.Product;
+import com.myinventory.dto.UpdateProductRequest;
 
 import java.util.List;
 
 public interface ProductService {
 
-ProductResponse save(CreateProductRequest request);
-    List<Product> findAll();
+    List<ProductResponse> getAll();
 
-    Product findById(Long id);
+    ProductResponse getById(Long id);
 
-    Product update(Long id, Product product);
+    ProductResponse create(
+            CreateProductRequest request);
+
+    ProductResponse update(
+            Long id,
+            UpdateProductRequest request);
 
     void disable(Long id);
 
-    
-
+    void enable(Long id);
 }

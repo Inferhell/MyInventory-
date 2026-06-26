@@ -3,56 +3,76 @@ package com.myinventory.controller;
 import com.myinventory.dto.CreateSupplierRequest;
 import com.myinventory.dto.SupplierResponse;
 import com.myinventory.dto.UpdateSupplierRequest;
-import com.myinventory.model.Supplier;
 import com.myinventory.service.SupplierService;
+
+import jakarta.validation.Valid;
+
+import lombok.RequiredArgsConstructor;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
+@PreAuthorize("hasAnyRole('ADMIN','SUPERVISOR')")
 @RequestMapping("/suppliers")
+@RequiredArgsConstructor
 public class SupplierController {
 
     private final SupplierService supplierService;
 
-    public SupplierController(
-            SupplierService supplierService) {
-
-        this.supplierService = supplierService;
-    }
-
     @PostMapping
-    public SupplierResponse save(
-            @RequestBody CreateSupplierRequest request) {
+    @ResponseStatus(HttpStatus.CREATED)
+    public SupplierResponse createSupplier(
+            @Valid @RequestBody CreateSupplierRequest request
+    ) {
 
-        return supplierService.save(request);
+        return supplierService.createSupplier(request);
     }
 
     @GetMapping
-    public List<Supplier> findAll() {
+    public List<SupplierResponse> getAllSuppliers() {
 
-        return supplierService.findAll();
+        return supplierService.getAllSuppliers();
     }
 
     @GetMapping("/{id}")
-    public Supplier findById(
-            @PathVariable Long id) {
+    public SupplierResponse getSupplierById(
+            @PathVariable Long id
+    ) {
 
-        return supplierService.findById(id);
+        return supplierService.getSupplierById(id);
     }
 
     @PutMapping("/{id}")
-    public Supplier update(
+    public SupplierResponse updateSupplier(
             @PathVariable Long id,
-            @RequestBody UpdateSupplierRequest request) {
+            @Valid @RequestBody UpdateSupplierRequest request
+    ) {
 
-        return supplierService.update(id, request);
+        return supplierService.updateSupplier(
+                id,
+                request
+        );
     }
 
     @PatchMapping("/{id}/disable")
-    public void disable(
-            @PathVariable Long id) {
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void disableSupplier(
+            @PathVariable Long id
+    ) {
 
-        supplierService.disable(id);
+        supplierService.disableSupplier(id);
+    }
+
+    @PatchMapping("/{id}/enable")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void enableSupplier(
+            @PathVariable Long id
+    ) {
+
+        supplierService.enableSupplier(id);
     }
 }

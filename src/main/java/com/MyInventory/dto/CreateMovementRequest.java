@@ -1,14 +1,24 @@
 package com.myinventory.dto;
 
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
+import jakarta.validation.constraints.NotNull;
 
 @Data
 public class CreateMovementRequest {
 
-    private Long productId;
+@NotNull(message = "El producto es obligatorio")
+private Long productId;
 
-    private Integer quantity;
+@NotNull(message = "La cantidad es obligatoria")
+@Positive(message = "La cantidad debe ser mayor que cero")
+private Integer quantity;
 
-    private String observation;
+@Size(
+        max = 500,
+        message = "La observación no puede superar los 500 caracteres"
+)
+private String observation;
 
 }

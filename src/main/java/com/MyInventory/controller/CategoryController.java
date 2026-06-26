@@ -4,15 +4,19 @@ import com.myinventory.dto.CategoryResponse;
 import com.myinventory.dto.CreateCategoryRequest;
 import com.myinventory.dto.UpdateCategoryRequest;
 import com.myinventory.service.CategoryService;
-import java.util.List;
 
 import jakarta.validation.Valid;
+
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
+@PreAuthorize("hasAnyRole('ADMIN','SUPERVISOR')")
 @RequestMapping("/categories")
 @RequiredArgsConstructor
 public class CategoryController {
@@ -22,7 +26,8 @@ public class CategoryController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public CategoryResponse createCategory(
-            @Valid @RequestBody CreateCategoryRequest request) {
+            @Valid @RequestBody CreateCategoryRequest request
+    ) {
 
         return categoryService.createCategory(request);
     }
@@ -34,28 +39,40 @@ public class CategoryController {
     }
 
     @GetMapping("/{id}")
-public CategoryResponse getCategoryById(
-        @PathVariable Long id) {
+    public CategoryResponse getCategoryById(
+            @PathVariable Long id
+    ) {
 
-    return categoryService.getCategoryById(id);
-}
+        return categoryService.getCategoryById(id);
+    }
 
-@PutMapping("/{id}")
-public CategoryResponse updateCategory(
-        @PathVariable Long id,
-        @Valid @RequestBody UpdateCategoryRequest request) {
+    @PutMapping("/{id}")
+    public CategoryResponse updateCategory(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateCategoryRequest request
+    ) {
 
-    return categoryService.updateCategory(
-            id,
-            request
-    );
-}
+        return categoryService.updateCategory(
+                id,
+                request
+        );
+    }
 
-@PatchMapping("/{id}/disable")
-@ResponseStatus(HttpStatus.NO_CONTENT)
-public void disableCategory(
-        @PathVariable Long id) {
+    @PatchMapping("/{id}/disable")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void disableCategory(
+            @PathVariable Long id
+    ) {
 
-    categoryService.disableCategory(id);
-}
+        categoryService.disableCategory(id);
+    }
+
+    @PatchMapping("/{id}/enable")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void enableCategory(
+            @PathVariable Long id
+    ) {
+
+        categoryService.enableCategory(id);
+    }
 }

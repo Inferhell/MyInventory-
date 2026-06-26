@@ -6,8 +6,13 @@ import com.myinventory.repository.CategoryRepository;
 import com.myinventory.repository.MovementRepository;
 import com.myinventory.repository.ProductRepository;
 import com.myinventory.repository.SupplierRepository;
+
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Service;
 
+
+@RequiredArgsConstructor
 @Service
 public class DashboardServiceImpl
         implements DashboardService {
@@ -17,17 +22,7 @@ public class DashboardServiceImpl
     private final SupplierRepository supplierRepository;
     private final MovementRepository movementRepository;
 
-    public DashboardServiceImpl(
-            ProductRepository productRepository,
-            CategoryRepository categoryRepository,
-            SupplierRepository supplierRepository,
-            MovementRepository movementRepository) {
-
-        this.productRepository = productRepository;
-        this.categoryRepository = categoryRepository;
-        this.supplierRepository = supplierRepository;
-        this.movementRepository = movementRepository;
-    }
+   
 
     @Override
     public DashboardResponse getDashboard() {
@@ -35,15 +30,15 @@ public class DashboardServiceImpl
         return DashboardResponse.builder()
 
                 .totalProducts(
-                        productRepository.count()
+                        productRepository.countByActiveTrue()
                 )
 
                 .totalCategories(
-                        categoryRepository.count()
+                        categoryRepository.countByActiveTrue()
                 )
 
                 .totalSuppliers(
-                        supplierRepository.count()
+                        supplierRepository.countByActiveTrue()
                 )
 
                 .totalMovements(
