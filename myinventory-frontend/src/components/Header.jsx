@@ -11,26 +11,28 @@ function Header() {
     const [user, setUser] =
         useState(null);
 
+    
+
     useEffect(() => {
 
-        loadUser();
+    let cancelled = false;
 
-    }, []);
+    getCurrentUser()
+        .then((data) => {
 
-    const loadUser = async () => {
-
-        try {
-
-            const data =
-                await getCurrentUser();
-
-            setUser(data);
-
-        } catch (error) {
-
+            if (!cancelled) {
+                setUser(data);
+            }
+        })
+        .catch((error) => {
             console.error(error);
-        }
+        });
+
+    return () => {
+        cancelled = true;
     };
+
+}, []);
 
     const handleLogout = async () => {
 

@@ -51,6 +51,8 @@ localStorage.setItem(
 
         } catch (error) {
 
+    console.error(error);
+
     localStorage.removeItem(
         "user"
     );

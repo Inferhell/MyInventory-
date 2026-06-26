@@ -37,31 +37,57 @@ function Categories() {
     const [errorMessage, setErrorMessage] =
         useState("");
 
-    useEffect(() => {
-
-        loadCategories();
-
-    }, []);
-
     const loadCategories = async () => {
 
-        try {
+    try {
 
-            const data =
-                await getCategories();
+        const data =
+            await getCategories();
 
-            setCategories(data);
+        setCategories(data);
 
-        } catch (error) {
+    } catch (error) {
+
+        console.error(error);
+
+        setErrorMessage(
+            "Error al cargar categorías"
+        );
+    }
+};
+
+useEffect(() => {
+
+    let cancelled = false;
+
+    getCategories()
+        .then((data) => {
+
+            if (!cancelled) {
+                setCategories(data);
+            }
+        })
+        .catch((error) => {
 
             console.error(error);
 
-            setErrorMessage(
-                "Error al cargar categorías"
-            );
-        }
+            if (!cancelled) {
+                setErrorMessage(
+                    "Error al cargar categorías"
+                );
+            }
+        });
+
+    return () => {
+
+        cancelled = true;
+
     };
 
+}, []);
+    
+
+    
     const clearMessages = () => {
 
         setMessage("");

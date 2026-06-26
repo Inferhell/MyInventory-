@@ -48,14 +48,7 @@ function Movements() {
     const [errorMessage, setErrorMessage] =
         useState("");
 
-    useEffect(() => {
-
-        loadMovements();
-        loadProducts();
-
-    }, []);
-
-    const loadMovements = async () => {
+         const loadMovements = async () => {
 
         try {
 
@@ -92,6 +85,46 @@ function Movements() {
             );
         }
     };
+
+   useEffect(() => {
+
+    let cancelled = false;
+
+    Promise.all([
+        getMovements(),
+        getProducts()
+    ])
+        .then(([
+            movementsData,
+            productsData
+        ]) => {
+
+            if (!cancelled) {
+
+                setMovements(movementsData);
+                setProducts(productsData);
+            }
+        })
+        .catch((error) => {
+
+            console.error(error);
+
+            if (!cancelled) {
+                setErrorMessage(
+                    "Error al cargar datos iniciales de movimientos"
+                );
+            }
+        });
+
+    return () => {
+        cancelled = true;
+    };
+
+}, []);
+
+
+
+
 
     const clearMessages = () => {
 

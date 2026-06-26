@@ -26,11 +26,35 @@ function Suppliers() {
     const [message, setMessage] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
 
-    useEffect(() => {
+   useEffect(() => {
 
-        loadSuppliers();
+    let cancelled = false;
 
-    }, []);
+    getSuppliers()
+        .then((data) => {
+
+            if (!cancelled) {
+                setSuppliers(data);
+            }
+        })
+        .catch((error) => {
+
+            console.error(error);
+
+            if (!cancelled) {
+                setErrorMessage(
+                    "Error al cargar proveedores"
+                );
+            }
+        });
+
+    return () => {
+        cancelled = true;
+    };
+
+}, []);
+
+        
 
     const loadSuppliers = async () => {
 
@@ -50,6 +74,7 @@ function Suppliers() {
             );
         }
     };
+
 
     const clearMessages = () => {
 

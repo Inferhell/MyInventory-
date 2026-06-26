@@ -26,13 +26,8 @@ function Users() {
     const [message, setMessage] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
 
-    useEffect(() => {
-
-        loadUsers();
-
-    }, []);
-
-    const loadUsers = async () => {
+   
+   const loadUsers = async () => {
 
         try {
 
@@ -50,6 +45,38 @@ function Users() {
         }
     };
 
+    useEffect(() => {
+
+    let cancelled = false;
+
+    getUsers()
+        .then((data) => {
+
+            if (!cancelled) {
+                setUsers(data);
+            }
+        })
+        .catch((error) => {
+
+            console.error(error);
+
+            if (!cancelled) {
+                setErrorMessage(
+                    "Error al cargar usuarios"
+                );
+            }
+        });
+
+    return () => {
+        cancelled = true;
+    };
+
+}, []);
+
+        
+    
+
+    
     const clearMessages = () => {
 
         setMessage("");

@@ -38,13 +38,7 @@ function Products() {
     const [message, setMessage] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
 
-    useEffect(() => {
 
-        loadProducts();
-        loadCategories();
-        loadSuppliers();
-
-    }, []);
 
     const loadProducts = async () => {
 
@@ -99,6 +93,55 @@ function Products() {
             );
         }
     };
+    
+    useEffect(() => {
+
+    let cancelled = false;
+
+    Promise.all([
+        getProducts(),
+        getCategories(),
+        getSuppliers()
+    ])
+        .then(([
+            productsData,
+            categoriesData,
+            suppliersData
+        ]) => {
+
+            if (!cancelled) {
+
+                setProducts(productsData);
+                setCategories(categoriesData);
+                setSuppliers(suppliersData);
+            }
+        })
+        .catch((error) => {
+
+            console.error(error);
+
+            if (!cancelled) {
+                setErrorMessage(
+                    "Error al cargar datos iniciales de productos"
+                );
+            }
+        });
+
+    return () => {
+        cancelled = true;
+    };
+
+}, []);
+
+        
+    
+
+loadProducts();
+        loadCategories();
+        loadSuppliers();
+
+    
+
 
     const clearMessages = () => {
 
