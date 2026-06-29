@@ -103,25 +103,25 @@ public class SupplierServiceImpl implements SupplierService {
         String email = normalize(request.email());
         String address = normalize(request.address());
 
-        if (supplierRepository.existsByNameAndIdNot(
-                name,
-                id
-        )) {
+       if (supplierRepository.existsByNameAndIdNot(
+        name,
+        id
+)) {
 
-            throw new RuntimeException(
-                    "El proveedor ya existe"
-            );
-        }
+    throw new DuplicateResourceException(
+            "El proveedor ya existe"
+    );
+}
 
-        if (supplierRepository.existsByEmailAndIdNot(
-                email,
-                id
-        )) {
+if (supplierRepository.existsByEmailAndIdNot(
+        email,
+        id
+)) {
 
-            throw new RuntimeException(
-                    "El correo del proveedor ya está registrado"
-            );
-        }
+    throw new DuplicateResourceException(
+            "El correo del proveedor ya está registrado"
+    );
+}
 
         supplier.setName(name);
         supplier.setPhone(phone);
@@ -134,7 +134,7 @@ public class SupplierServiceImpl implements SupplierService {
         return toResponse(updatedSupplier);
     }
 
-    @Override
+   @Override
 public void disableSupplier(Long id) {
 
     Supplier supplier = supplierRepository.findByIdAndActiveTrue(id)

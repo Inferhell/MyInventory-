@@ -56,7 +56,7 @@ public class CategoryServiceImpl implements CategoryService {
 
         if (categoryRepository.existsByName(name)) {
 
-            throw new DuplicateResourceException(
+        throw new DuplicateResourceException(
         "La categoría ya existe"
 );
         }
@@ -95,9 +95,9 @@ public class CategoryServiceImpl implements CategoryService {
                 id
         )) {
 
-            throw new RuntimeException(
-                    "La categoría ya existe"
-            );
+            throw new DuplicateResourceException(
+        "La categoría ya existe"
+);
         }
 
         category.setName(name);

@@ -2,6 +2,7 @@ package com.myinventory.controller;
 
 import com.myinventory.dto.ChangePasswordRequest;
 import com.myinventory.dto.MeResponse;
+import com.myinventory.exception.ResourceNotFoundException;
 import com.myinventory.model.User;
 import com.myinventory.repository.UserRepository;
 import com.myinventory.security.PermissionService;
@@ -36,7 +37,7 @@ public class AuthController {
 
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() ->
-                        new RuntimeException(
+                        new ResourceNotFoundException(
                                 "Usuario autenticado no encontrado"
                         )
                 );
