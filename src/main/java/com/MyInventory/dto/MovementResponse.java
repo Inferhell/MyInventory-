@@ -21,7 +21,9 @@ public class MovementResponse {
 
     private Integer quantity;
 
-    private Integer currentStock;
+    private Integer stockBefore;
+
+    private Integer stockAfter;
 
     private String type;
 

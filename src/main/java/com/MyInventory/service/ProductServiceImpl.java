@@ -5,32 +5,48 @@ import com.myinventory.dto.ProductResponse;
 import com.myinventory.dto.UpdateProductRequest;
 import com.myinventory.exception.ResourceNotFoundException;
 import com.myinventory.model.Category;
+import com.myinventory.model.Movement;
+import com.myinventory.model.MovementType;
 import com.myinventory.model.Product;
 import com.myinventory.model.Supplier;
+import com.myinventory.model.User;
 import com.myinventory.repository.CategoryRepository;
+import com.myinventory.repository.MovementRepository;
 import com.myinventory.repository.ProductRepository;
 import com.myinventory.repository.SupplierRepository;
+import com.myinventory.repository.UserRepository;
+import com.myinventory.exception.InactiveResourceException;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
+@Transactional
 public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
     private final SupplierRepository supplierRepository;
+    private final MovementRepository movementRepository;
+    private final UserRepository userRepository;
 
     public ProductServiceImpl(
             ProductRepository productRepository,
             CategoryRepository categoryRepository,
-            SupplierRepository supplierRepository
+            SupplierRepository supplierRepository,
+            MovementRepository movementRepository,
+            UserRepository userRepository
     ) {
 
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
         this.supplierRepository = supplierRepository;
+        this.movementRepository = movementRepository;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -71,10 +87,26 @@ public class ProductServiceImpl implements ProductService {
         Product saved =
                 productRepository.save(product);
 
+        if (saved.getStock() > 0) {
+
+            Movement initialMovement = Movement.builder()
+                    .user(getAuthenticatedUser())
+                    .product(saved)
+                    .quantity(saved.getStock())
+                    .stockBefore(0)
+                    .stockAfter(saved.getStock())
+                    .type(MovementType.INITIAL_BALANCE)
+                    .observation("Stock inicial del producto")
+                    .build();
+
+            movementRepository.save(initialMovement);
+        }
+
         return toResponse(saved);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ProductResponse> getAll() {
 
         return productRepository
@@ -85,6 +117,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ProductResponse getById(
             Long id
     ) {
@@ -131,7 +164,6 @@ public class ProductServiceImpl implements ProductService {
         existing.setName(request.getName());
         existing.setDescription(request.getDescription());
         existing.setPrice(request.getPrice());
-        existing.setStock(request.getStock());
         existing.setCategory(category);
         existing.setSupplier(supplier);
 
@@ -160,22 +192,40 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void enable(
-            Long id
+public void enable(Long id) {
+
+    Product product =
+            productRepository.findById(id)
+                    .orElseThrow(() ->
+                            new ResourceNotFoundException(
+                                    "Producto no encontrado"
+                            )
+                    );
+
+    if (
+            product.getCategory() == null
+                    || !product.getCategory().isActive()
     ) {
 
-        Product product =
-                productRepository.findById(id)
-                        .orElseThrow(() ->
-                                new ResourceNotFoundException(
-                                        "Producto no encontrado"
-                                )
-                        );
-
-        product.setActive(true);
-
-        productRepository.save(product);
+        throw new InactiveResourceException(
+                "No se puede reactivar el producto porque su categoría está inactiva"
+        );
     }
+
+    if (
+            product.getSupplier() == null
+                    || !product.getSupplier().isActive()
+    ) {
+
+        throw new InactiveResourceException(
+                "No se puede reactivar el producto porque su proveedor está inactivo"
+        );
+    }
+
+    product.setActive(true);
+
+    productRepository.save(product);
+}
 
     private Product getProductEntity(
             Long id
@@ -186,6 +236,24 @@ public class ProductServiceImpl implements ProductService {
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
                                 "Producto no encontrado o inactivo"
+                        )
+                );
+    }
+
+    private User getAuthenticatedUser() {
+
+        Authentication authentication =
+                SecurityContextHolder
+                        .getContext()
+                        .getAuthentication();
+
+        String email = authentication.getName();
+
+        return userRepository
+                .findByEmail(email)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Usuario no encontrado"
                         )
                 );
     }

@@ -7,6 +7,9 @@ import {
     disableCategory,
     enableCategory
 } from "../services/categoryService";
+import {
+    getApiErrorMessage
+} from "../utils/getApiErrorMessage";
 
 function Categories() {
 
@@ -107,18 +110,16 @@ useEffect(() => {
         clearMessages();
     };
 
-    const getErrorMessage = (
+   const getErrorMessage = (
+    error,
+    defaultMessage
+) => {
+
+    return getApiErrorMessage(
         error,
         defaultMessage
-    ) => {
-
-        return (
-            error.response?.data?.message ||
-            error.response?.data?.error ||
-            error.response?.data ||
-            defaultMessage
-        );
-    };
+    );
+};
 
     const validateForm = () => {
 

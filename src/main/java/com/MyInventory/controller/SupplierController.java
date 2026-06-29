@@ -16,13 +16,13 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@PreAuthorize("hasAnyRole('ADMIN','SUPERVISOR')")
 @RequestMapping("/suppliers")
 @RequiredArgsConstructor
 public class SupplierController {
 
     private final SupplierService supplierService;
 
+    @PreAuthorize("hasAuthority('SUPPLIER_WRITE')")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public SupplierResponse createSupplier(
@@ -32,12 +32,14 @@ public class SupplierController {
         return supplierService.createSupplier(request);
     }
 
+    @PreAuthorize("hasAuthority('SUPPLIER_READ')")
     @GetMapping
     public List<SupplierResponse> getAllSuppliers() {
 
         return supplierService.getAllSuppliers();
     }
 
+    @PreAuthorize("hasAuthority('SUPPLIER_READ')")
     @GetMapping("/{id}")
     public SupplierResponse getSupplierById(
             @PathVariable Long id
@@ -46,6 +48,7 @@ public class SupplierController {
         return supplierService.getSupplierById(id);
     }
 
+    @PreAuthorize("hasAuthority('SUPPLIER_WRITE')")
     @PutMapping("/{id}")
     public SupplierResponse updateSupplier(
             @PathVariable Long id,
@@ -58,6 +61,7 @@ public class SupplierController {
         );
     }
 
+    @PreAuthorize("hasAuthority('SUPPLIER_STATUS_CHANGE')")
     @PatchMapping("/{id}/disable")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void disableSupplier(
@@ -67,6 +71,7 @@ public class SupplierController {
         supplierService.disableSupplier(id);
     }
 
+    @PreAuthorize("hasAuthority('SUPPLIER_STATUS_CHANGE')")
     @PatchMapping("/{id}/enable")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void enableSupplier(

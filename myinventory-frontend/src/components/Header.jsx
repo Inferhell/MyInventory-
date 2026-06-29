@@ -1,87 +1,61 @@
-import { useEffect, useState } from "react";
-import { logout, getCurrentUser } from "../services/authService";
 import { useNavigate } from "react-router-dom";
 
-
+import {
+    useAuth
+} from "../hooks/useAuth";
 
 function Header() {
 
-    const navigate = useNavigate();
+    const navigate =
+        useNavigate();
 
-    const [user, setUser] =
-        useState(null);
-
-    
-
-    useEffect(() => {
-
-    let cancelled = false;
-
-    getCurrentUser()
-        .then((data) => {
-
-            if (!cancelled) {
-                setUser(data);
-            }
-        })
-        .catch((error) => {
-            console.error(error);
-        });
-
-    return () => {
-        cancelled = true;
-    };
-
-}, []);
+    const {
+        user,
+        logout
+    } = useAuth();
 
     const handleLogout = async () => {
 
-        try {
+        await logout();
 
-            await logout();
-
-            localStorage.clear();
-
-            navigate("/login");
-
-        } catch (error) {
-
-            console.error(error);
-        }
+        navigate("/login");
     };
 
     return (
 
-    <div>
+        <header>
 
-        <span>
-            {user?.email}
-        </span>
+            <h2>
+                MyInventory
+            </h2>
 
-        {" | "}
-
-        <span>
             {
-                user?.authorities?.find(
-                    auth =>
-                        auth.authority.startsWith(
-                            "ROLE_"
-                        )
-                )?.authority
+                user && (
+
+                    <div>
+
+                        <span>
+                            {user.email}
+                            {" "}
+                            |
+                            {" "}
+                            {user.role}
+                        </span>
+
+                        {" "}
+
+                        <button
+                            onClick={handleLogout}
+                        >
+                            Cerrar Sesión
+                        </button>
+
+                    </div>
+                )
             }
-        </span>
 
-        {" "}
-
-        <button
-            onClick={handleLogout}
-        >
-            Cerrar Sesión
-        </button>
-
-    </div>
-);  
-
+        </header>
+    );
 }
 
 export default Header;

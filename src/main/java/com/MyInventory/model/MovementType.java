@@ -3,6 +3,7 @@ package com.myinventory.model;
 public enum MovementType {
 
     ENTRY,
-    EXIT
+    EXIT,
+    INITIAL_BALANCE
 
 }

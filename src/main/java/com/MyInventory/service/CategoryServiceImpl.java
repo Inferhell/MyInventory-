@@ -3,9 +3,13 @@ package com.myinventory.service;
 import com.myinventory.dto.CategoryResponse;
 import com.myinventory.dto.CreateCategoryRequest;
 import com.myinventory.dto.UpdateCategoryRequest;
+import com.myinventory.exception.DuplicateResourceException;
 import com.myinventory.exception.ResourceNotFoundException;
 import com.myinventory.model.Category;
 import com.myinventory.repository.CategoryRepository;
+import com.myinventory.exception.BusinessRuleException;
+import com.myinventory.repository.ProductRepository;
+
 
 import lombok.RequiredArgsConstructor;
 
@@ -18,6 +22,8 @@ import java.util.List;
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
+    private final ProductRepository productRepository;
+
 
     @Override
     public List<CategoryResponse> getAllCategories() {
@@ -50,9 +56,9 @@ public class CategoryServiceImpl implements CategoryService {
 
         if (categoryRepository.existsByName(name)) {
 
-            throw new RuntimeException(
-                    "La categoría ya existe"
-            );
+            throw new DuplicateResourceException(
+        "La categoría ya existe"
+);
         }
 
         Category category = Category.builder()
@@ -108,21 +114,32 @@ public class CategoryServiceImpl implements CategoryService {
         return toResponse(updatedCategory);
     }
 
-    @Override
-    public void disableCategory(Long id) {
+   @Override
+public void disableCategory(Long id) {
 
-        Category category = categoryRepository.findByIdAndActiveTrue(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Categoría no encontrada o inactiva"
-                        )
-                );
+    Category category = categoryRepository.findByIdAndActiveTrue(id)
+            .orElseThrow(() ->
+                    new ResourceNotFoundException(
+                            "Categoría no encontrada o inactiva"
+                    )
+            );
 
-        category.setActive(false);
+    long activeProducts =
+            productRepository.countByCategoryIdAndActiveTrue(id);
 
-        categoryRepository.save(category);
+    if (activeProducts > 0) {
+
+        throw new BusinessRuleException(
+                "No se puede desactivar la categoría porque tiene "
+                        + activeProducts
+                        + " productos activos asociados"
+        );
     }
 
+    category.setActive(false);
+
+    categoryRepository.save(category);
+}
     @Override
     public void enableCategory(Long id) {
 

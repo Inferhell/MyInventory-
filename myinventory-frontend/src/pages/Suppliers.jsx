@@ -7,6 +7,9 @@ import {
     disableSupplier,
     enableSupplier
 } from "../services/supplierService";
+import {
+    getApiErrorMessage
+} from "../utils/getApiErrorMessage";
 
 function Suppliers() {
 
@@ -97,18 +100,16 @@ function Suppliers() {
         clearMessages();
     };
 
-    const getErrorMessage = (
+       const getErrorMessage = (
+    error,
+    defaultMessage
+) => {
+
+    return getApiErrorMessage(
         error,
         defaultMessage
-    ) => {
-
-        return (
-            error.response?.data?.message ||
-            error.response?.data?.error ||
-            error.response?.data ||
-            defaultMessage
-        );
-    };
+    );
+};
 
     const validateForm = () => {
 

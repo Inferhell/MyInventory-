@@ -7,9 +7,11 @@ import org.springframework.context.annotation.Configuration;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 
+@EnableMethodSecurity
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
@@ -20,59 +22,37 @@ public class SecurityConfig {
     ) throws Exception {
 
         http
+                .cors(cors -> {
+                })
 
-            .cors(cors -> {})
+                .csrf(csrf -> csrf.disable())
 
-            .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(auth -> auth
 
-            .authorizeHttpRequests(auth -> auth
+                        // Swagger / OpenAPI
+                        .requestMatchers(
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**"
+                        ).permitAll()
 
-                // Swagger
-                .requestMatchers(
-                        "/swagger-ui/**",
-                        "/v3/api-docs/**"
-                ).permitAll()
+                        // Spring Security login/logout
+                        .requestMatchers(
+                                "/login",
+                                "/logout"
+                        ).permitAll()
 
-                // Login y logout
-                .requestMatchers(
-                        "/login",
-                        "/logout"
-                ).permitAll()
-
-                // Usuario autenticado
-                .requestMatchers(
-                        "/me",
-                        "/dashboard",
-                        "/products/**",
-                        "/movements/**",
-                        "/change-password"
-                ).authenticated()
-
-                // Admin + Supervisor
-                .requestMatchers(
-                        "/categories/**",
-                        "/suppliers/**"
-                ).hasAnyRole(
-                        "ADMIN",
-                        "SUPERVISOR"
+                        // Todo lo demás requiere sesión activa
+                        .anyRequest()
+                        .authenticated()
                 )
 
-                // Solo Admin
-                .requestMatchers(
-                        "/users/**"
-                ).hasRole("ADMIN")
+                .formLogin(form -> form
+                        .permitAll()
+                )
 
-                .anyRequest()
-                .authenticated()
-            )
-
-            .formLogin(form -> form
-                    .permitAll()
-            )
-
-            .logout(logout -> logout
-                    .permitAll()
-            );
+                .logout(logout -> logout
+                        .permitAll()
+                );
 
         return http.build();
     }

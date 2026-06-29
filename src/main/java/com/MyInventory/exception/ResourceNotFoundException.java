@@ -1,11 +1,15 @@
 package com.myinventory.exception;
 
-public class ResourceNotFoundException
-        extends RuntimeException {
+import org.springframework.http.HttpStatus;
 
-    public ResourceNotFoundException(
-            String message) {
+public class ResourceNotFoundException extends BusinessException {
 
-        super(message);
+    public ResourceNotFoundException(String message) {
+
+        super(
+                message,
+                HttpStatus.NOT_FOUND,
+                ErrorCode.RESOURCE_NOT_FOUND
+        );
     }
 }

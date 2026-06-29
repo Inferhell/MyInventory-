@@ -1,8 +1,9 @@
 package com.myinventory.repository;
 
+import com.myinventory.model.Role;
 import com.myinventory.model.User;
+
 import org.springframework.data.jpa.repository.JpaRepository;
-import java.util.List;
 
 import java.util.Optional;
 
@@ -13,7 +14,12 @@ public interface UserRepository
 
     boolean existsByEmail(String email);
 
-    List<User> findByActiveTrue();
+    boolean existsByEmailAndIdNot(
+            String email,
+            Long id
+    );
 
     Optional<User> findByIdAndActiveTrue(Long id);
+
+    long countByRoleAndActiveTrue(Role role);
 }

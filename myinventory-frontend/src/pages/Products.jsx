@@ -15,6 +15,9 @@ import {
 import {
     getSuppliers
 } from "../services/supplierService";
+import {
+    getApiErrorMessage
+} from "../utils/getApiErrorMessage";
 
 function Products() {
 
@@ -58,41 +61,8 @@ function Products() {
         }
     };
 
-    const loadCategories = async () => {
-
-        try {
-
-            const data = await getCategories();
-
-            setCategories(data);
-
-        } catch (error) {
-
-            console.error(error);
-
-            setErrorMessage(
-                "Error al cargar categorías"
-            );
-        }
-    };
-
-    const loadSuppliers = async () => {
-
-        try {
-
-            const data = await getSuppliers();
-
-            setSuppliers(data);
-
-        } catch (error) {
-
-            console.error(error);
-
-            setErrorMessage(
-                "Error al cargar proveedores"
-            );
-        }
-    };
+    
+    
     
     useEffect(() => {
 
@@ -103,29 +73,17 @@ function Products() {
         getCategories(),
         getSuppliers()
     ])
-        .then(([
-            productsData,
-            categoriesData,
-            suppliersData
-        ]) => {
+        .then(([productsData, categoriesData, suppliersData]) => {
 
-            if (!cancelled) {
-
-                setProducts(productsData);
-                setCategories(categoriesData);
-                setSuppliers(suppliersData);
+            if (cancelled) {
+                return;
             }
+
+            setProducts(productsData);
+            setCategories(categoriesData);
+            setSuppliers(suppliersData);
         })
-        .catch((error) => {
-
-            console.error(error);
-
-            if (!cancelled) {
-                setErrorMessage(
-                    "Error al cargar datos iniciales de productos"
-                );
-            }
-        });
+        .catch(console.error);
 
     return () => {
         cancelled = true;
@@ -134,12 +92,6 @@ function Products() {
 }, []);
 
         
-    
-
-loadProducts();
-        loadCategories();
-        loadSuppliers();
-
     
 
 
@@ -169,17 +121,15 @@ loadProducts();
     };
 
     const getErrorMessage = (
+    error,
+    defaultMessage
+) => {
+
+    return getApiErrorMessage(
         error,
         defaultMessage
-    ) => {
-
-        return (
-            error.response?.data?.message ||
-            error.response?.data?.error ||
-            error.response?.data ||
-            defaultMessage
-        );
-    };
+    );
+};
 
     const validateForm = () => {
 
@@ -200,15 +150,14 @@ loadProducts();
 
             return false;
         }
+            if (!editingId && (stock === "" || Number(stock) < 0)) {
 
-        if (stock === "" || Number(stock) < 0) {
+                setErrorMessage(
+                    "El stock inicial no puede ser negativo"
+                );
 
-            setErrorMessage(
-                "El stock no puede ser negativo"
-            );
-
-            return false;
-        }
+                return false;
+            }
 
         if (!categoryId) {
 
@@ -243,15 +192,17 @@ loadProducts();
 
             setLoading(true);
 
-            const payload = {
-                name: name.trim(),
-                description: description.trim(),
-                price: Number(price),
-                stock: Number(stock),
-                categoryId: Number(categoryId),
-                supplierId: Number(supplierId)
-            };
+                const payload = {
+            name: name.trim(),
+            description: description.trim(),
+            price: Number(price),
+            categoryId: Number(categoryId),
+            supplierId: Number(supplierId)
+        };
 
+        if (!editingId) {
+            payload.stock = Number(stock);
+        }
             if (editingId) {
 
                 await updateProduct(
@@ -520,15 +471,33 @@ loadProducts();
             <br />
             <br />
 
-            <input
-                type="number"
-                placeholder="Stock"
-                value={stock}
-                min="0"
-                onChange={(e) =>
-                    setStock(e.target.value)
-                }
-            />
+            {
+    editingId ? (
+
+        <p>
+            <strong>Stock actual:</strong>
+            {" "}
+            {getStockText(Number(stock))}
+            {" "}
+            <br />
+            <small>
+                El stock se modifica desde Movimientos.
+            </small>
+        </p>
+
+    ) : (
+
+        <input
+            type="number"
+            placeholder="Stock inicial"
+            value={stock}
+            min="0"
+            onChange={(e) =>
+                setStock(e.target.value)
+            }
+        />
+    )
+}
 
             <br />
             <br />

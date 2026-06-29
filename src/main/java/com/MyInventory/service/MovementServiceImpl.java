@@ -10,6 +10,7 @@ import com.myinventory.model.User;
 import com.myinventory.repository.MovementRepository;
 import com.myinventory.repository.ProductRepository;
 import com.myinventory.repository.UserRepository;
+import com.myinventory.exception.InsufficientStockException;
 
 import lombok.RequiredArgsConstructor;
 
@@ -48,10 +49,13 @@ public class MovementServiceImpl implements MovementService {
 
         User user = getAuthenticatedUser();
 
-        product.setStock(
-                product.getStock()
-                        + request.getQuantity()
-        );
+        Integer stockBefore =
+                product.getStock();
+
+        Integer stockAfter =
+                stockBefore + request.getQuantity();
+
+        product.setStock(stockAfter);
 
         Product updatedProduct =
                 productRepository.save(product);
@@ -60,6 +64,8 @@ public class MovementServiceImpl implements MovementService {
                 .user(user)
                 .product(updatedProduct)
                 .quantity(request.getQuantity())
+                .stockBefore(stockBefore)
+                .stockAfter(stockAfter)
                 .type(MovementType.ENTRY)
                 .observation(normalizeObservation(
                         request.getObservation()
@@ -89,18 +95,21 @@ public class MovementServiceImpl implements MovementService {
 
         User user = getAuthenticatedUser();
 
-        if (product.getStock() < request.getQuantity()) {
+        Integer stockBefore =
+                product.getStock();
 
-            throw new RuntimeException(
-                    "Stock insuficiente. Stock actual: "
-                            + product.getStock()
-            );
-        }
+        if (stockBefore < request.getQuantity()) {
 
-        product.setStock(
-                product.getStock()
-                        - request.getQuantity()
-        );
+    throw new InsufficientStockException(
+            "Stock insuficiente. Stock actual: "
+                    + stockBefore
+    );
+}
+
+        Integer stockAfter =
+                stockBefore - request.getQuantity();
+
+        product.setStock(stockAfter);
 
         Product updatedProduct =
                 productRepository.save(product);
@@ -109,6 +118,8 @@ public class MovementServiceImpl implements MovementService {
                 .user(user)
                 .product(updatedProduct)
                 .quantity(request.getQuantity())
+                .stockBefore(stockBefore)
+                .stockAfter(stockAfter)
                 .type(MovementType.EXIT)
                 .observation(normalizeObservation(
                         request.getObservation()
@@ -188,11 +199,9 @@ public class MovementServiceImpl implements MovementService {
 
                 .quantity(movement.getQuantity())
 
-                .currentStock(
-                        product != null
-                                ? product.getStock()
-                                : null
-                )
+                .stockBefore(movement.getStockBefore())
+
+                .stockAfter(movement.getStockAfter())
 
                 .type(movement.getType().name())
 

@@ -1,86 +1,88 @@
 import { Link } from "react-router-dom";
 
+import { useAuth } from "../hooks/useAuth";
+
 function Sidebar() {
-const user = JSON.parse(
-    localStorage.getItem("user")
-);
 
-const role =
-    user?.authorities?.find(
-        auth =>
-            auth.authority.startsWith(
-                "ROLE_"
-            )
-    )?.authority;
-    
+    const {
+        hasPermission
+    } = useAuth();
+
     return (
-        <div>
-            <h2>MyInventory</h2>
 
-            <ul>
+        <aside>
 
-    <li>
-        <Link to="/">
-            Dashboard
-        </Link>
-    </li>
+            <nav>
 
-    <li>
-        <Link to="/products">
-            Productos
-        </Link>
-    </li>
+                {
+                    hasPermission("DASHBOARD_READ") && (
+                        <>
+                            <Link to="/dashboard">
+                                Dashboard
+                            </Link>
+                            <br />
+                        </>
+                    )
+                }
 
-    {
-    (
-        role === "ROLE_ADMIN" ||
-        role === "ROLE_SUPERVISOR"
-    ) && (
+                {
+                    hasPermission("PRODUCT_READ") && (
+                        <>
+                            <Link to="/products">
+                                Productos
+                            </Link>
+                            <br />
+                        </>
+                    )
+                }
 
-        <li>
-            <Link to="/categories">
-                Categorías
-            </Link>
-        </li>
+                {
+                    hasPermission("CATEGORY_READ") && (
+                        <>
+                            <Link to="/categories">
+                                Categorías
+                            </Link>
+                            <br />
+                        </>
+                    )
+                }
 
-    )
-}
+                {
+                    hasPermission("SUPPLIER_READ") && (
+                        <>
+                            <Link to="/suppliers">
+                                Proveedores
+                            </Link>
+                            <br />
+                        </>
+                    )
+                }
 
-    {
-        (
-            role === "ROLE_ADMIN" ||
-            role === "ROLE_SUPERVISOR"
-        ) && (
+                {
+                    hasPermission("MOVEMENT_READ") && (
+                        <>
+                            <Link to="/movements">
+                                Movimientos
+                            </Link>
+                            <br />
+                        </>
+                    )
+                }
 
-            <li>
-                <Link to="/suppliers">
-                    Proveedores
-                </Link>
-            </li>
+                {
+                    hasPermission("USER_READ") && (
+                        <>
+                            <Link to="/users">
+                                Usuarios
+                            </Link>
+                            <br />
+                        </>
+                    )
+                }
 
-        )
-    }
+            </nav>
 
-    <li>
-        <Link to="/movements">
-            Movimientos
-        </Link>
-    </li>
-
-    {
-        role === "ROLE_ADMIN" && (
-
-            <li>
-                <Link to="/users">
-                    Usuarios
-                </Link>
-            </li>
-
-        )
-    }
-
-</ul>
-        </div>
+        </aside>
     );
 }
 

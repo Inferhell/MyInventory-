@@ -6,6 +6,8 @@ import com.myinventory.service.MovementService;
 
 import jakarta.validation.Valid;
 
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -14,20 +16,12 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/movements")
-@PreAuthorize(
-        "hasAnyRole('ADMIN','SUPERVISOR','EMPLOYEE')"
-)
+@RequiredArgsConstructor
 public class MovementController {
 
     private final MovementService movementService;
 
-    public MovementController(
-            MovementService movementService
-    ) {
-
-        this.movementService = movementService;
-    }
-
+    @PreAuthorize("hasAuthority('MOVEMENT_CREATE')")
     @PostMapping("/entry")
     @ResponseStatus(HttpStatus.CREATED)
     public MovementResponse registerEntry(
@@ -37,6 +31,7 @@ public class MovementController {
         return movementService.registerEntry(request);
     }
 
+    @PreAuthorize("hasAuthority('MOVEMENT_CREATE')")
     @PostMapping("/exit")
     @ResponseStatus(HttpStatus.CREATED)
     public MovementResponse registerExit(
@@ -46,6 +41,7 @@ public class MovementController {
         return movementService.registerExit(request);
     }
 
+    @PreAuthorize("hasAuthority('MOVEMENT_READ')")
     @GetMapping
     public List<MovementResponse> findAll() {
 

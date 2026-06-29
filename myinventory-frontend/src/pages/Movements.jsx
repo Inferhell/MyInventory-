@@ -10,6 +10,10 @@ import {
     getProducts
 } from "../services/productService";
 
+import {
+    getApiErrorMessage
+} from "../utils/getApiErrorMessage";
+
 function Movements() {
 
     const [movements, setMovements] =
@@ -140,18 +144,16 @@ function Movements() {
         setType("ENTRY");
     };
 
-    const getErrorMessage = (
+       const getErrorMessage = (
+    error,
+    defaultMessage
+) => {
+
+    return getApiErrorMessage(
         error,
         defaultMessage
-    ) => {
-
-        return (
-            error.response?.data?.message ||
-            error.response?.data?.error ||
-            error.response?.data ||
-            defaultMessage
-        );
-    };
+    );
+};
 
     const selectedProduct =
         products.find(product =>
@@ -269,29 +271,38 @@ function Movements() {
 
     const formatType = (movementType) => {
 
-        if (movementType === "ENTRY") {
-            return "Entrada";
-        }
+    if (movementType === "ENTRY") {
+        return "Entrada";
+    }
 
-        if (movementType === "EXIT") {
-            return "Salida";
-        }
+    if (movementType === "EXIT") {
+        return "Salida";
+    }
 
-        return movementType;
-    };
+    if (movementType === "INITIAL_BALANCE") {
+        return "Stock inicial";
+    }
 
-    const getTypeIcon = (movementType) => {
+    return movementType;
+};
 
-        if (movementType === "ENTRY") {
-            return "🟢";
-        }
+  const getTypeIcon = (movementType) => {
 
-        if (movementType === "EXIT") {
-            return "🔴";
-        }
+    if (movementType === "ENTRY") {
+        return "🟢";
+    }
 
-        return "";
-    };
+    if (movementType === "EXIT") {
+        return "🔴";
+    }
+
+    if (movementType === "INITIAL_BALANCE") {
+        return "🔵";
+    }
+
+    return "";
+};
+
 
     const getStockText = (stock) => {
 
@@ -588,7 +599,8 @@ function Movements() {
                         <th>Proveedor</th>
                         <th>Tipo</th>
                         <th>Cantidad</th>
-                        <th>Stock actual</th>
+                        <th>Stock antes</th>
+                        <th>Stock después</th>
                         <th>Usuario</th>
                         <th>Fecha</th>
                         <th>Observación</th>
@@ -602,7 +614,7 @@ function Movements() {
                         filteredMovements.length === 0 ? (
 
                             <tr>
-                                <td colSpan="10">
+                                <td colSpan="11">
                                     No hay movimientos para mostrar
                                 </td>
                             </tr>
@@ -640,15 +652,22 @@ function Movements() {
                                     </td>
 
                                     <td>
-                                        {
-                                            movement.currentStock !== null
-                                            && movement.currentStock !== undefined
-                                                ? getStockText(
-                                                    movement.currentStock
-                                                )
-                                                : "-"
-                                        }
-                                    </td>
+    {
+        movement.stockBefore !== null
+        && movement.stockBefore !== undefined
+            ? movement.stockBefore
+            : "-"
+    }
+</td>
+
+<td>
+    {
+        movement.stockAfter !== null
+        && movement.stockAfter !== undefined
+            ? getStockText(movement.stockAfter)
+            : "-"
+    }
+</td>
 
                                     <td>
                                         {movement.userName || "-"}

@@ -51,8 +51,9 @@ export const disableUser =
     async (id) => {
 
         const response =
-            await axios.delete(
-                `${API_URL}/${id}`,
+            await axios.patch(
+                `${API_URL}/${id}/disable`,
+                {},
                 {
                     withCredentials: true
                 }
@@ -61,12 +62,11 @@ export const disableUser =
         return response.data;
     };
 
-
-    export const enableUser =
+export const enableUser =
     async (id) => {
 
         const response =
-            await axios.put(
+            await axios.patch(
                 `${API_URL}/${id}/enable`,
                 {},
                 {

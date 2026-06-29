@@ -1,16 +1,23 @@
 import { Navigate } from "react-router-dom";
+import { useAuth } from "../hooks/useAuth";
 
 function ProtectedRoute({ children }) {
 
-    const storedUser =
-        localStorage.getItem("user");
+    const {
+        loading,
+        isAuthenticated
+    } = useAuth();
 
-    const user =
-        storedUser
-            ? JSON.parse(storedUser)
-            : null;
+    if (loading) {
 
-    if (!user) {
+        return (
+            <p>
+                Verificando sesión...
+            </p>
+        );
+    }
+
+    if (!isAuthenticated) {
 
         return (
             <Navigate

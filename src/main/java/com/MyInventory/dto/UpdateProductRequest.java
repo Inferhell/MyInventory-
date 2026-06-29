@@ -8,7 +8,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.Min;
 
 @Data
 public class UpdateProductRequest {
@@ -31,15 +30,6 @@ public class UpdateProductRequest {
             message = "El precio debe ser mayor que cero"
     )
     private BigDecimal price;
-
-    @NotNull(
-            message = "El stock es obligatorio"
-    )
-    @Min(
-            value = 0,
-            message = "El stock no puede ser negativo"
-    )
-    private Integer stock;
 
     @NotNull(
             message = "La categoría es obligatoria"

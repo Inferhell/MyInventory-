@@ -2,13 +2,20 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import {
-    login,
-    getCurrentUser
-} from "../services/authService";
+    useAuth
+} from "../hooks/useAuth";
+import {
+    getApiErrorMessage
+} from "../utils/getApiErrorMessage";
 
 function Login() {
 
-    const navigate = useNavigate();
+    const {
+        login
+    } = useAuth();
+
+    const navigate =
+        useNavigate();
 
     const [email, setEmail] =
         useState("");
@@ -16,51 +23,39 @@ function Login() {
     const [password, setPassword] =
         useState("");
 
-    const handleSubmit = async () => {
+    const [errorMessage, setErrorMessage] =
+        useState("");
+
+    const handleLogin = async (event) => {
+
+        event.preventDefault();
+
+        setErrorMessage("");
 
         try {
 
-            await login(
+            await login({
                 email,
                 password
-            );
-
-            const user =
-    await getCurrentUser();
-
-if (
-    !user ||
-    !user.email
-) {
-
-    throw new Error(
-        "No existe usuario autenticado"
-    );
-}
-
-localStorage.setItem(
-    "user",
-    JSON.stringify(user)
-);
+            });
 
             alert(
-                `Bienvenido ${user.email}`
+                `Bienvenido ${email}`
             );
 
-            navigate("/");
+            navigate("/dashboard");
 
         } catch (error) {
 
-    console.error(error);
+            console.error(error);
 
-    localStorage.removeItem(
-        "user"
-    );
-
-    alert(
-        "Correo o contraseña incorrectos"
-    );
-}
+            setErrorMessage(
+    getApiErrorMessage(
+        error,
+        "Credenciales inválidas o usuario inactivo"
+    )
+);
+        }
     };
 
     return (
@@ -70,6 +65,19 @@ localStorage.setItem(
             <h1>
                 MyInventory
             </h1>
+
+            {
+                errorMessage && (
+
+                    <p
+                        style={{
+                            color: "red"
+                        }}
+                    >
+                        {errorMessage}
+                    </p>
+                )
+            }
 
             <input
                 type="email"
@@ -100,7 +108,7 @@ localStorage.setItem(
             <br />
 
             <button
-                onClick={handleSubmit}
+                onClick={handleLogin}
             >
                 Iniciar Sesión
             </button>

@@ -7,6 +7,9 @@ import {
     disableUser,
     enableUser
 } from "../services/userService";
+import {
+    getApiErrorMessage
+} from "../utils/getApiErrorMessage";
 
 function Users() {
 
@@ -98,24 +101,16 @@ function Users() {
         clearMessages();
     };
 
-    const getErrorMessage = (
+       const getErrorMessage = (
+    error,
+    defaultMessage
+) => {
+
+    return getApiErrorMessage(
         error,
         defaultMessage
-    ) => {
-
-        const data =
-            error.response?.data;
-
-        if (typeof data === "string") {
-            return data;
-        }
-
-        return (
-            data?.message ||
-            data?.error ||
-            defaultMessage
-        );
-    };
+    );
+};
 
     const validateForm = () => {
 

@@ -19,5 +19,5 @@ public class DashboardResponse {
 
     private Long totalExits;
 
-    private Integer totalStock;
+    private Long totalStock;
 }

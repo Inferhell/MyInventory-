@@ -2,9 +2,12 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Layout from "./components/Layout";
 
+
+import PermissionRoute from "./components/PermissionRoute";
+import Forbidden from "./pages/Forbidden";
+
 import Login from "./pages/Login";
 import ProtectedRoute from "./components/ProtectedRoute";
-import RoleRoute from "./components/RoleRoute";
 import Dashboard from "./pages/Dashboard";
 import Products from "./pages/Products";
 import Categories from "./pages/Categories";
@@ -19,6 +22,10 @@ function App() {
         <BrowserRouter>
 
             <Routes>
+                <Route
+    path="/forbidden"
+    element={<Forbidden />}
+/>
 
                 <Route
                     path="/login"
@@ -37,77 +44,68 @@ function App() {
                 />
 
                 <Route
-                    path="/products"
-                    element={
-                        <ProtectedRoute>
-                            <Layout>
-                                <Products />
-                            </Layout>
-                        </ProtectedRoute>
-                    }
-                />
+    path="/dashboard"
+    element={
+        <PermissionRoute permission="DASHBOARD_READ">
+            <Layout>
+                <Dashboard />
+            </Layout>
+        </PermissionRoute>
+    }
+/>
 
-                <Route
+<Route
+    path="/products"
+    element={
+        <PermissionRoute permission="PRODUCT_READ">
+            <Layout>
+                <Products />
+            </Layout>
+        </PermissionRoute>
+    }
+/>
+
+<Route
     path="/categories"
     element={
-        <ProtectedRoute>
-            <RoleRoute
-                roles={[
-                    "ROLE_ADMIN",
-                    "ROLE_SUPERVISOR"
-                ]}
-            >
-                <Layout>
-                    <Categories />
-                </Layout>
-            </RoleRoute>
-        </ProtectedRoute>
+        <PermissionRoute permission="CATEGORY_READ">
+            <Layout>
+                <Categories />
+            </Layout>
+        </PermissionRoute>
     }
 />
 
-                <Route
+<Route
     path="/suppliers"
     element={
-        <ProtectedRoute>
-            <RoleRoute
-                roles={[
-                    "ROLE_ADMIN",
-                    "ROLE_SUPERVISOR"
-                ]}
-            >
-                <Layout>
-                    <Suppliers />
-                </Layout>
-            </RoleRoute>
-        </ProtectedRoute>
+        <PermissionRoute permission="SUPPLIER_READ">
+            <Layout>
+                <Suppliers />
+            </Layout>
+        </PermissionRoute>
     }
 />
 
-                <Route
-                    path="/movements"
-                    element={
-                        <ProtectedRoute>
-                            <Layout>
-                                <Movements />
-                            </Layout>
-                        </ProtectedRoute>
-                    }
-                />
+<Route
+    path="/movements"
+    element={
+        <PermissionRoute permission="MOVEMENT_READ">
+            <Layout>
+                <Movements />
+            </Layout>
+        </PermissionRoute>
+    }
+/>
 
-                <Route
+<Route
     path="/users"
     element={
-        <ProtectedRoute>
-            <RoleRoute
-                roles={[
-                    "ROLE_ADMIN"
-                ]}
-            >
-                <Layout>
-                    <Users />
-                </Layout>
-            </RoleRoute>
-        </ProtectedRoute>
+        <PermissionRoute permission="USER_READ">
+            <Layout>
+                <Users />
+            </Layout>
+        </PermissionRoute>
     }
 />
 

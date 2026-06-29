@@ -3,9 +3,13 @@ package com.myinventory.service;
 import com.myinventory.dto.CreateSupplierRequest;
 import com.myinventory.dto.SupplierResponse;
 import com.myinventory.dto.UpdateSupplierRequest;
+import com.myinventory.exception.DuplicateResourceException;
 import com.myinventory.exception.ResourceNotFoundException;
 import com.myinventory.model.Supplier;
 import com.myinventory.repository.SupplierRepository;
+import com.myinventory.exception.BusinessRuleException;
+import com.myinventory.repository.ProductRepository;
+
 
 import lombok.RequiredArgsConstructor;
 
@@ -18,6 +22,8 @@ import java.util.List;
 public class SupplierServiceImpl implements SupplierService {
 
     private final SupplierRepository supplierRepository;
+
+    private final ProductRepository productRepository;
 
     @Override
     public List<SupplierResponse> getAllSuppliers() {
@@ -53,16 +59,16 @@ public class SupplierServiceImpl implements SupplierService {
 
         if (supplierRepository.existsByName(name)) {
 
-            throw new RuntimeException(
-                    "El proveedor ya existe"
-            );
+            throw new DuplicateResourceException(
+        "El proveedor ya existe"
+);
         }
 
         if (supplierRepository.existsByEmail(email)) {
 
-            throw new RuntimeException(
-                    "El correo del proveedor ya está registrado"
-            );
+            throw new DuplicateResourceException(
+        "El correo del proveedor ya está registrado"
+);
         }
 
         Supplier supplier = Supplier.builder()
@@ -129,20 +135,31 @@ public class SupplierServiceImpl implements SupplierService {
     }
 
     @Override
-    public void disableSupplier(Long id) {
+public void disableSupplier(Long id) {
 
-        Supplier supplier = supplierRepository.findByIdAndActiveTrue(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Proveedor no encontrado o inactivo"
-                        )
-                );
+    Supplier supplier = supplierRepository.findByIdAndActiveTrue(id)
+            .orElseThrow(() ->
+                    new ResourceNotFoundException(
+                            "Proveedor no encontrado o inactivo"
+                    )
+            );
 
-        supplier.setActive(false);
+    long activeProducts =
+            productRepository.countBySupplierIdAndActiveTrue(id);
 
-        supplierRepository.save(supplier);
+    if (activeProducts > 0) {
+
+        throw new BusinessRuleException(
+                "No se puede desactivar el proveedor porque tiene "
+                        + activeProducts
+                        + " productos activos asociados"
+        );
     }
 
+    supplier.setActive(false);
+
+    supplierRepository.save(supplier);
+}
     @Override
     public void enableSupplier(Long id) {
 

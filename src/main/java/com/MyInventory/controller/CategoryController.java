@@ -16,13 +16,13 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@PreAuthorize("hasAnyRole('ADMIN','SUPERVISOR')")
 @RequestMapping("/categories")
 @RequiredArgsConstructor
 public class CategoryController {
 
     private final CategoryService categoryService;
 
+    @PreAuthorize("hasAuthority('CATEGORY_WRITE')")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public CategoryResponse createCategory(
@@ -31,13 +31,15 @@ public class CategoryController {
 
         return categoryService.createCategory(request);
     }
-
+    
+    @PreAuthorize("hasAuthority('CATEGORY_READ')")
     @GetMapping
     public List<CategoryResponse> getAllCategories() {
 
         return categoryService.getAllCategories();
     }
 
+    @PreAuthorize("hasAuthority('CATEGORY_READ')")
     @GetMapping("/{id}")
     public CategoryResponse getCategoryById(
             @PathVariable Long id
@@ -46,6 +48,7 @@ public class CategoryController {
         return categoryService.getCategoryById(id);
     }
 
+    @PreAuthorize("hasAuthority('CATEGORY_WRITE')")
     @PutMapping("/{id}")
     public CategoryResponse updateCategory(
             @PathVariable Long id,
@@ -58,6 +61,7 @@ public class CategoryController {
         );
     }
 
+    @PreAuthorize("hasAuthority('CATEGORY_STATUS_CHANGE')")
     @PatchMapping("/{id}/disable")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void disableCategory(
@@ -67,6 +71,7 @@ public class CategoryController {
         categoryService.disableCategory(id);
     }
 
+    @PreAuthorize("hasAuthority('CATEGORY_STATUS_CHANGE')")
     @PatchMapping("/{id}/enable")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void enableCategory(

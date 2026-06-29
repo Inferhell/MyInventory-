@@ -1,0 +1,23 @@
+package com.myinventory.exception;
+
+public enum ErrorCode {
+
+    RESOURCE_NOT_FOUND,
+
+    DUPLICATE_RESOURCE,
+
+    INACTIVE_RESOURCE,
+
+    INSUFFICIENT_STOCK,
+
+    BUSINESS_RULE_VIOLATION,
+
+    VALIDATION_ERROR,
+
+    ACCESS_DENIED,
+
+    AUTHENTICATION_ERROR,
+
+    INTERNAL_ERROR
+
+}

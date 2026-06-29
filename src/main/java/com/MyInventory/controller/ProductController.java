@@ -7,54 +7,53 @@ import com.myinventory.service.ProductService;
 
 import jakarta.validation.Valid;
 
-import org.springframework.http.ResponseEntity;
+import lombok.RequiredArgsConstructor;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/products")
+@RequiredArgsConstructor
 public class ProductController {
 
     private final ProductService productService;
 
-    public ProductController(
-            ProductService productService) {
-
-        this.productService = productService;
-    }
-
-    @PostMapping
-    public ProductResponse create(
-            @Valid
-            @RequestBody
-            CreateProductRequest request) {
-
-        return productService.create(request);
-    }
-
+    @PreAuthorize("hasAuthority('PRODUCT_READ')")
     @GetMapping
     public List<ProductResponse> getAll() {
 
         return productService.getAll();
     }
 
+    @PreAuthorize("hasAuthority('PRODUCT_READ')")
     @GetMapping("/{id}")
-    public ResponseEntity<ProductResponse> getById(
-            @PathVariable Long id) {
+    public ProductResponse getById(
+            @PathVariable Long id
+    ) {
 
-        ProductResponse product =
-                productService.getById(id);
-
-        return ResponseEntity.ok(product);
+        return productService.getById(id);
     }
 
+    @PreAuthorize("hasAuthority('PRODUCT_WRITE')")
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public ProductResponse create(
+            @Valid @RequestBody CreateProductRequest request
+    ) {
+
+        return productService.create(request);
+    }
+
+    @PreAuthorize("hasAuthority('PRODUCT_WRITE')")
     @PutMapping("/{id}")
     public ProductResponse update(
             @PathVariable Long id,
-            @Valid
-            @RequestBody
-            UpdateProductRequest request) {
+            @Valid @RequestBody UpdateProductRequest request
+    ) {
 
         return productService.update(
                 id,
@@ -62,16 +61,22 @@ public class ProductController {
         );
     }
 
+    @PreAuthorize("hasAuthority('PRODUCT_STATUS_CHANGE')")
     @PatchMapping("/{id}/disable")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void disable(
-            @PathVariable Long id) {
+            @PathVariable Long id
+    ) {
 
         productService.disable(id);
     }
 
+    @PreAuthorize("hasAuthority('PRODUCT_STATUS_CHANGE')")
     @PatchMapping("/{id}/enable")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void enable(
-            @PathVariable Long id) {
+            @PathVariable Long id
+    ) {
 
         productService.enable(id);
     }
