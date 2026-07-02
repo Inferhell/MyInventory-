@@ -10,8 +10,21 @@ import {
 import {
     getApiErrorMessage
 } from "../utils/getApiErrorMessage";
+import {
+    useAuth
+} from "../hooks/useAuth";
 
 function Categories() {
+
+    const {
+    hasPermission
+} = useAuth();
+
+const canWriteCategory =
+    hasPermission("CATEGORY_WRITE");
+
+const canChangeCategoryStatus =
+    hasPermission("CATEGORY_STATUS_CHANGE");
 
     const [categories, setCategories] =
         useState([]);
@@ -332,17 +345,8 @@ useEffect(() => {
                 Categorías
             </h1>
 
-            <h2>
-                {
-                    editingId
-                        ? "Editar Categoría"
-                        : "Nueva Categoría"
-                }
-            </h2>
-
             {
                 message && (
-
                     <p style={{ color: "green" }}>
                         {message}
                     </p>
@@ -351,61 +355,73 @@ useEffect(() => {
 
             {
                 errorMessage && (
-
                     <p style={{ color: "red" }}>
                         {errorMessage}
                     </p>
                 )
             }
 
-            <input
-                type="text"
-                placeholder="Nombre"
-                value={name}
-                onChange={(e) =>
-                    setName(e.target.value)
-                }
-            />
-
-            <br />
-            <br />
-
-            <input
-                type="text"
-                placeholder="Descripción"
-                value={description}
-                onChange={(e) =>
-                    setDescription(e.target.value)
-                }
-            />
-
-            <br />
-            <br />
-
-            <button
-                onClick={handleSaveCategory}
-                disabled={loading}
-            >
-                {
-                    editingId
-                        ? "Actualizar Categoría"
-                        : "Crear Categoría"
-                }
-            </button>
-
             {
-                editingId && (
+                canWriteCategory && (
+                    <>
+                        <h2>
+                            {
+                                editingId
+                                    ? "Editar Categoría"
+                                    : "Nueva Categoría"
+                            }
+                        </h2>
 
-                    <button
-                        onClick={clearForm}
-                        disabled={loading}
-                    >
-                        Cancelar
-                    </button>
+                        <input
+                            type="text"
+                            placeholder="Nombre"
+                            value={name}
+                            onChange={(e) =>
+                                setName(e.target.value)
+                            }
+                        />
+
+                        <br />
+                        <br />
+
+                        <input
+                            type="text"
+                            placeholder="Descripción"
+                            value={description}
+                            onChange={(e) =>
+                                setDescription(e.target.value)
+                            }
+                        />
+
+                        <br />
+                        <br />
+
+                        <button
+                            onClick={handleSaveCategory}
+                            disabled={loading}
+                        >
+                            {
+                                editingId
+                                    ? "Actualizar Categoría"
+                                    : "Crear Categoría"
+                            }
+                        </button>
+
+                        {
+                            editingId && (
+                                <button
+                                    onClick={clearForm}
+                                    disabled={loading}
+                                >
+                                    Cancelar
+                                </button>
+                            )
+                        }
+
+                        <hr />
+                    </>
                 )
             }
-
-            <hr />
 
             <input
                 type="text"
@@ -510,55 +526,53 @@ useEffect(() => {
                                     <td>
 
                                         {
-                                            category.active ? (
+    canWriteCategory && category.active ? (
 
-                                                <button
-                                                    onClick={() =>
-                                                        handleEditCategory(
-                                                            category
-                                                        )
-                                                    }
-                                                    disabled={loading}
-                                                >
-                                                    Editar
-                                                </button>
+        <button
+            onClick={() =>
+                handleEditCategory(category)
+            }
+            disabled={loading}
+        >
+            Editar
+        </button>
 
-                                            ) : (
+    ) : !category.active && canWriteCategory ? (
 
-                                                <span>
-                                                    Reactivar para editar
-                                                </span>
-                                            )
-                                        }
+        <span>
+            Reactivar para editar
+        </span>
+
+    ) : null
+}
 
                                         {
-                                            category.active ? (
+    canChangeCategoryStatus && (
 
-                                                <button
-                                                    onClick={() =>
-                                                        handleDisableCategory(
-                                                            category.id
-                                                        )
-                                                    }
-                                                    disabled={loading}
-                                                >
-                                                    Desactivar
-                                                </button>
+        category.active ? (
 
-                                            ) : (
+            <button
+                onClick={() =>
+                    handleDisableCategory(category.id)
+                }
+                disabled={loading}
+            >
+                Desactivar
+            </button>
 
-                                                <button
-                                                    onClick={() =>
-                                                        handleEnableCategory(
-                                                            category.id
-                                                        )
-                                                    }
-                                                    disabled={loading}
-                                                >
-                                                    Reactivar
-                                                </button>
-                                            )
-                                        }
+        ) : (
+
+            <button
+                onClick={() =>
+                    handleEnableCategory(category.id)
+                }
+                disabled={loading}
+            >
+                Reactivar
+            </button>
+        )
+    )
+}
 
                                     </td>
 

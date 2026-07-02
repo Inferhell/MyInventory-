@@ -11,7 +11,21 @@ import {
     getApiErrorMessage
 } from "../utils/getApiErrorMessage";
 
+import {
+    useAuth
+} from "../hooks/useAuth";
+
 function Suppliers() {
+
+    const {
+    hasPermission
+} = useAuth();
+
+const canWriteSupplier =
+    hasPermission("SUPPLIER_WRITE");
+
+const canChangeSupplierStatus =
+    hasPermission("SUPPLIER_STATUS_CHANGE");
 
     const [suppliers, setSuppliers] = useState([]);
 
@@ -374,17 +388,8 @@ function Suppliers() {
                 Proveedores
             </h1>
 
-            <h2>
-                {
-                    editingId
-                        ? "Editar Proveedor"
-                        : "Nuevo Proveedor"
-                }
-            </h2>
-
             {
                 message && (
-
                     <p style={{ color: "green" }}>
                         {message}
                     </p>
@@ -393,85 +398,97 @@ function Suppliers() {
 
             {
                 errorMessage && (
-
                     <p style={{ color: "red" }}>
                         {errorMessage}
                     </p>
                 )
             }
 
-            <input
-                type="text"
-                placeholder="Nombre"
-                value={name}
-                onChange={(e) =>
-                    setName(e.target.value)
-                }
-            />
-
-            <br />
-            <br />
-
-            <input
-                type="text"
-                placeholder="Teléfono"
-                value={phone}
-                onChange={(e) =>
-                    setPhone(e.target.value)
-                }
-            />
-
-            <br />
-            <br />
-
-            <input
-                type="email"
-                placeholder="Correo"
-                value={email}
-                onChange={(e) =>
-                    setEmail(e.target.value)
-                }
-            />
-
-            <br />
-            <br />
-
-            <input
-                type="text"
-                placeholder="Dirección"
-                value={address}
-                onChange={(e) =>
-                    setAddress(e.target.value)
-                }
-            />
-
-            <br />
-            <br />
-
-            <button
-                onClick={handleSaveSupplier}
-                disabled={loading}
-            >
-                {
-                    editingId
-                        ? "Actualizar Proveedor"
-                        : "Crear Proveedor"
-                }
-            </button>
-
             {
-                editingId && (
+                canWriteSupplier && (
+                    <>
+                        <h2>
+                            {
+                                editingId
+                                    ? "Editar Proveedor"
+                                    : "Nuevo Proveedor"
+                            }
+                        </h2>
 
-                    <button
-                        onClick={clearForm}
-                        disabled={loading}
-                    >
-                        Cancelar
-                    </button>
+                        <input
+                            type="text"
+                            placeholder="Nombre"
+                            value={name}
+                            onChange={(e) =>
+                                setName(e.target.value)
+                            }
+                        />
+
+                        <br />
+                        <br />
+
+                        <input
+                            type="text"
+                            placeholder="Teléfono"
+                            value={phone}
+                            onChange={(e) =>
+                                setPhone(e.target.value)
+                            }
+                        />
+
+                        <br />
+                        <br />
+
+                        <input
+                            type="email"
+                            placeholder="Correo"
+                            value={email}
+                            onChange={(e) =>
+                                setEmail(e.target.value)
+                            }
+                        />
+
+                        <br />
+                        <br />
+
+                        <input
+                            type="text"
+                            placeholder="Dirección"
+                            value={address}
+                            onChange={(e) =>
+                                setAddress(e.target.value)
+                            }
+                        />
+
+                        <br />
+                        <br />
+
+                        <button
+                            onClick={handleSaveSupplier}
+                            disabled={loading}
+                        >
+                            {
+                                editingId
+                                    ? "Actualizar Proveedor"
+                                    : "Crear Proveedor"
+                            }
+                        </button>
+
+                        {
+                            editingId && (
+                                <button
+                                    onClick={clearForm}
+                                    disabled={loading}
+                                >
+                                    Cancelar
+                                </button>
+                            )
+                        }
+
+                        <hr />
+                    </>
                 )
             }
-
-            <hr />
 
             <input
                 type="text"
@@ -586,55 +603,53 @@ function Suppliers() {
                                     <td>
 
                                         {
-                                            supplier.active ? (
+    canWriteSupplier && supplier.active ? (
 
-                                                <button
-                                                    onClick={() =>
-                                                        handleEditSupplier(
-                                                            supplier
-                                                        )
-                                                    }
-                                                    disabled={loading}
-                                                >
-                                                    Editar
-                                                </button>
+        <button
+            onClick={() =>
+                handleEditSupplier(supplier)
+            }
+            disabled={loading}
+        >
+            Editar
+        </button>
 
-                                            ) : (
+    ) : !supplier.active && canWriteSupplier ? (
 
-                                                <span>
-                                                    Reactivar para editar
-                                                </span>
-                                            )
-                                        }
+        <span>
+            Reactivar para editar
+        </span>
+
+    ) : null
+}
 
                                         {
-                                            supplier.active ? (
+    canChangeSupplierStatus && (
 
-                                                <button
-                                                    onClick={() =>
-                                                        handleDisableSupplier(
-                                                            supplier.id
-                                                        )
-                                                    }
-                                                    disabled={loading}
-                                                >
-                                                    Desactivar
-                                                </button>
+        supplier.active ? (
 
-                                            ) : (
+            <button
+                onClick={() =>
+                    handleDisableSupplier(supplier.id)
+                }
+                disabled={loading}
+            >
+                Desactivar
+            </button>
 
-                                                <button
-                                                    onClick={() =>
-                                                        handleEnableSupplier(
-                                                            supplier.id
-                                                        )
-                                                    }
-                                                    disabled={loading}
-                                                >
-                                                    Reactivar
-                                                </button>
-                                            )
-                                        }
+        ) : (
+
+            <button
+                onClick={() =>
+                    handleEnableSupplier(supplier.id)
+                }
+                disabled={loading}
+            >
+                Reactivar
+            </button>
+        )
+    )
+}
 
                                     </td>
 

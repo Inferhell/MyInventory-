@@ -18,9 +18,23 @@ import {
 import {
     getApiErrorMessage
 } from "../utils/getApiErrorMessage";
+import {
+    useAuth
+} from "../hooks/useAuth";
 
 
 function Products() {
+
+
+    const {
+    hasPermission
+} = useAuth();
+
+const canWriteProduct =
+    hasPermission("PRODUCT_WRITE");
+
+const canChangeProductStatus =
+    hasPermission("PRODUCT_STATUS_CHANGE");
 
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
@@ -63,28 +77,41 @@ function Products() {
     };
 
     
-    
+     const getErrorMessage = (
+    error,
+    defaultMessage
+) => {
+
+    return getApiErrorMessage(
+        error,
+        defaultMessage
+    );
+};
     
     useEffect(() => {
 
     let cancelled = false;
 
-    Promise.all([
-        getProducts(),
-        getCategories(),
-        getSuppliers()
-    ])
-        .then(([productsData, categoriesData, suppliersData]) => {
+    getProducts()
+        .then((productsData) => {
 
-            if (cancelled) {
-                return;
+            if (!cancelled) {
+                setProducts(productsData);
             }
-
-            setProducts(productsData);
-            setCategories(categoriesData);
-            setSuppliers(suppliersData);
         })
-        .catch(console.error);
+        .catch((error) => {
+
+            console.error(error);
+
+            if (!cancelled) {
+                setErrorMessage(
+                    getErrorMessage(
+                        error,
+                        "Error al cargar productos"
+                    )
+                );
+            }
+        });
 
     return () => {
         cancelled = true;
@@ -92,6 +119,48 @@ function Products() {
 
 }, []);
 
+
+useEffect(() => {
+
+    if (!canWriteProduct) {
+        return;
+    }
+
+    let cancelled = false;
+
+    Promise.all([
+        getCategories(),
+        getSuppliers()
+    ])
+        .then(([
+            categoriesData,
+            suppliersData
+        ]) => {
+
+            if (!cancelled) {
+                setCategories(categoriesData);
+                setSuppliers(suppliersData);
+            }
+        })
+        .catch((error) => {
+
+            console.error(error);
+
+            if (!cancelled) {
+                setErrorMessage(
+                    getErrorMessage(
+                        error,
+                        "Error al cargar categorías o proveedores"
+                    )
+                );
+            }
+        });
+
+    return () => {
+        cancelled = true;
+    };
+
+}, [canWriteProduct]);
         
     
 
@@ -121,16 +190,7 @@ function Products() {
         clearMessages();
     };
 
-    const getErrorMessage = (
-    error,
-    defaultMessage
-) => {
-
-    return getApiErrorMessage(
-        error,
-        defaultMessage
-    );
-};
+   
 
     const validateForm = () => {
 
@@ -410,7 +470,26 @@ function Products() {
         <div>
 
             <h1>Productos</h1>
+            {
+    message && (
+        <p style={{ color: "green" }}>
+            {message}
+        </p>
+    )
+}
 
+{
+    errorMessage && (
+        <p style={{ color: "red" }}>
+            {errorMessage}
+        </p>
+    )
+}
+
+            {
+    canWriteProduct && (
+
+        <>
             <h2>
                 {
                     editingId
@@ -418,22 +497,6 @@ function Products() {
                         : "Nuevo Producto"
                 }
             </h2>
-
-            {
-                message && (
-                    <p style={{ color: "green" }}>
-                        {message}
-                    </p>
-                )
-            }
-
-            {
-                errorMessage && (
-                    <p style={{ color: "red" }}>
-                        {errorMessage}
-                    </p>
-                )
-            }
 
             <input
                 type="text"
@@ -473,32 +536,31 @@ function Products() {
             <br />
 
             {
-    editingId ? (
+                editingId ? (
 
-        <p>
-            <strong>Stock actual:</strong>
-            {" "}
-            {getStockText(Number(stock))}
-            {" "}
-            <br />
-            <small>
-                El stock se modifica desde Movimientos.
-            </small>
-        </p>
+                    <p>
+                        <strong>Stock actual:</strong>
+                        {" "}
+                        {getStockText(Number(stock))}
+                        <br />
+                        <small>
+                            El stock se modifica desde Movimientos.
+                        </small>
+                    </p>
 
-    ) : (
+                ) : (
 
-        <input
-            type="number"
-            placeholder="Stock inicial"
-            value={stock}
-            min="0"
-            onChange={(e) =>
-                setStock(e.target.value)
+                    <input
+                        type="number"
+                        placeholder="Stock inicial"
+                        value={stock}
+                        min="0"
+                        onChange={(e) =>
+                            setStock(e.target.value)
+                        }
+                    />
+                )
             }
-        />
-    )
-}
 
             <br />
             <br />
@@ -509,7 +571,6 @@ function Products() {
                     setCategoryId(e.target.value)
                 }
             >
-
                 <option value="">
                     Seleccione categoría
                 </option>
@@ -525,7 +586,6 @@ function Products() {
                         </option>
                     ))
                 }
-
             </select>
 
             <br />
@@ -537,7 +597,6 @@ function Products() {
                     setSupplierId(e.target.value)
                 }
             >
-
                 <option value="">
                     Seleccione proveedor
                 </option>
@@ -553,7 +612,6 @@ function Products() {
                         </option>
                     ))
                 }
-
             </select>
 
             <br />
@@ -583,6 +641,9 @@ function Products() {
             }
 
             <hr />
+        </>
+    )
+}
 
             <input
                 type="text"
@@ -689,54 +750,57 @@ function Products() {
 
                                     <td>
 
-                                        {
-                                            product.active ? (
+                                       {
+                    canWriteProduct && product.active ? (
 
-                                                <button
-                                                    onClick={() =>
-                                                        handleEditProduct(product)
-                                                    }
-                                                    disabled={loading}
-                                                >
-                                                    Editar
-                                                </button>
+                        <button
+                            onClick={() =>
+                                handleEditProduct(product)
+                            }
+                            disabled={loading}
+                        >
+                            Editar
+                        </button>
 
-                                            ) : (
+                    ) : !product.active && canWriteProduct ? (
 
-                                                <span>
-                                                    Reactivar para editar
-                                                </span>
-                                            )
-                                        }
+                        <span>
+                            Reactivar para editar
+                        </span>
 
-                                        {
-                                            product.active ? (
+                    ) : null
+                }
+{
+    canChangeProductStatus && (
 
-                                                <button
-                                                    onClick={() =>
-                                                        handleDisableProduct(
-                                                            product.id
-                                                        )
-                                                    }
-                                                    disabled={loading}
-                                                >
-                                                    Desactivar
-                                                </button>
+        product.active ? (
 
-                                            ) : (
+            <button
+                onClick={() =>
+                    handleDisableProduct(
+                        product.id
+                    )
+                }
+                disabled={loading}
+            >
+                Desactivar
+            </button>
 
-                                                <button
-                                                    onClick={() =>
-                                                        handleEnableProduct(
-                                                            product.id
-                                                        )
-                                                    }
-                                                    disabled={loading}
-                                                >
-                                                    Reactivar
-                                                </button>
-                                            )
-                                        }
+        ) : (
+
+            <button
+                onClick={() =>
+                    handleEnableProduct(
+                        product.id
+                    )
+                }
+                disabled={loading}
+            >
+                Reactivar
+            </button>
+        )
+    )
+}
 
                                     </td>
 

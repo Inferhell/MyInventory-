@@ -14,7 +14,18 @@ import {
     getApiErrorMessage
 } from "../utils/getApiErrorMessage";
 
+import {
+    useAuth
+} from "../hooks/useAuth";
+
 function Movements() {
+
+    const {
+    hasPermission
+} = useAuth();
+
+const canCreateMovement =
+    hasPermission("MOVEMENT_CREATE");
 
     const [movements, setMovements] =
         useState([]);
@@ -375,13 +386,8 @@ function Movements() {
                 Movimientos
             </h1>
 
-            <h2>
-                Registrar Movimiento
-            </h2>
-
             {
                 message && (
-
                     <p style={{ color: "green" }}>
                         {message}
                     </p>
@@ -390,135 +396,136 @@ function Movements() {
 
             {
                 errorMessage && (
-
                     <p style={{ color: "red" }}>
                         {errorMessage}
                     </p>
                 )
             }
 
-            <select
-                value={productId}
-                onChange={(e) =>
-                    setProductId(e.target.value)
-                }
-            >
-
-                <option value="">
-                    Seleccione producto
-                </option>
-
-                {
-                    activeProducts.map(product => (
-
-                        <option
-                            key={product.id}
-                            value={product.id}
-                        >
-                            {product.name}
-                            {" "}
-                            | Stock:
-                            {" "}
-                            {product.stock}
-                            {" "}
-                            | Proveedor:
-                            {" "}
-                            {product.supplierName || "-"}
-                        </option>
-                    ))
-                }
-
-            </select>
-
-            <br />
-            <br />
-
             {
-                selectedProduct && (
+                canCreateMovement && (
+                    <>
+                        <h2>
+                            Registrar Movimiento
+                        </h2>
 
-                    <div>
+                        <select
+                            value={productId}
+                            onChange={(e) =>
+                                setProductId(e.target.value)
+                            }
+                        >
+                            <option value="">
+                                Seleccione producto
+                            </option>
 
-                        <strong>
-                            Producto seleccionado:
-                        </strong>
+                            {
+                                activeProducts.map(product => (
+                                    <option
+                                        key={product.id}
+                                        value={product.id}
+                                    >
+                                        {product.name}
+                                        {" "}
+                                        | Stock:
+                                        {" "}
+                                        {product.stock}
+                                        {" "}
+                                        | Proveedor:
+                                        {" "}
+                                        {product.supplierName || "-"}
+                                    </option>
+                                ))
+                            }
+                        </select>
 
-                        <p>
-                            Nombre: {selectedProduct.name}
-                        </p>
+                        <br />
+                        <br />
 
-                        <p>
-                            Categoría: {selectedProduct.categoryName || "-"}
-                        </p>
+                        {
+                            selectedProduct && (
+                                <div>
+                                    <strong>
+                                        Producto seleccionado:
+                                    </strong>
 
-                        <p>
-                            Proveedor: {selectedProduct.supplierName || "-"}
-                        </p>
+                                    <p>
+                                        Nombre: {selectedProduct.name}
+                                    </p>
 
-                        <p>
-                            Stock actual: {getStockText(selectedProduct.stock)}
-                        </p>
+                                    <p>
+                                        Categoría: {selectedProduct.categoryName || "-"}
+                                    </p>
 
-                    </div>
+                                    <p>
+                                        Proveedor: {selectedProduct.supplierName || "-"}
+                                    </p>
+
+                                    <p>
+                                        Stock actual: {getStockText(selectedProduct.stock)}
+                                    </p>
+                                </div>
+                            )
+                        }
+
+                        <input
+                            type="number"
+                            placeholder="Cantidad"
+                            value={quantity}
+                            min="1"
+                            onChange={(e) =>
+                                setQuantity(e.target.value)
+                            }
+                        />
+
+                        <br />
+                        <br />
+
+                        <input
+                            type="text"
+                            placeholder="Observación"
+                            value={observation}
+                            onChange={(e) =>
+                                setObservation(e.target.value)
+                            }
+                        />
+
+                        <br />
+                        <br />
+
+                        <select
+                            value={type}
+                            onChange={(e) =>
+                                setType(e.target.value)
+                            }
+                        >
+                            <option value="ENTRY">
+                                Entrada
+                            </option>
+
+                            <option value="EXIT">
+                                Salida
+                            </option>
+                        </select>
+
+                        <br />
+                        <br />
+
+                        <button
+                            onClick={handleSubmit}
+                            disabled={loading}
+                        >
+                            {
+                                loading
+                                    ? "Registrando..."
+                                    : "Registrar Movimiento"
+                            }
+                        </button>
+
+                        <hr />
+                    </>
                 )
             }
-
-            <input
-                type="number"
-                placeholder="Cantidad"
-                value={quantity}
-                min="1"
-                onChange={(e) =>
-                    setQuantity(e.target.value)
-                }
-            />
-
-            <br />
-            <br />
-
-            <input
-                type="text"
-                placeholder="Observación"
-                value={observation}
-                onChange={(e) =>
-                    setObservation(e.target.value)
-                }
-            />
-
-            <br />
-            <br />
-
-            <select
-                value={type}
-                onChange={(e) =>
-                    setType(e.target.value)
-                }
-            >
-
-                <option value="ENTRY">
-                    Entrada
-                </option>
-
-                <option value="EXIT">
-                    Salida
-                </option>
-
-            </select>
-
-            <br />
-            <br />
-
-            <button
-                onClick={handleSubmit}
-                disabled={loading}
-            >
-                {
-                    loading
-                        ? "Registrando..."
-                        : "Registrar Movimiento"
-                }
-            </button>
-
-            <hr />
 
             <h2>
                 Historial de Movimientos

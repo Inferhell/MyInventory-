@@ -11,7 +11,25 @@ import {
     getApiErrorMessage
 } from "../utils/getApiErrorMessage";
 
+import {
+    useAuth
+} from "../hooks/useAuth";
+
 function Users() {
+
+    const {
+    hasPermission,
+    user: currentUser
+} = useAuth();
+
+const canCreateUser =
+    hasPermission("USER_CREATE");
+
+const canEditUser =
+    hasPermission("USER_EDIT");
+
+const canChangeUserStatus =
+    hasPermission("USER_STATUS_CHANGE");
 
     const [users, setUsers] = useState([]);
 
@@ -384,17 +402,8 @@ function Users() {
                 Usuarios
             </h1>
 
-            <h2>
-                {
-                    editingId
-                        ? "Editar Usuario"
-                        : "Nuevo Usuario"
-                }
-            </h2>
-
             {
                 message && (
-
                     <p style={{ color: "green" }}>
                         {message}
                     </p>
@@ -403,104 +412,108 @@ function Users() {
 
             {
                 errorMessage && (
-
                     <p style={{ color: "red" }}>
                         {errorMessage}
                     </p>
                 )
             }
 
-            <input
-                type="text"
-                placeholder="Nombre"
-                value={name}
-                onChange={(e) =>
-                    setName(e.target.value)
-                }
-            />
-
-            <br />
-            <br />
-
-            <input
-                type="email"
-                placeholder="Correo"
-                value={email}
-                onChange={(e) =>
-                    setEmail(e.target.value)
-                }
-            />
-
-            <br />
-            <br />
-
             {
-                !editingId && (
-
+                (
+                    (!editingId && canCreateUser)
+                    || (editingId && canEditUser)
+                ) && (
                     <>
+                        <h2>
+                            {
+                                editingId
+                                    ? "Editar Usuario"
+                                    : "Nuevo Usuario"
+                            }
+                        </h2>
+
                         <input
-                            type="password"
-                            placeholder="Contraseña"
-                            value={password}
+                            type="text"
+                            placeholder="Nombre"
+                            value={name}
                             onChange={(e) =>
-                                setPassword(e.target.value)
+                                setName(e.target.value)
                             }
                         />
 
                         <br />
                         <br />
+
+                        <input
+                            type="email"
+                            placeholder="Correo"
+                            value={email}
+                            onChange={(e) =>
+                                setEmail(e.target.value)
+                            }
+                        />
+
+                        <br />
+                        <br />
+
+                        {
+                            !editingId && (
+                                <>
+                                    <input
+                                        type="password"
+                                        placeholder="Contraseña"
+                                        value={password}
+                                        onChange={(e) =>
+                                            setPassword(e.target.value)
+                                        }
+                                    />
+
+                                    <br />
+                                    <br />
+                                </>
+                            )
+                        }
+
+                        <select
+                            value={role}
+                            onChange={(e) =>
+                                setRole(e.target.value)
+                            }
+                        >
+                            <option value="ADMIN">ADMIN</option>
+                            <option value="SUPERVISOR">SUPERVISOR</option>
+                            <option value="EMPLOYEE">EMPLOYEE</option>
+                        </select>
+
+                        <br />
+                        <br />
+
+                        <button
+                            onClick={handleSaveUser}
+                            disabled={loading}
+                        >
+                            {
+                                editingId
+                                    ? "Actualizar Usuario"
+                                    : "Crear Usuario"
+                            }
+                        </button>
+
+                        {
+                            editingId && (
+                                <button
+                                    onClick={clearForm}
+                                    disabled={loading}
+                                >
+                                    Cancelar
+                                </button>
+                            )
+                        }
+
+                        <hr />
                     </>
                 )
             }
-
-            <select
-                value={role}
-                onChange={(e) =>
-                    setRole(e.target.value)
-                }
-            >
-
-                <option value="ADMIN">
-                    ADMIN
-                </option>
-
-                <option value="SUPERVISOR">
-                    SUPERVISOR
-                </option>
-
-                <option value="EMPLOYEE">
-                    EMPLOYEE
-                </option>
-
-            </select>
-
-            <br />
-            <br />
-
-            <button
-                onClick={handleSaveUser}
-                disabled={loading}
-            >
-                {
-                    editingId
-                        ? "Actualizar Usuario"
-                        : "Crear Usuario"
-                }
-            </button>
-
-            {
-                editingId && (
-
-                    <button
-                        onClick={clearForm}
-                        disabled={loading}
-                    >
-                        Cancelar
-                    </button>
-                )
-            }
-
-            <hr />
 
             <input
                 type="text"
@@ -608,55 +621,56 @@ function Users() {
                                     <td>
 
                                         {
-                                            user.active ? (
+    canEditUser && user.active ? (
 
-                                                <button
-                                                    onClick={() =>
-                                                        handleEditUser(
-                                                            user
-                                                        )
-                                                    }
-                                                    disabled={loading}
-                                                >
-                                                    Editar
-                                                </button>
+        <button
+            onClick={() =>
+                handleEditUser(user)
+            }
+            disabled={loading}
+        >
+            Editar
+        </button>
 
-                                            ) : (
+    ) : !user.active && canEditUser ? (
 
-                                                <span>
-                                                    Reactivar para editar
-                                                </span>
-                                            )
-                                        }
+        <span>
+            Reactivar para editar
+        </span>
 
-                                        {
-                                            user.active ? (
+    ) : null
+}
 
-                                                <button
-                                                    onClick={() =>
-                                                        handleDisableUser(
-                                                            user.id
-                                                        )
-                                                    }
-                                                    disabled={loading}
-                                                >
-                                                    Desactivar
-                                                </button>
+                                      {
+    canChangeUserStatus && (
 
-                                            ) : (
+        user.active ? (
 
-                                                <button
-                                                    onClick={() =>
-                                                        handleEnableUser(
-                                                            user.id
-                                                        )
-                                                    }
-                                                    disabled={loading}
-                                                >
-                                                    Reactivar
-                                                </button>
-                                            )
-                                        }
+            user.email !== currentUser?.email && (
+
+                <button
+                    onClick={() =>
+                        handleDisableUser(user.id)
+                    }
+                    disabled={loading}
+                >
+                    Desactivar
+                </button>
+            )
+
+        ) : (
+
+            <button
+                onClick={() =>
+                    handleEnableUser(user.id)
+                }
+                disabled={loading}
+            >
+                Reactivar
+            </button>
+        )
+    )
+}
 
                                     </td>
 
