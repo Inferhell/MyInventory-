@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - master
+
   pull_request:
     branches:
       - main
@@ -14,11 +15,6 @@ jobs:
   backend:
     name: Backend - Maven Verify
     runs-on: ubuntu-latest
-
-    services:
-      docker:
-        image: docker:27-dind
-        options: --privileged
 
     steps:
       - name: Checkout repository
@@ -30,6 +26,9 @@ jobs:
           distribution: temurin
           java-version: "21"
           cache: maven
+
+      - name: Verify Docker is available
+        run: docker version
 
       - name: Make Maven Wrapper executable
         run: chmod +x mvnw
@@ -64,5 +63,3 @@ jobs:
 
       - name: Build frontend
         run: npm run build
-
-        
