@@ -2,61 +2,82 @@ package com.myinventory.controller;
 
 import com.myinventory.dto.CreateProductRequest;
 import com.myinventory.dto.ProductResponse;
-import com.myinventory.model.Product;
+import com.myinventory.dto.UpdateProductRequest;
 import com.myinventory.service.ProductService;
 
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
+
+import lombok.RequiredArgsConstructor;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/products")
+@RequiredArgsConstructor
 public class ProductController {
 
     private final ProductService productService;
 
-    public ProductController(ProductService productService){
-        this.productService = productService;
-    }
-
-    
-    @PostMapping
-public ProductResponse save(
-       @Valid @RequestBody CreateProductRequest request){
-
-    return productService.save(request);
-}
-
+    @PreAuthorize("hasAuthority('PRODUCT_READ')")
     @GetMapping
-    public List<Product> findAll(){
-        return productService.findAll();
+    public List<ProductResponse> getAll() {
+
+        return productService.getAll();
     }
 
+    @PreAuthorize("hasAuthority('PRODUCT_READ')")
     @GetMapping("/{id}")
-    public ResponseEntity<Product> findById(@PathVariable Long id){
+    public ProductResponse getById(
+            @PathVariable Long id
+    ) {
 
-    Product product = productService.findById(id);
-
-    if(product == null){
-         return ResponseEntity.notFound().build();
+        return productService.getById(id);
     }
 
-     return ResponseEntity.ok(product);
+    @PreAuthorize("hasAuthority('PRODUCT_WRITE')")
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public ProductResponse create(
+            @Valid @RequestBody CreateProductRequest request
+    ) {
+
+        return productService.create(request);
     }
+
+    @PreAuthorize("hasAuthority('PRODUCT_WRITE')")
     @PutMapping("/{id}")
-    public Product update(
-        @PathVariable Long id,
-        @RequestBody Product product) {
+    public ProductResponse update(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateProductRequest request
+    ) {
 
-    return productService.update(id, product);
-}
+        return productService.update(
+                id,
+                request
+        );
+    }
 
+    @PreAuthorize("hasAuthority('PRODUCT_STATUS_CHANGE')")
     @PatchMapping("/{id}/disable")
-    public void disable(@PathVariable Long id) {
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void disable(
+            @PathVariable Long id
+    ) {
 
-    productService.disable(id);
-}
+        productService.disable(id);
+    }
 
+    @PreAuthorize("hasAuthority('PRODUCT_STATUS_CHANGE')")
+    @PatchMapping("/{id}/enable")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void enable(
+            @PathVariable Long id
+    ) {
+
+        productService.enable(id);
+    }
 }

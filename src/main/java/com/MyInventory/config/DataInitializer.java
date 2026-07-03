@@ -1,7 +1,6 @@
 package com.myinventory.config;
 
 import com.myinventory.model.Role;
-import com.myinventory.model.User;
 import com.myinventory.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;

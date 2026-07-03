@@ -16,9 +16,8 @@ public record UpdateUserRequest(
         String email,
 
         @NotNull
-        Role role,
+        Role role
 
-        boolean active
 
 ) {
 }

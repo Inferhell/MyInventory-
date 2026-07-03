@@ -3,20 +3,25 @@ package com.myinventory.service;
 import com.myinventory.dto.CreateSupplierRequest;
 import com.myinventory.dto.SupplierResponse;
 import com.myinventory.dto.UpdateSupplierRequest;
-import com.myinventory.model.Supplier;
 
 import java.util.List;
 
 public interface SupplierService {
 
-    SupplierResponse save(CreateSupplierRequest request);
+    List<SupplierResponse> getAllSuppliers();
 
-    List<Supplier> findAll();
+    SupplierResponse getSupplierById(Long id);
 
-    Supplier findById(Long id);
+    SupplierResponse createSupplier(
+            CreateSupplierRequest request
+    );
 
-    Supplier update(Long id, UpdateSupplierRequest request);
+    SupplierResponse updateSupplier(
+            Long id,
+            UpdateSupplierRequest request
+    );
 
-    void disable(Long id);
+    void disableSupplier(Long id);
 
+    void enableSupplier(Long id);
 }

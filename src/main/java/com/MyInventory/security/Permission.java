@@ -1,0 +1,27 @@
+package com.myinventory.security;
+
+public enum Permission {
+
+    DASHBOARD_READ,
+
+    PRODUCT_READ,
+    PRODUCT_WRITE,
+    PRODUCT_STATUS_CHANGE,
+
+    CATEGORY_READ,
+    CATEGORY_WRITE,
+    CATEGORY_STATUS_CHANGE,
+
+    SUPPLIER_READ,
+    SUPPLIER_WRITE,
+    SUPPLIER_STATUS_CHANGE,
+
+    MOVEMENT_READ,
+    MOVEMENT_CREATE,
+
+    USER_READ,
+    USER_CREATE,
+    USER_EDIT,
+    USER_STATUS_CHANGE
+
+}

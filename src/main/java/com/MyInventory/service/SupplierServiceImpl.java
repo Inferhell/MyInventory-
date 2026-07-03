@@ -3,90 +3,198 @@ package com.myinventory.service;
 import com.myinventory.dto.CreateSupplierRequest;
 import com.myinventory.dto.SupplierResponse;
 import com.myinventory.dto.UpdateSupplierRequest;
+import com.myinventory.exception.DuplicateResourceException;
+import com.myinventory.exception.ResourceNotFoundException;
 import com.myinventory.model.Supplier;
 import com.myinventory.repository.SupplierRepository;
+import com.myinventory.exception.BusinessRuleException;
+import com.myinventory.repository.ProductRepository;
+
+
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class SupplierServiceImpl implements SupplierService {
 
     private final SupplierRepository supplierRepository;
 
-    public SupplierServiceImpl(
-            SupplierRepository supplierRepository) {
+    private final ProductRepository productRepository;
 
-        this.supplierRepository = supplierRepository;
+    @Override
+    public List<SupplierResponse> getAllSuppliers() {
+
+        return supplierRepository.findAll()
+                .stream()
+                .map(this::toResponse)
+                .toList();
     }
 
     @Override
-    public SupplierResponse save(
-            CreateSupplierRequest request) {
+    public SupplierResponse getSupplierById(Long id) {
+
+        Supplier supplier = supplierRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Proveedor no encontrado"
+                        )
+                );
+
+        return toResponse(supplier);
+    }
+
+    @Override
+    public SupplierResponse createSupplier(
+            CreateSupplierRequest request
+    ) {
+
+        String name = normalize(request.name());
+        String phone = normalize(request.phone());
+        String email = normalize(request.email());
+        String address = normalize(request.address());
+
+        if (supplierRepository.existsByName(name)) {
+
+            throw new DuplicateResourceException(
+        "El proveedor ya existe"
+);
+        }
+
+        if (supplierRepository.existsByEmail(email)) {
+
+            throw new DuplicateResourceException(
+        "El correo del proveedor ya está registrado"
+);
+        }
 
         Supplier supplier = Supplier.builder()
-                .name(request.getName())
-                .phone(request.getPhone())
-                .email(request.getEmail())
-                .address(request.getAddress())
+                .name(name)
+                .phone(phone)
+                .email(email)
+                .address(address)
                 .active(true)
                 .build();
 
-        Supplier saved =
+        Supplier savedSupplier =
                 supplierRepository.save(supplier);
 
-        return SupplierResponse.builder()
-                .id(saved.getId())
-                .name(saved.getName())
-                .phone(saved.getPhone())
-                .email(saved.getEmail())
-                .address(saved.getAddress())
-                .active(saved.isActive())
-                .build();
+        return toResponse(savedSupplier);
     }
 
     @Override
-    public List<Supplier> findAll() {
-        return supplierRepository.findByActiveTrue();
-    }
-
-    @Override
-    public Supplier findById(Long id) {
-        return supplierRepository.findById(id)
-                .orElse(null);
-    }
-
-    @Override
-    public Supplier update(
+    public SupplierResponse updateSupplier(
             Long id,
-            UpdateSupplierRequest request) {
+            UpdateSupplierRequest request
+    ) {
 
-        Supplier supplier = findById(id);
+        Supplier supplier = supplierRepository.findByIdAndActiveTrue(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Proveedor no encontrado o inactivo"
+                        )
+                );
 
-        if (supplier == null) {
-            return null;
-        }
+        String name = normalize(request.name());
+        String phone = normalize(request.phone());
+        String email = normalize(request.email());
+        String address = normalize(request.address());
 
-        supplier.setName(request.getName());
-        supplier.setPhone(request.getPhone());
-        supplier.setEmail(request.getEmail());
-        supplier.setAddress(request.getAddress());
+       if (supplierRepository.existsByNameAndIdNot(
+        name,
+        id
+)) {
 
-        return supplierRepository.save(supplier);
+    throw new DuplicateResourceException(
+            "El proveedor ya existe"
+    );
+}
+
+if (supplierRepository.existsByEmailAndIdNot(
+        email,
+        id
+)) {
+
+    throw new DuplicateResourceException(
+            "El correo del proveedor ya está registrado"
+    );
+}
+
+        supplier.setName(name);
+        supplier.setPhone(phone);
+        supplier.setEmail(email);
+        supplier.setAddress(address);
+
+        Supplier updatedSupplier =
+                supplierRepository.save(supplier);
+
+        return toResponse(updatedSupplier);
     }
 
+   @Override
+public void disableSupplier(Long id) {
+
+    Supplier supplier = supplierRepository.findByIdAndActiveTrue(id)
+            .orElseThrow(() ->
+                    new ResourceNotFoundException(
+                            "Proveedor no encontrado o inactivo"
+                    )
+            );
+
+    long activeProducts =
+            productRepository.countBySupplierIdAndActiveTrue(id);
+
+    if (activeProducts > 0) {
+
+        throw new BusinessRuleException(
+                "No se puede desactivar el proveedor porque tiene "
+                        + activeProducts
+                        + " productos activos asociados"
+        );
+    }
+
+    supplier.setActive(false);
+
+    supplierRepository.save(supplier);
+}
     @Override
-    public void disable(Long id) {
+    public void enableSupplier(Long id) {
 
-        Supplier supplier = findById(id);
+        Supplier supplier = supplierRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Proveedor no encontrado"
+                        )
+                );
 
-        if (supplier != null) {
+        supplier.setActive(true);
 
-            supplier.setActive(false);
-
-            supplierRepository.save(supplier);
-        }
+        supplierRepository.save(supplier);
     }
 
-   
+    private SupplierResponse toResponse(Supplier supplier) {
+
+    return new SupplierResponse(
+            supplier.getId(),
+            supplier.getName(),
+            supplier.getPhone(),
+            supplier.getEmail(),
+            supplier.getAddress(),
+            supplier.isActive(),
+            supplier.getCreatedAt(),
+            supplier.getUpdatedAt()
+    );
+}
+
+    private String normalize(String value) {
+
+        if (value == null) {
+            return "";
+        }
+
+        return value.trim();
+    }
 }

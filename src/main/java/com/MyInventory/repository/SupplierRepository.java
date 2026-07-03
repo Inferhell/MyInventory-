@@ -13,6 +13,21 @@ public interface SupplierRepository
 
     boolean existsByName(String name);
 
+    boolean existsByEmail(String email);
+
+    boolean existsByNameAndIdNot(
+            String name,
+            Long id
+    );
+
+    boolean existsByEmailAndIdNot(
+            String email,
+            Long id
+    );
+
     List<Supplier> findByActiveTrue();
 
+    Long countByActiveTrue();
+
+    Optional<Supplier> findByIdAndActiveTrue(Long id);
 }

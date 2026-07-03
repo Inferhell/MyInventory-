@@ -23,4 +23,5 @@ public interface CategoryService {
 
     void disableCategory(Long id);
 
+    void enableCategory(Long id);
 }

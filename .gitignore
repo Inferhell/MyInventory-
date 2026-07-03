@@ -1,33 +1,46 @@
-HELP.md
+# =========================
+# Backend / Java / Maven
+# =========================
 target/
+*.class
+*.log
+
+# Maven wrapper generated jar, if present
 .mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
 
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
+# =========================
+# Frontend / Node / Vite
+# =========================
+myinventory-frontend/node_modules/
+myinventory-frontend/dist/
+myinventory-frontend/.vite/
 
-### IntelliJ IDEA ###
-.idea
-*.iws
-*.iml
-*.ipr
+# =========================
+# Environment files
+# =========================
+.env
+.env.*
+!.env.example
 
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
+myinventory-frontend/.env
+myinventory-frontend/.env.*
+!myinventory-frontend/.env.example
 
-### VS Code ###
+# =========================
+# Temporary / compressed files
+# =========================
+*.zip
+src/main.zip
+
+# =========================
+# IDEs
+# =========================
 .vscode/
+.idea/
+*.iml
+
+# =========================
+# OS files
+# =========================
+.DS_Store
+Thumbs.db

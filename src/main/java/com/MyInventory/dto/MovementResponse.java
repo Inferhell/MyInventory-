@@ -15,7 +15,15 @@ public class MovementResponse {
 
     private String productName;
 
+    private String categoryName;
+
+    private String supplierName;
+
     private Integer quantity;
+
+    private Integer stockBefore;
+
+    private Integer stockAfter;
 
     private String type;
 
@@ -26,5 +34,4 @@ public class MovementResponse {
     private Long userId;
 
     private String userName;
-
 }

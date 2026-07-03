@@ -12,29 +12,44 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Product {
+public class Product extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(
+            nullable = false
+    )
     private String name;
 
-    @Column(length = 300)
+    @Column(
+            length = 300
+    )
     private String description;
 
-    @Column(nullable = false)
+    @Column(
+            nullable = false
+    )
     private BigDecimal price;
 
-    @Column(nullable = false)
+    @Column(
+            nullable = false
+    )
     private Integer stock;
 
     @Builder.Default
     private boolean active = true;
 
     @ManyToOne
-    @JoinColumn(name = "category_id")
+    @JoinColumn(
+            name = "category_id"
+    )
     private Category category;
 
+    @ManyToOne
+    @JoinColumn(
+            name = "supplier_id"
+    )
+    private Supplier supplier;
 }

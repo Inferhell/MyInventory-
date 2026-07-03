@@ -1,16 +1,22 @@
 package com.myinventory.dto;
 
-import lombok.Data;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 
-@Data
-public class CreateSupplierRequest {
+public record CreateSupplierRequest(
 
-    private String name;
+        @NotBlank(message = "El nombre es obligatorio")
+        String name,
 
-    private String phone;
+        @NotBlank(message = "El teléfono es obligatorio")
+        String phone,
 
-    private String email;
+        @Email(message = "Correo inválido")
+        @NotBlank(message = "El correo es obligatorio")
+        String email,
 
-    private String address;
+        @NotBlank(message = "La dirección es obligatoria")
+        String address
 
+) {
 }

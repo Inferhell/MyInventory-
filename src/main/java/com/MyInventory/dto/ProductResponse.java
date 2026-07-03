@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Data
 @Builder
@@ -25,4 +26,11 @@ public class ProductResponse {
 
     private String categoryName;
 
+    private Long supplierId;
+
+    private String supplierName;
+
+    private LocalDateTime createdAt;
+
+    private LocalDateTime updatedAt;
 }

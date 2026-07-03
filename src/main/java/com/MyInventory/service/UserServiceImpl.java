@@ -1,8 +1,13 @@
 package com.myinventory.service;
 
+import com.myinventory.dto.ChangePasswordRequest;
 import com.myinventory.dto.CreateUserRequest;
 import com.myinventory.dto.UpdateUserRequest;
 import com.myinventory.dto.UserResponse;
+import com.myinventory.exception.BusinessRuleException;
+import com.myinventory.exception.DuplicateResourceException;
+import com.myinventory.exception.ResourceNotFoundException;
+import com.myinventory.model.Role;
 import com.myinventory.model.User;
 import com.myinventory.repository.UserRepository;
 
@@ -10,35 +15,71 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+
     private final PasswordEncoder passwordEncoder;
 
     @Override
+    @Transactional(readOnly = true)
     public Optional<User> findByEmail(String email) {
-        return userRepository.findByEmail(email);
+
+        return userRepository.findByEmail(
+                normalizeEmail(email)
+        );
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<UserResponse> getAllUsers() {
+
+        return userRepository.findAll()
+                .stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public UserResponse getUserById(Long id) {
+
+        User user = userRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Usuario no encontrado"
+                        )
+                );
+
+        return toResponse(user);
     }
 
     @Override
     public UserResponse createUser(
-            CreateUserRequest request) {
+            CreateUserRequest request
+    ) {
 
-        if (userRepository.existsByEmail(request.email())) {
-            throw new RuntimeException(
-                    "Email already exists"
+        String email =
+                normalizeEmail(request.email());
+
+        if (userRepository.existsByEmail(email)) {
+
+            throw new DuplicateResourceException(
+                    "El correo ya está registrado"
             );
         }
 
         User user = User.builder()
-                .name(request.name())
-                .email(request.email())
+                .name(normalize(request.name()))
+                .email(email)
                 .password(
                         passwordEncoder.encode(
                                 request.password()
@@ -48,74 +89,123 @@ public class UserServiceImpl implements UserService {
                 .active(true)
                 .build();
 
-        User savedUser = userRepository.save(user);
+        User savedUser =
+                userRepository.save(user);
 
         return toResponse(savedUser);
     }
 
     @Override
-    public List<UserResponse> getAllUsers() {
+    public UserResponse updateUser(
+            Long id,
+            UpdateUserRequest request
+    ) {
 
-        return userRepository.findAll()
-                .stream()
-                .map(this::toResponse)
-                .toList();
-    }
+        User user = userRepository.findByIdAndActiveTrue(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Usuario no encontrado o inactivo"
+                        )
+                );
 
-@Override
-public UserResponse getUserById(Long id) {
+        String newEmail =
+                normalizeEmail(request.email());
 
-    User user = userRepository.findById(id)
-            .orElseThrow(() ->
-                    new RuntimeException(
-                            "Usuario no encontrado"
-                    ));
+        if (userRepository.existsByEmailAndIdNot(
+                newEmail,
+                id
+        )) {
 
-    return toResponse(user);
-}
+            throw new DuplicateResourceException(
+                    "El correo ya está registrado"
+            );
+        }
 
-  @Override
-public UserResponse updateUser(
-        Long id,
-        UpdateUserRequest request) {
+        Role currentRole =
+                user.getRole();
 
-    User user = userRepository.findById(id)
-            .orElseThrow(() ->
-                    new RuntimeException(
-                            "Usuario no encontrado"
-                    ));
+        Role newRole =
+                request.role();
 
-    Optional<User> existingUser =
-            userRepository.findByEmail(request.email());
+        if (
+                currentRole == Role.ADMIN
+                        && newRole != Role.ADMIN
+                        && isLastActiveAdmin(user)
+        ) {
 
-    if (existingUser.isPresent()
-            && !existingUser.get().getId().equals(id)) {
+            throw new BusinessRuleException(
+                    "No se puede cambiar el rol del último ADMIN activo"
+            );
+        }
 
-        throw new RuntimeException(
-                "El email ya está en uso"
+        user.setName(
+                normalize(request.name())
         );
+
+        user.setEmail(newEmail);
+
+        user.setRole(newRole);
+
+        User updatedUser =
+                userRepository.save(user);
+
+        return toResponse(updatedUser);
     }
-
-    user.setName(request.name());
-    user.setEmail(request.email());
-    user.setRole(request.role());
-    user.setActive(request.active());
-
-    User updatedUser = userRepository.save(user);
-
-    return toResponse(updatedUser);
-}
 
     @Override
-    public void disableUser(Long id) {
+    public void disableUser(
+            Long id,
+            String currentUserEmail
+    ) {
+
+        User userToDisable = userRepository.findByIdAndActiveTrue(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Usuario no encontrado o inactivo"
+                        )
+                );
+
+        String normalizedCurrentUserEmail =
+                normalizeEmail(currentUserEmail);
+
+        if (
+                userToDisable.getEmail()
+                        .equalsIgnoreCase(
+                                normalizedCurrentUserEmail
+                        )
+        ) {
+
+            throw new BusinessRuleException(
+                    "No puedes desactivar tu propio usuario"
+            );
+        }
+
+        if (
+                userToDisable.getRole() == Role.ADMIN
+                        && isLastActiveAdmin(userToDisable)
+        ) {
+
+            throw new BusinessRuleException(
+                    "No se puede desactivar el último ADMIN activo"
+            );
+        }
+
+        userToDisable.setActive(false);
+
+        userRepository.save(userToDisable);
+    }
+
+    @Override
+    public void enableUser(Long id) {
 
         User user = userRepository.findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException(
+                        new ResourceNotFoundException(
                                 "Usuario no encontrado"
-                        ));
+                        )
+                );
 
-        user.setActive(false);
+        user.setActive(true);
 
         userRepository.save(user);
     }
@@ -123,37 +213,52 @@ public UserResponse updateUser(
     @Override
     public void changePassword(
             String email,
-            String currentPassword,
-            String newPassword) {
+            ChangePasswordRequest request
+    ) {
 
-        if (newPassword.length() < 8) {
-            throw new RuntimeException(
-                    "La nueva contraseña debe tener al menos 8 caracteres"
+        User user = userRepository.findByEmail(
+                        normalizeEmail(email)
+                )
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Usuario no encontrado"
+                        )
+                );
+
+        if (!user.isActive()) {
+
+            throw new BusinessRuleException(
+                    "No se puede cambiar la contraseña de un usuario inactivo"
             );
         }
 
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() ->
-                        new RuntimeException(
-                                "Usuario no encontrado"
-                        ));
+        if (
+                !passwordEncoder.matches(
+                        request.currentPassword(),
+                        user.getPassword()
+                )
+        ) {
 
-        boolean matches = passwordEncoder.matches(
-                currentPassword,
-                user.getPassword()
-        );
-
-        if (!matches) {
-            throw new RuntimeException(
-                    "La contraseña actual es incorrecta"
+            throw new BusinessRuleException(
+                    "La contraseña actual no es correcta"
             );
         }
 
         user.setPassword(
-                passwordEncoder.encode(newPassword)
+                passwordEncoder.encode(
+                        request.newPassword()
+                )
         );
 
         userRepository.save(user);
+    }
+
+    private boolean isLastActiveAdmin(User user) {
+
+        return user.getRole() == Role.ADMIN
+                && userRepository.countByRoleAndActiveTrue(
+                        Role.ADMIN
+                ) <= 1;
     }
 
     private UserResponse toResponse(User user) {
@@ -163,7 +268,29 @@ public UserResponse updateUser(
                 user.getName(),
                 user.getEmail(),
                 user.getRole(),
-                user.isActive()
+                user.isActive(),
+                user.getCreatedAt(),
+                user.getUpdatedAt()
         );
+    }
+
+    private String normalize(String value) {
+
+        if (value == null) {
+            return "";
+        }
+
+        return value.trim();
+    }
+
+    private String normalizeEmail(String email) {
+
+        if (email == null) {
+            return "";
+        }
+
+        return email
+                .trim()
+                .toLowerCase();
     }
 }

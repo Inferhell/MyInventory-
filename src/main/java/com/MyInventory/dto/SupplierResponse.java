@@ -1,22 +1,24 @@
 package com.myinventory.dto;
 
-import lombok.Builder;
-import lombok.Data;
+import java.time.LocalDateTime;
 
-@Data
-@Builder
-public class SupplierResponse {
+public record SupplierResponse(
 
-    private Long id;
+        Long id,
 
-    private String name;
+        String name,
 
-    private String phone;
+        String phone,
 
-    private String email;
+        String email,
 
-    private String address;
+        String address,
 
-    private boolean active;
+        boolean active,
 
+        LocalDateTime createdAt,
+
+        LocalDateTime updatedAt
+
+) {
 }
