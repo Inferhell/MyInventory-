@@ -26,6 +26,9 @@ const canWriteCategory =
 const canChangeCategoryStatus =
     hasPermission("CATEGORY_STATUS_CHANGE");
 
+    const showCategoryActions =
+    canWriteCategory || canChangeCategoryStatus;
+
     const [categories, setCategories] =
         useState([]);
 
@@ -465,7 +468,11 @@ useEffect(() => {
                         <th>Activo</th>
                         <th>Creado</th>
                         <th>Actualizado</th>
-                        <th>Acciones</th>
+   {
+                            showCategoryActions && (
+                                <th>Acciones</th>
+                            )
+                        }
                     </tr>
 
                 </thead>
@@ -476,7 +483,7 @@ useEffect(() => {
                         filteredCategories.length === 0 ? (
 
                             <tr>
-                                <td colSpan="7">
+                                <td colSpan={showCategoryActions ? 7 : 6}>
                                     No hay categorías para mostrar
                                 </td>
                             </tr>
@@ -523,8 +530,10 @@ useEffect(() => {
                                         }
                                     </td>
 
-                                    <td>
+                                    {
+                                        showCategoryActions && (
 
+                                            <td>
                                         {
     canWriteCategory && category.active ? (
 
@@ -574,7 +583,9 @@ useEffect(() => {
     )
 }
 
-                                    </td>
+                                            </td>
+                                        )
+                                    }
 
                                 </tr>
                             ))

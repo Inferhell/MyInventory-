@@ -36,6 +36,9 @@ const canWriteProduct =
 const canChangeProductStatus =
     hasPermission("PRODUCT_STATUS_CHANGE");
 
+    const showProductActions =
+    canWriteProduct || canChangeProductStatus;
+
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
     const [suppliers, setSuppliers] = useState([]);
@@ -687,7 +690,11 @@ useEffect(() => {
                         <th>Activo</th>
                         <th>Creado</th>
                         <th>Actualizado</th>
-                        <th>Acciones</th>
+                               {
+                showProductActions && (
+                    <th>Acciones</th>
+                )
+            }
                     </tr>
                 </thead>
 
@@ -697,7 +704,7 @@ useEffect(() => {
                         filteredProducts.length === 0 ? (
 
                             <tr>
-                                <td colSpan="10">
+                                <td colSpan={showProductActions ? 10 : 9}>
                                     No hay productos para mostrar
                                 </td>
                             </tr>
@@ -748,8 +755,10 @@ useEffect(() => {
                                         {formatDate(product.updatedAt)}
                                     </td>
 
-                                    <td>
+                                    {
+                                        showProductActions && (
 
+                                            <td>
                                        {
                     canWriteProduct && product.active ? (
 
@@ -802,7 +811,9 @@ useEffect(() => {
     )
 }
 
-                                    </td>
+                                            </td>
+                                        )
+                                    }
 
                                 </tr>
                             ))

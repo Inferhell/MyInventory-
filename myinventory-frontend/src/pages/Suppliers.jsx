@@ -27,6 +27,9 @@ const canWriteSupplier =
 const canChangeSupplierStatus =
     hasPermission("SUPPLIER_STATUS_CHANGE");
 
+    const showSupplierActions =
+    canWriteSupplier || canChangeSupplierStatus;
+
     const [suppliers, setSuppliers] = useState([]);
 
     const [editingId, setEditingId] = useState(null);
@@ -534,7 +537,11 @@ const canChangeSupplierStatus =
                         <th>Activo</th>
                         <th>Creado</th>
                         <th>Actualizado</th>
-                        <th>Acciones</th>
+    {
+                            showSupplierActions && (
+                                <th>Acciones</th>
+                            )
+                        }
                     </tr>
 
                 </thead>
@@ -545,7 +552,7 @@ const canChangeSupplierStatus =
                         filteredSuppliers.length === 0 ? (
 
                             <tr>
-                                <td colSpan="9">
+                                <td colSpan={showSupplierActions ? 9 : 8}>
                                     No hay proveedores para mostrar
                                 </td>
                             </tr>
@@ -600,8 +607,10 @@ const canChangeSupplierStatus =
                                         }
                                     </td>
 
-                                    <td>
+                                    {
+                                        showSupplierActions && (
 
+                                            <td>
                                         {
     canWriteSupplier && supplier.active ? (
 
@@ -651,7 +660,9 @@ const canChangeSupplierStatus =
     )
 }
 
-                                    </td>
+                                            </td>
+                                        )
+                                    }
 
                                 </tr>
                             ))

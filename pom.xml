@@ -37,6 +37,20 @@
 
     <dependencies>
 
+
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-test</artifactId>
+    <scope>test</scope>
+</dependency>
+
+<!-- 2. La dependencia que agregamos al inicio para tus pruebas de seguridad -->
+<dependency>
+    <groupId>org.springframework.security</groupId>
+    <artifactId>spring-security-test</artifactId>
+    <scope>test</scope>
+</dependency>
+
         <!-- OpenAPI / Swagger -->
         <dependency>
             <groupId>org.springdoc</groupId>

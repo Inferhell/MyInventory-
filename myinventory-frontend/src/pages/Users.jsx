@@ -31,6 +31,9 @@ const canEditUser =
 const canChangeUserStatus =
     hasPermission("USER_STATUS_CHANGE");
 
+    const showUserActions =
+    canEditUser || canChangeUserStatus;
+
     const [users, setUsers] = useState([]);
 
     const [editingId, setEditingId] = useState(null);
@@ -556,7 +559,11 @@ const canChangeUserStatus =
                         <th>Activo</th>
                         <th>Creado</th>
                         <th>Actualizado</th>
-                        <th>Acciones</th>
+                      {
+                            showUserActions && (
+                                <th>Acciones</th>
+                            )
+                        }
                     </tr>
 
                 </thead>
@@ -567,7 +574,7 @@ const canChangeUserStatus =
                         filteredUsers.length === 0 ? (
 
                             <tr>
-                                <td colSpan="8">
+                                <td colSpan={showUserActions ? 8 : 7}>
                                     No hay usuarios para mostrar
                                 </td>
                             </tr>
@@ -618,8 +625,10 @@ const canChangeUserStatus =
                                         }
                                     </td>
 
-                                    <td>
+                                    {
+                                        showUserActions && (
 
+                                            <td>
                                         {
     canEditUser && user.active ? (
 
@@ -672,7 +681,9 @@ const canChangeUserStatus =
     )
 }
 
-                                    </td>
+                                            </td>
+                                        )
+                                    }
 
                                 </tr>
                             ))
