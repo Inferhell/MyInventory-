@@ -30,11 +30,11 @@ jobs:
       - name: Verify Docker is available
         run: docker version
 
-      - name: Make Maven Wrapper executable
-        run: chmod +x mvnw
+      - name: Show Maven version
+        run: mvn -v
 
       - name: Run backend tests
-        run: ./mvnw clean verify
+        run: mvn -B clean verify
 
   frontend:
     name: Frontend - Lint and Build
