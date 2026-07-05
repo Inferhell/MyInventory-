@@ -1,17 +1,13 @@
-import axios from "axios";
-
-const API_URL =
-    "http://localhost:8080/users";
+import {
+    apiClient
+} from "./apiClient";
 
 export const getUsers =
     async () => {
 
         const response =
-            await axios.get(
-                API_URL,
-                {
-                    withCredentials: true
-                }
+            await apiClient.get(
+                "/users"
             );
 
         return response.data;
@@ -21,12 +17,9 @@ export const createUser =
     async (user) => {
 
         const response =
-            await axios.post(
-                API_URL,
-                user,
-                {
-                    withCredentials: true
-                }
+            await apiClient.post(
+                "/users",
+                user
             );
 
         return response.data;
@@ -36,12 +29,9 @@ export const updateUser =
     async (id, user) => {
 
         const response =
-            await axios.put(
-                `${API_URL}/${id}`,
-                user,
-                {
-                    withCredentials: true
-                }
+            await apiClient.put(
+                `/users/${id}`,
+                user
             );
 
         return response.data;
@@ -51,12 +41,8 @@ export const disableUser =
     async (id) => {
 
         const response =
-            await axios.patch(
-                `${API_URL}/${id}/disable`,
-                {},
-                {
-                    withCredentials: true
-                }
+            await apiClient.patch(
+                `/users/${id}/disable`
             );
 
         return response.data;
@@ -66,12 +52,8 @@ export const enableUser =
     async (id) => {
 
         const response =
-            await axios.patch(
-                `${API_URL}/${id}/enable`,
-                {},
-                {
-                    withCredentials: true
-                }
+            await apiClient.patch(
+                `/users/${id}/enable`
             );
 
         return response.data;

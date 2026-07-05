@@ -1,17 +1,13 @@
-import axios from "axios";
-
-const API_URL =
-    "http://localhost:8080/categories";
+import {
+    apiClient
+} from "./apiClient";
 
 export const getCategories =
     async () => {
 
         const response =
-            await axios.get(
-                API_URL,
-                {
-                    withCredentials: true
-                }
+            await apiClient.get(
+                "/categories"
             );
 
         return response.data;
@@ -21,12 +17,9 @@ export const createCategory =
     async (category) => {
 
         const response =
-            await axios.post(
-                API_URL,
-                category,
-                {
-                    withCredentials: true
-                }
+            await apiClient.post(
+                "/categories",
+                category
             );
 
         return response.data;
@@ -39,12 +32,9 @@ export const updateCategory =
     ) => {
 
         const response =
-            await axios.put(
-                `${API_URL}/${id}`,
-                category,
-                {
-                    withCredentials: true
-                }
+            await apiClient.put(
+                `/categories/${id}`,
+                category
             );
 
         return response.data;
@@ -54,12 +44,8 @@ export const disableCategory =
     async (id) => {
 
         const response =
-            await axios.patch(
-                `${API_URL}/${id}/disable`,
-                {},
-                {
-                    withCredentials: true
-                }
+            await apiClient.patch(
+                `/categories/${id}/disable`
             );
 
         return response.data;
@@ -69,12 +55,8 @@ export const enableCategory =
     async (id) => {
 
         const response =
-            await axios.patch(
-                `${API_URL}/${id}/enable`,
-                {},
-                {
-                    withCredentials: true
-                }
+            await apiClient.patch(
+                `/categories/${id}/enable`
             );
 
         return response.data;

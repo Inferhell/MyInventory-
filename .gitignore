@@ -3,7 +3,6 @@
 # =========================
 target/
 *.class
-*.log
 
 # Maven wrapper generated jar, if present
 .mvn/wrapper/maven-wrapper.jar
@@ -11,20 +10,44 @@ target/
 # =========================
 # Frontend / Node / Vite
 # =========================
+node_modules/
+dist/
+dist-ssr/
+.vite/
+
 myinventory-frontend/node_modules/
 myinventory-frontend/dist/
+myinventory-frontend/dist-ssr/
 myinventory-frontend/.vite/
 
 # =========================
 # Environment files
 # =========================
 .env
-.env.*
-!.env.example
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
 myinventory-frontend/.env
-myinventory-frontend/.env.*
+myinventory-frontend/.env.local
+myinventory-frontend/.env.development.local
+myinventory-frontend/.env.test.local
+myinventory-frontend/.env.production.local
+
+!.env.example
 !myinventory-frontend/.env.example
+
+# =========================
+# Logs
+# =========================
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 
 # =========================
 # Temporary / compressed files
@@ -35,9 +58,15 @@ src/main.zip
 # =========================
 # IDEs
 # =========================
-.vscode/
+.vscode/*
+!.vscode/extensions.json
 .idea/
 *.iml
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
 
 # =========================
 # OS files
