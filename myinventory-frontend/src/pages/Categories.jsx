@@ -14,6 +14,10 @@ import {
     useAuth
 } from "../hooks/useAuth";
 
+import ActionButton from "../components/ActionButton";
+
+import StatusBadge from "../components/StatusBadge";
+
 import AlertMessage from "../components/AlertMessage";
 
 function Categories() {
@@ -395,25 +399,27 @@ useEffect(() => {
                         <br />
                         <br />
 
-                        <button
-                            onClick={handleSaveCategory}
-                            disabled={loading}
+                      <ActionButton
+                         variant="primary"
+                         onClick={handleSaveCategory}
+                         disabled={loading}
                         >
                             {
                                 editingId
                                     ? "Actualizar Categoría"
                                     : "Crear Categoría"
                             }
-                        </button>
+                        </ActionButton>
 
                         {
                             editingId && (
-                                <button
-                                    onClick={clearForm}
-                                    disabled={loading}
-                                >
-                                    Cancelar
-                                </button>
+                                <ActionButton
+    variant="secondary"
+    onClick={clearForm}
+    disabled={loading}
+>
+    Cancelar
+</ActionButton>
                             )
                         }
 
@@ -503,11 +509,7 @@ useEffect(() => {
                                     </td>
 
                                     <td>
-                                        {
-                                            category.active
-                                                ? "Sí"
-                                                : "No"
-                                        }
+                                        <StatusBadge active={category.active} />
                                     </td>
 
                                     <td>
@@ -533,14 +535,15 @@ useEffect(() => {
                                         {
     canWriteCategory && category.active ? (
 
-        <button
-            onClick={() =>
-                handleEditCategory(category)
-            }
-            disabled={loading}
-        >
-            Editar
-        </button>
+                        <ActionButton
+                                variant="primary"
+                                onClick={() =>
+                                    handleEditCategory(category)
+                                }
+                                disabled={loading}
+                            >
+                                Editar
+                            </ActionButton>
 
     ) : !category.active && canWriteCategory ? (
 
@@ -555,26 +558,27 @@ useEffect(() => {
     canChangeCategoryStatus && (
 
         category.active ? (
-
-            <button
-                onClick={() =>
-                    handleDisableCategory(category.id)
-                }
-                disabled={loading}
-            >
-                Desactivar
-            </button>
+                    <ActionButton
+                        variant="danger"
+                        onClick={() =>
+                            handleDisableCategory(category.id)
+                        }
+                        disabled={loading}
+                    >
+                        Desactivar
+                    </ActionButton>
 
         ) : (
 
-            <button
+            <ActionButton
+                variant="success"
                 onClick={() =>
                     handleEnableCategory(category.id)
                 }
                 disabled={loading}
             >
                 Reactivar
-            </button>
+            </ActionButton>
         )
     )
 }

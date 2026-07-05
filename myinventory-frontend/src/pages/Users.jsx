@@ -13,9 +13,10 @@ import {
 
 import AlertMessage from "../components/AlertMessage";
 
-import {
-    formatRole
-} from "../utils/formatRole";
+import StatusBadge from "../components/StatusBadge";
+import RoleBadge from "../components/RoleBadge";
+
+import ActionButton from "../components/ActionButton";
 
 import {
     useAuth
@@ -491,25 +492,27 @@ const canChangeUserStatus =
                         <br />
                         <br />
 
-                        <button
-                            onClick={handleSaveUser}
-                            disabled={loading}
-                        >
+                         <ActionButton
+                         variant="primary"
+                         onClick={handleSaveUser}
+                         disabled={loading}
+                                        >
                             {
                                 editingId
                                     ? "Actualizar Usuario"
                                     : "Crear Usuario"
                             }
-                        </button>
+                        </ActionButton>
 
                         {
                             editingId && (
-                                <button
-                                    onClick={clearForm}
-                                    disabled={loading}
-                                >
-                                    Cancelar
-                                </button>
+                            <ActionButton
+                                variant="secondary"
+                                onClick={clearForm}
+                                disabled={loading}
+                            >
+                                Cancelar
+                            </ActionButton>
                             )
                         }
 
@@ -598,15 +601,11 @@ const canChangeUserStatus =
                                     </td>
 
                                     <td>
-                                        {formatRole(user.role)}
+                                      <RoleBadge role={user.role} />
                                     </td>
 
                                     <td>
-                                        {
-                                            user.active
-                                                ? "Sí"
-                                                : "No"
-                                        }
+                                        <StatusBadge active={user.active} />
                                     </td>
 
                                     <td>
@@ -632,14 +631,15 @@ const canChangeUserStatus =
                                         {
     canEditUser && user.active ? (
 
-        <button
-            onClick={() =>
-                handleEditUser(user)
-            }
-            disabled={loading}
-        >
-            Editar
-        </button>
+                               <ActionButton
+                                variant="primary"
+                                onClick={() =>
+                                    handleEditUser(user)
+                                }
+                                disabled={loading}
+                            >
+                                Editar
+                            </ActionButton>
 
     ) : !user.active && canEditUser ? (
 
@@ -657,26 +657,28 @@ const canChangeUserStatus =
 
             user.email !== currentUser?.email && (
 
-                <button
-                    onClick={() =>
-                        handleDisableUser(user.id)
-                    }
-                    disabled={loading}
-                >
-                    Desactivar
-                </button>
+               <ActionButton
+                        variant="danger"
+                        onClick={() =>
+                            handleDisableUser(user.id)
+                        }
+                        disabled={loading}
+                    >
+                        Desactivar
+                    </ActionButton>
             )
 
         ) : (
 
-            <button
+            <ActionButton
+                variant="success"
                 onClick={() =>
-                    handleEnableUser(user.id)
+                     handleEnableUser(user.id)
                 }
                 disabled={loading}
             >
                 Reactivar
-            </button>
+            </ActionButton>
         )
     )
 }

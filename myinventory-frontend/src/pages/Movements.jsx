@@ -8,6 +8,8 @@ import {
 
 import AlertMessage from "../components/AlertMessage";
 
+import MovementTypeBadge from "../components/MovementTypeBadge";
+
 import {
     getProducts
 } from "../services/productService";
@@ -16,9 +18,7 @@ import {
     getApiErrorMessage
 } from "../utils/getApiErrorMessage";
 
-import {
-    formatMovementType
-} from "../utils/formatMovementType";
+import ActionButton from "../components/ActionButton";
 
 import {
     useAuth
@@ -291,15 +291,15 @@ const canCreateMovement =
   const getTypeIcon = (movementType) => {
 
     if (movementType === "ENTRY") {
-        return "🟢";
+        return "";
     }
 
     if (movementType === "EXIT") {
-        return "🔴";
+        return "";
     }
 
     if (movementType === "INITIAL_BALANCE") {
-        return "🔵";
+        return "";
     }
 
     return "";
@@ -309,14 +309,14 @@ const canCreateMovement =
     const getStockText = (stock) => {
 
         if (stock === 0) {
-            return "🔴 Agotado";
+            return "Agotado";
         }
 
         if (stock <= 5) {
-            return `🟡 Bajo (${stock})`;
+            return `Bajo (${stock})`;
         }
 
-        return `🟢 Normal (${stock})`;
+        return `Normal (${stock})`;
     };
 
     const filteredMovements =
@@ -496,16 +496,20 @@ const canCreateMovement =
                         <br />
                         <br />
 
-                        <button
-                            onClick={handleSubmit}
-                            disabled={loading}
-                        >
+                       <ActionButton
+                        variant="primary"
+                        onClick={handleSubmit}
+                        disabled={loading}
+                    >
                             {
                                 loading
                                     ? "Registrando..."
                                     : "Registrar Movimiento"
                             }
-                        </button>
+                        </ActionButton>
+
+
+                        
 
                         <hr />
                     </>
@@ -636,7 +640,7 @@ const canCreateMovement =
                                     <td>
                                         {getTypeIcon(movement.type)}
                                         {" "}
-                                        {formatMovementType(movement.type)}
+                                       <MovementTypeBadge type={movement.type} />
                                     </td>
 
                                     <td>

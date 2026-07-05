@@ -4,12 +4,12 @@ export function formatStock(stock) {
         Number(stock);
 
     if (numericStock <= 0) {
-        return "🔴 Agotado";
+        return "Agotado";
     }
 
     if (numericStock <= 5) {
-        return `🟡 Bajo (${numericStock})`;
+        return `Bajo (${numericStock})`;
     }
 
-    return `🟢 Normal (${numericStock})`;
+    return `Normal (${numericStock})`;
 }

@@ -11,6 +11,10 @@ import {
     getApiErrorMessage
 } from "../utils/getApiErrorMessage";
 
+import ActionButton from "../components/ActionButton";
+
+import StatusBadge from "../components/StatusBadge";
+
 import AlertMessage from "../components/AlertMessage";
 
 import {
@@ -462,26 +466,28 @@ const canChangeSupplierStatus =
                         <br />
                         <br />
 
-                        <button
-                            onClick={handleSaveSupplier}
-                            disabled={loading}
-                        >
+                        <ActionButton
+                         variant="primary"
+                        onClick={handleSaveSupplier}
+                         disabled={loading}
+                                        >
                             {
                                 editingId
                                     ? "Actualizar Proveedor"
                                     : "Crear Proveedor"
                             }
-                        </button>
+                        </ActionButton>
 
                         {
                             editingId && (
-                                <button
-                                    onClick={clearForm}
-                                    disabled={loading}
-                                >
-                                    Cancelar
-                                </button>
-                            )
+                                <ActionButton
+                                variant="secondary"
+                                onClick={clearForm}
+                                disabled={loading}
+                            >
+                                Cancelar
+                            </ActionButton>
+                                                        )
                         }
 
                         <hr />
@@ -580,11 +586,7 @@ const canChangeSupplierStatus =
                                     </td>
 
                                     <td>
-                                        {
-                                            supplier.active
-                                                ? "Sí"
-                                                : "No"
-                                        }
+                                        <StatusBadge active={supplier.active} />
                                     </td>
 
                                     <td>
@@ -610,14 +612,15 @@ const canChangeSupplierStatus =
                                         {
     canWriteSupplier && supplier.active ? (
 
-        <button
-            onClick={() =>
-                handleEditSupplier(supplier)
-            }
-            disabled={loading}
-        >
-            Editar
-        </button>
+                               <ActionButton
+                                variant="primary"
+                                onClick={() =>
+                                    handleEditSupplier(product)
+                                }
+                                disabled={loading}
+                            >
+                                Editar
+                            </ActionButton>
 
     ) : !supplier.active && canWriteSupplier ? (
 
@@ -633,25 +636,27 @@ const canChangeSupplierStatus =
 
         supplier.active ? (
 
-            <button
-                onClick={() =>
-                    handleDisableSupplier(supplier.id)
-                }
-                disabled={loading}
-            >
-                Desactivar
-            </button>
+                    <ActionButton
+                        variant="danger"
+                        onClick={() =>
+                           handleDisableSupplier(supplier.id)
+                        }
+                        disabled={loading}
+                    >
+                        Desactivar
+                    </ActionButton>
 
         ) : (
 
-            <button
+            <ActionButton
+                variant="success"
                 onClick={() =>
                     handleEnableSupplier(supplier.id)
                 }
                 disabled={loading}
             >
                 Reactivar
-            </button>
+            </ActionButton>
         )
     )
 }

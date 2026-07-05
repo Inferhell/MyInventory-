@@ -10,13 +10,14 @@ import {
 
 import AlertMessage from "../components/AlertMessage";
 
+import StatusBadge from "../components/StatusBadge";
+import StockBadge from "../components/StockBadge";
+
 import {
     formatCurrency
 } from "../utils/formatCurrency";
 
-import {
-    formatStock
-} from "../utils/formatStock";
+import ActionButton from "../components/ActionButton";
 
 import {
     getCategories
@@ -434,14 +435,14 @@ useEffect(() => {
     const getStockText = (productStock) => {
 
         if (productStock === 0) {
-            return "🔴 Agotado";
+            return "Agotado";
         }
 
         if (productStock <= 5) {
-            return `🟡 Bajo (${productStock})`;
+            return `Bajo (${productStock})`;
         }
 
-        return `🟢 Normal (${productStock})`;
+        return `Normal (${productStock})`;
     };
 
     const activeCategories =
@@ -624,26 +625,28 @@ useEffect(() => {
             <br />
             <br />
 
-            <button
-                onClick={handleSaveProduct}
-                disabled={loading}
-            >
+                            <ActionButton
+                    variant="primary"
+                    onClick={handleSaveProduct}
+                    disabled={loading}
+                >
                 {
                     editingId
                         ? "Actualizar Producto"
                         : "Crear Producto"
                 }
-            </button>
+            </ActionButton>
 
             {
                 editingId && (
 
-                    <button
+                        <ActionButton
+                        variant="secondary"
                         onClick={clearForm}
                         disabled={loading}
                     >
                         Cancelar
-                    </button>
+                    </ActionButton>
                 )
             }
 
@@ -732,7 +735,7 @@ useEffect(() => {
                                     </td>
 
                                     <td>
-                                        {formatStock(product.stock)}
+                                        <StockBadge stock={product.stock} />
                                     </td>
 
                                     <td>
@@ -744,11 +747,7 @@ useEffect(() => {
                                     </td>
 
                                     <td>
-                                        {
-                                            product.active
-                                                ? "Sí"
-                                                : "No"
-                                        }
+                                        <StatusBadge active={product.active} />
                                     </td>
 
                                     <td>
@@ -766,14 +765,15 @@ useEffect(() => {
                                        {
                     canWriteProduct && product.active ? (
 
-                        <button
-                            onClick={() =>
-                                handleEditProduct(product)
-                            }
-                            disabled={loading}
-                        >
-                            Editar
-                        </button>
+                        <ActionButton
+                                variant="primary"
+                                onClick={() =>
+                                    handleEditProduct(product)
+                                }
+                                disabled={loading}
+                            >
+                                Editar
+                            </ActionButton>
 
                     ) : !product.active && canWriteProduct ? (
 
@@ -788,29 +788,27 @@ useEffect(() => {
 
         product.active ? (
 
-            <button
-                onClick={() =>
-                    handleDisableProduct(
-                        product.id
-                    )
-                }
-                disabled={loading}
-            >
-                Desactivar
-            </button>
+                    <ActionButton
+                        variant="danger"
+                        onClick={() =>
+                            handleDisableProduct(product.id)
+                        }
+                        disabled={loading}
+                    >
+                        Desactivar
+                    </ActionButton>
 
         ) : (
 
-            <button
+            <ActionButton
+                variant="success"
                 onClick={() =>
-                    handleEnableProduct(
-                        product.id
-                    )
+                    handleEnableProduct(product.id)
                 }
                 disabled={loading}
             >
                 Reactivar
-            </button>
+            </ActionButton>
         )
     )
 }
