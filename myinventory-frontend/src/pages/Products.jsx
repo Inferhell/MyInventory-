@@ -9,6 +9,14 @@ import {
 } from "../services/productService";
 
 import {
+    formatCurrency
+} from "../utils/formatCurrency";
+
+import {
+    formatStock
+} from "../utils/formatStock";
+
+import {
     getCategories
 } from "../services/categoryService";
 
@@ -724,11 +732,11 @@ useEffect(() => {
                                     </td>
 
                                     <td>
-                                        {product.price}
+                                        {formatCurrency(product.price)}
                                     </td>
 
                                     <td>
-                                        {getStockText(product.stock)}
+                                        {formatStock(product.stock)}
                                     </td>
 
                                     <td>

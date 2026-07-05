@@ -12,6 +12,10 @@ import {
 } from "../utils/getApiErrorMessage";
 
 import {
+    formatRole
+} from "../utils/formatRole";
+
+import {
     useAuth
 } from "../hooks/useAuth";
 
@@ -598,7 +602,7 @@ const canChangeUserStatus =
                                     </td>
 
                                     <td>
-                                        {user.role}
+                                        {formatRole(user.role)}
                                     </td>
 
                                     <td>

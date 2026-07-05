@@ -15,6 +15,10 @@ import {
 } from "../utils/getApiErrorMessage";
 
 import {
+    formatMovementType
+} from "../utils/formatMovementType";
+
+import {
     useAuth
 } from "../hooks/useAuth";
 
@@ -280,22 +284,7 @@ const canCreateMovement =
         return new Date(date).toLocaleString();
     };
 
-    const formatType = (movementType) => {
 
-    if (movementType === "ENTRY") {
-        return "Entrada";
-    }
-
-    if (movementType === "EXIT") {
-        return "Salida";
-    }
-
-    if (movementType === "INITIAL_BALANCE") {
-        return "Stock inicial";
-    }
-
-    return movementType;
-};
 
   const getTypeIcon = (movementType) => {
 
@@ -651,7 +640,7 @@ const canCreateMovement =
                                     <td>
                                         {getTypeIcon(movement.type)}
                                         {" "}
-                                        {formatType(movement.type)}
+                                        {formatMovementType(movement.type)}
                                     </td>
 
                                     <td>
