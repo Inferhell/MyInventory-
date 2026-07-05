@@ -11,6 +11,8 @@ import {
     getApiErrorMessage
 } from "../utils/getApiErrorMessage";
 
+import AlertMessage from "../components/AlertMessage";
+
 import {
     formatRole
 } from "../utils/formatRole";
@@ -409,21 +411,15 @@ const canChangeUserStatus =
                 Usuarios
             </h1>
 
-            {
-                message && (
-                    <p style={{ color: "green" }}>
-                        {message}
-                    </p>
-                )
-            }
+            <AlertMessage
+    type="success"
+    message={message}
+/>
 
-            {
-                errorMessage && (
-                    <p style={{ color: "red" }}>
-                        {errorMessage}
-                    </p>
-                )
-            }
+<AlertMessage
+    type="error"
+    message={errorMessage}
+/>
 
             {
                 (

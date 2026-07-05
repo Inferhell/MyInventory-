@@ -8,6 +8,8 @@ import {
     getApiErrorMessage
 } from "../utils/getApiErrorMessage";
 
+import AlertMessage from "../components/AlertMessage";
+
 function Login() {
 
     const {
@@ -39,9 +41,7 @@ function Login() {
                 password
             });
 
-            alert(
-                `Bienvenido ${email}`
-            );
+        
 
             navigate("/dashboard");
 
@@ -66,19 +66,10 @@ function Login() {
                 MyInventory
             </h1>
 
-            {
-                errorMessage && (
-
-                    <p
-                        style={{
-                            color: "red"
-                        }}
-                    >
-                        {errorMessage}
-                    </p>
-                )
-            }
-
+            <AlertMessage
+    type="error"
+    message={errorMessage}
+/>
             <input
                 type="email"
                 placeholder="Correo"

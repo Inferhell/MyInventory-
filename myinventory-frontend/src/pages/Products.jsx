@@ -8,6 +8,8 @@ import {
     enableProduct
 } from "../services/productService";
 
+import AlertMessage from "../components/AlertMessage";
+
 import {
     formatCurrency
 } from "../utils/formatCurrency";
@@ -481,21 +483,15 @@ useEffect(() => {
         <div>
 
             <h1>Productos</h1>
-            {
-    message && (
-        <p style={{ color: "green" }}>
-            {message}
-        </p>
-    )
-}
+         <AlertMessage
+    type="success"
+    message={message}
+/>
 
-{
-    errorMessage && (
-        <p style={{ color: "red" }}>
-            {errorMessage}
-        </p>
-    )
-}
+<AlertMessage
+    type="error"
+    message={errorMessage}
+/>
 
             {
     canWriteProduct && (

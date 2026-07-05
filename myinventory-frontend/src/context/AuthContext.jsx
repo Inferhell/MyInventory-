@@ -24,12 +24,25 @@ export function AuthProvider({ children }) {
         useState(true);
 
     const login = useCallback(
-        async (credentials) => {
+    async (credentials) => {
+
+        try {
 
             await loginRequest(credentials);
 
             const currentUser =
                 await getCurrentUser();
+
+            if (
+                !currentUser
+                || typeof currentUser !== "object"
+                || !currentUser.email
+                || !Array.isArray(currentUser.permissions)
+            ) {
+                throw new Error(
+                    "Respuesta de autenticación inválida"
+                );
+            }
 
             setUser(currentUser);
 
@@ -39,9 +52,20 @@ export function AuthProvider({ children }) {
             );
 
             return currentUser;
-        },
-        []
-    );
+
+        } catch (error) {
+
+            setUser(null);
+
+            localStorage.removeItem(
+                "user"
+            );
+
+            throw error;
+        }
+    },
+    []
+);
 
     const logout = useCallback(
         async () => {
