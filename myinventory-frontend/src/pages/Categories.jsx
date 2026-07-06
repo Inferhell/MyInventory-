@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
 
+import CategoryForm from "../components/CategoryForm";
+import CategoryTable from "../components/CategoryTable";
+
 import {
     getCategories,
     createCategory,
@@ -14,11 +17,8 @@ import {
     useAuth
 } from "../hooks/useAuth";
 
-import ActionButton from "../components/ActionButton";
 
 import ConfirmDialog from "../components/ConfirmDialog";
-
-import StatusBadge from "../components/StatusBadge";
 
 import AlertMessage from "../components/AlertMessage";
 
@@ -366,14 +366,6 @@ useEffect(() => {
         });
     };
 
-    const formatDate = (date) => {
-
-        if (!date) {
-            return "-";
-        }
-
-        return new Date(date).toLocaleString();
-    };
 
     const filteredCategories =
         categories.filter(category => {
@@ -417,69 +409,17 @@ useEffect(() => {
     message={errorMessage}
 />
 
-            {
-                canWriteCategory && (
-                    <>
-                        <h2>
-                            {
-                                editingId
-                                    ? "Editar Categoría"
-                                    : "Nueva Categoría"
-                            }
-                        </h2>
-
-                        <input
-                            type="text"
-                            placeholder="Nombre"
-                            value={name}
-                            onChange={(e) =>
-                                setName(e.target.value)
-                            }
-                        />
-
-                        <br />
-                        <br />
-
-                        <input
-                            type="text"
-                            placeholder="Descripción"
-                            value={description}
-                            onChange={(e) =>
-                                setDescription(e.target.value)
-                            }
-                        />
-
-                        <br />
-                        <br />
-
-                      <ActionButton
-                         variant="primary"
-                         onClick={handleSaveCategory}
-                         disabled={loading}
-                        >
-                            {
-                                editingId
-                                    ? "Actualizar Categoría"
-                                    : "Crear Categoría"
-                            }
-                        </ActionButton>
-
-                        {
-                            editingId && (
-                                <ActionButton
-    variant="secondary"
-    onClick={clearForm}
-    disabled={loading}
->
-    Cancelar
-</ActionButton>
-                            )
-                        }
-
-                        <hr />
-                    </>
-                )
-            }
+            <CategoryForm
+    canWriteCategory={canWriteCategory}
+    editingId={editingId}
+    name={name}
+    setName={setName}
+    description={description}
+    setDescription={setDescription}
+    loading={loading}
+    handleSaveCategory={handleSaveCategory}
+    clearForm={clearForm}
+/>
 
             <SearchInput
                 value={search}
@@ -498,142 +438,16 @@ useEffect(() => {
             <br />
             <br />
 
-            <table border="1">
-
-                <thead>
-
-                    <tr>
-                        <th>ID</th>
-                        <th>Nombre</th>
-                        <th>Descripción</th>
-                        <th>Activo</th>
-                        <th>Creado</th>
-                        <th>Actualizado</th>
-   {
-                            showCategoryActions && (
-                                <th>Acciones</th>
-                            )
-                        }
-                    </tr>
-
-                </thead>
-
-                <tbody>
-
-                    {
-                        filteredCategories.length === 0 ? (
-
-                            <tr>
-                                <td colSpan={showCategoryActions ? 7 : 6}>
-                                    No hay categorías para mostrar
-                                </td>
-                            </tr>
-
-                        ) : (
-
-                            filteredCategories.map(category => (
-
-                                <tr key={category.id}>
-
-                                    <td>
-                                        {category.id}
-                                    </td>
-
-                                    <td>
-                                        {category.name}
-                                    </td>
-
-                                    <td>
-                                        {category.description || "-"}
-                                    </td>
-
-                                    <td>
-                                        <StatusBadge active={category.active} />
-                                    </td>
-
-                                    <td>
-                                        {
-                                            formatDate(
-                                                category.createdAt
-                                            )
-                                        }
-                                    </td>
-
-                                    <td>
-                                        {
-                                            formatDate(
-                                                category.updatedAt
-                                            )
-                                        }
-                                    </td>
-
-                                    {
-                                        showCategoryActions && (
-
-                                            <td>
-                                        {
-    canWriteCategory && category.active ? (
-
-                        <ActionButton
-                                variant="primary"
-                                onClick={() =>
-                                    handleEditCategory(category)
-                                }
-                                disabled={loading}
-                            >
-                                Editar
-                            </ActionButton>
-
-    ) : !category.active && canWriteCategory ? (
-
-        <span>
-            Reactivar para editar
-        </span>
-
-    ) : null
-}
-
-                                        {
-    canChangeCategoryStatus && (
-
-        category.active ? (
-                    <ActionButton
-                        variant="danger"
-                        onClick={() =>
-                            handleDisableCategory(category.id)
-                        }
-                        disabled={loading}
-                    >
-                        Desactivar
-                    </ActionButton>
-
-        ) : (
-
-            <ActionButton
-                variant="success"
-                onClick={() =>
-                    handleEnableCategory(category.id)
-                }
-                disabled={loading}
-            >
-                Reactivar
-            </ActionButton>
-        )
-    )
-}
-
-                                            </td>
-                                        )
-                                    }
-
-                                </tr>
-                            ))
-                        )
-                    }
-
-                </tbody>
-
-            </table>
+            <CategoryTable
+    categories={filteredCategories}
+    loading={loading}
+    showCategoryActions={showCategoryActions}
+    canWriteCategory={canWriteCategory}
+    canChangeCategoryStatus={canChangeCategoryStatus}
+    handleEditCategory={handleEditCategory}
+    handleDisableCategory={handleDisableCategory}
+    handleEnableCategory={handleEnableCategory}
+/>
 
 
             <ConfirmDialog
