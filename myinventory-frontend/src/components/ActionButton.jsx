@@ -1,12 +1,11 @@
-
-
 function ActionButton({
     children,
     variant = "primary",
     type = "button",
     onClick,
     disabled = false,
-    title
+    title,
+    fullWidth = false
 }) {
 
     const variants = {
@@ -46,6 +45,7 @@ function ActionButton({
         opacity: disabled ? 0.6 : 1,
         marginRight: "6px",
         marginBottom: "6px",
+        width: fullWidth ? "100%" : "auto",
         ...variants[variant]
     };
 

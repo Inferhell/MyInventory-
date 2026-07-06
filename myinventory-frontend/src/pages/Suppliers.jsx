@@ -13,6 +13,8 @@ import {
 
 import ActionButton from "../components/ActionButton";
 
+import ConfirmDialog from "../components/ConfirmDialog";
+
 import StatusBadge from "../components/StatusBadge";
 
 import AlertMessage from "../components/AlertMessage";
@@ -20,6 +22,12 @@ import AlertMessage from "../components/AlertMessage";
 import {
     useAuth
 } from "../hooks/useAuth";
+
+import PageHeader from "../components/PageHeader";
+
+import SearchInput from "../components/SearchInput";
+
+import ShowInactiveCheckbox from "../components/ShowInactiveCheckbox";
 
 function Suppliers() {
 
@@ -51,6 +59,17 @@ const canChangeSupplierStatus =
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
+
+    const [confirmDialog, setConfirmDialog] =
+        useState({
+            isOpen: false,
+            title: "",
+            message: "",
+            confirmText: "Confirmar",
+            variant: "danger",
+            onConfirm: null
+        });
+
 
    useEffect(() => {
 
@@ -107,6 +126,28 @@ const canChangeSupplierStatus =
         setMessage("");
         setErrorMessage("");
     };
+
+    const closeConfirmDialog = () => {
+
+        setConfirmDialog({
+            isOpen: false,
+            title: "",
+            message: "",
+            confirmText: "Confirmar",
+            variant: "danger",
+            onConfirm: null
+        });
+    };
+
+    const handleConfirmDialog = async () => {
+
+        if (confirmDialog.onConfirm) {
+            await confirmDialog.onConfirm();
+        }
+
+        closeConfirmDialog();
+    };
+
 
     const resetForm = () => {
 
@@ -266,83 +307,94 @@ const canChangeSupplierStatus =
         setAddress(supplier.address || "");
     };
 
-    const handleDisableSupplier = async (id) => {
+    const handleDisableSupplier = (id) => {
 
         clearMessages();
 
-        const confirmDisable =
-            window.confirm(
-                "¿Seguro que deseas desactivar este proveedor?"
-            );
+        setConfirmDialog({
+            isOpen: true,
+            title: "Desactivar proveedor",
+            message: "¿Seguro que deseas desactivar este proveedor?",
+            confirmText: "Desactivar",
+            variant: "danger",
+            onConfirm: async () => {
 
-        if (!confirmDisable) {
-            return;
-        }
+                try {
 
-        try {
+                    setLoading(true);
 
-            setLoading(true);
+                    await disableSupplier(id);
 
-            await disableSupplier(id);
+                    await loadSuppliers();
 
-            await loadSuppliers();
+                    setMessage(
+                        "Proveedor desactivado correctamente"
+                    );
 
-            setMessage(
-                "Proveedor desactivado correctamente"
-            );
+                    if (editingId === id) {
+                        resetForm();
+                    }
 
-            if (editingId === id) {
-                resetForm();
+                } catch (error) {
+
+                    console.error(error);
+
+                    setErrorMessage(
+                        getErrorMessage(
+                            error,
+                            "Error al desactivar proveedor"
+                        )
+                    );
+
+                } finally {
+
+                    setLoading(false);
+                }
             }
-
-        } catch (error) {
-
-            console.error(error);
-
-            setErrorMessage(
-                getErrorMessage(
-                    error,
-                    "Error al desactivar proveedor"
-                )
-            );
-
-        } finally {
-
-            setLoading(false);
-        }
+        });
     };
 
-    const handleEnableSupplier = async (id) => {
+    const handleEnableSupplier = (id) => {
 
         clearMessages();
 
-        try {
+        setConfirmDialog({
+            isOpen: true,
+            title: "Reactivar proveedor",
+            message: "¿Seguro que deseas reactivar este proveedor?",
+            confirmText: "Reactivar",
+            variant: "success",
+            onConfirm: async () => {
 
-            setLoading(true);
+                try {
 
-            await enableSupplier(id);
+                    setLoading(true);
 
-            await loadSuppliers();
+                    await enableSupplier(id);
 
-            setMessage(
-                "Proveedor reactivado correctamente"
-            );
+                    await loadSuppliers();
 
-        } catch (error) {
+                    setMessage(
+                        "Proveedor reactivado correctamente"
+                    );
 
-            console.error(error);
+                } catch (error) {
 
-            setErrorMessage(
-                getErrorMessage(
-                    error,
-                    "Error al reactivar proveedor"
-                )
-            );
+                    console.error(error);
 
-        } finally {
+                    setErrorMessage(
+                        getErrorMessage(
+                            error,
+                            "Error al reactivar proveedor"
+                        )
+                    );
 
-            setLoading(false);
-        }
+                } finally {
+
+                    setLoading(false);
+                }
+            }
+        });
     };
 
     const formatDate = (date) => {
@@ -393,9 +445,10 @@ const canChangeSupplierStatus =
 
         <div>
 
-            <h1>
-                Proveedores
-            </h1>
+            <PageHeader
+                title="Proveedores"
+                subtitle="Administra los proveedores del inventario"
+            />
 
           <AlertMessage
     type="success"
@@ -495,33 +548,19 @@ const canChangeSupplierStatus =
                 )
             }
 
-            <input
-                type="text"
-                placeholder="Buscar proveedor..."
+            <SearchInput
                 value={search}
-                onChange={(e) =>
-                    setSearch(e.target.value)
-                }
+                onChange={setSearch}
+                placeholder="Buscar proveedor..."
             />
 
             <br />
             <br />
 
-            <label>
-
-                <input
-                    type="checkbox"
-                    checked={showInactive}
-                    onChange={() =>
-                        setShowInactive(
-                            !showInactive
-                        )
-                    }
-                />
-
-                Mostrar inactivos
-
-            </label>
+            <ShowInactiveCheckbox
+                checked={showInactive}
+                onChange={setShowInactive}
+            />
 
             <br />
             <br />
@@ -614,8 +653,7 @@ const canChangeSupplierStatus =
 
                                <ActionButton
                                 variant="primary"
-                                onClick={() =>
-                                    handleEditSupplier(product)
+                                onClick={() =>handleEditSupplier(supplier.id)
                                 }
                                 disabled={loading}
                             >
@@ -673,6 +711,18 @@ const canChangeSupplierStatus =
                 </tbody>
 
             </table>
+
+
+            <ConfirmDialog
+                isOpen={confirmDialog.isOpen}
+                title={confirmDialog.title}
+                message={confirmDialog.message}
+                confirmText={confirmDialog.confirmText}
+                variant={confirmDialog.variant}
+                loading={loading}
+                onConfirm={handleConfirmDialog}
+                onCancel={closeConfirmDialog}
+            />
 
         </div>
     );

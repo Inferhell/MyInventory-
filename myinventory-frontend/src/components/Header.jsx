@@ -4,6 +4,8 @@ import {
     useAuth
 } from "../hooks/useAuth";
 
+import ActionButton from "../components/ActionButton";
+
 function Header() {
 
     const navigate =
@@ -44,11 +46,12 @@ function Header() {
 
                         {" "}
 
-                        <button
-                            onClick={handleLogout}
-                        >
-                            Cerrar Sesión
-                        </button>
+                    <ActionButton
+                        variant="secondary"
+                        onClick={handleLogout}
+                    >
+                        Cerrar sesión
+                    </ActionButton>
 
                     </div>
                 )

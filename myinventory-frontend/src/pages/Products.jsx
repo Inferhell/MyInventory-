@@ -8,16 +8,25 @@ import {
     enableProduct
 } from "../services/productService";
 
+import ProductForm from "../components/ProductForm";
+
 import AlertMessage from "../components/AlertMessage";
 
 import StatusBadge from "../components/StatusBadge";
 import StockBadge from "../components/StockBadge";
+
+import PageHeader from "../components/PageHeader";
+
+import SearchInput from "../components/SearchInput";
+import ShowInactiveCheckbox from "../components/ShowInactiveCheckbox";
 
 import {
     formatCurrency
 } from "../utils/formatCurrency";
 
 import ActionButton from "../components/ActionButton";
+
+import ConfirmDialog from "../components/ConfirmDialog";
 
 import {
     getCategories
@@ -40,6 +49,7 @@ function Products() {
     const {
     hasPermission
 } = useAuth();
+
 
 const canWriteProduct =
     hasPermission("PRODUCT_WRITE");
@@ -69,6 +79,17 @@ const canChangeProductStatus =
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
+
+    const [confirmDialog, setConfirmDialog] =
+        useState({
+            isOpen: false,
+            title: "",
+            message: "",
+            confirmText: "Confirmar",
+            variant: "danger",
+            onConfirm: null
+        });
+
 
 
 
@@ -184,6 +205,28 @@ useEffect(() => {
         setMessage("");
         setErrorMessage("");
     };
+
+    const closeConfirmDialog = () => {
+
+        setConfirmDialog({
+            isOpen: false,
+            title: "",
+            message: "",
+            confirmText: "Confirmar",
+            variant: "danger",
+            onConfirm: null
+        });
+    };
+
+    const handleConfirmDialog = async () => {
+
+        if (confirmDialog.onConfirm) {
+            await confirmDialog.onConfirm();
+        }
+
+        closeConfirmDialog();
+    };
+
 
     const resetForm = () => {
 
@@ -321,83 +364,94 @@ useEffect(() => {
         }
     };
 
-    const handleDisableProduct = async (id) => {
+    const handleDisableProduct = (id) => {
 
         clearMessages();
 
-        const confirmDisable =
-            window.confirm(
-                "¿Seguro que deseas desactivar este producto?"
-            );
+        setConfirmDialog({
+            isOpen: true,
+            title: "Desactivar producto",
+            message: "¿Seguro que deseas desactivar este producto?",
+            confirmText: "Desactivar",
+            variant: "danger",
+            onConfirm: async () => {
 
-        if (!confirmDisable) {
-            return;
-        }
+                try {
 
-        try {
+                    setLoading(true);
 
-            setLoading(true);
+                    await disableProduct(id);
 
-            await disableProduct(id);
+                    await loadProducts();
 
-            await loadProducts();
+                    setMessage(
+                        "Producto desactivado correctamente"
+                    );
 
-            setMessage(
-                "Producto desactivado correctamente"
-            );
+                    if (editingId === id) {
+                        resetForm();
+                    }
 
-            if (editingId === id) {
-                resetForm();
+                } catch (error) {
+
+                    console.error(error);
+
+                    setErrorMessage(
+                        getErrorMessage(
+                            error,
+                            "Error al desactivar producto"
+                        )
+                    );
+
+                } finally {
+
+                    setLoading(false);
+                }
             }
-
-        } catch (error) {
-
-            console.error(error);
-
-            setErrorMessage(
-                getErrorMessage(
-                    error,
-                    "Error al desactivar producto"
-                )
-            );
-
-        } finally {
-
-            setLoading(false);
-        }
+        });
     };
 
-    const handleEnableProduct = async (id) => {
+    const handleEnableProduct = (id) => {
 
         clearMessages();
 
-        try {
+        setConfirmDialog({
+            isOpen: true,
+            title: "Reactivar producto",
+            message: "¿Seguro que deseas reactivar este producto?",
+            confirmText: "Reactivar",
+            variant: "success",
+            onConfirm: async () => {
 
-            setLoading(true);
+                try {
 
-            await enableProduct(id);
+                    setLoading(true);
 
-            await loadProducts();
+                    await enableProduct(id);
 
-            setMessage(
-                "Producto reactivado correctamente"
-            );
+                    await loadProducts();
 
-        } catch (error) {
+                    setMessage(
+                        "Producto reactivado correctamente"
+                    );
 
-            console.error(error);
+                } catch (error) {
 
-            setErrorMessage(
-                getErrorMessage(
-                    error,
-                    "Error al reactivar producto"
-                )
-            );
+                    console.error(error);
 
-        } finally {
+                    setErrorMessage(
+                        getErrorMessage(
+                            error,
+                            "Error al reactivar producto"
+                        )
+                    );
 
-            setLoading(false);
-        }
+                } finally {
+
+                    setLoading(false);
+                }
+            }
+        });
     };
 
     const handleEditProduct = (product) => {
@@ -432,18 +486,6 @@ useEffect(() => {
         return new Date(date).toLocaleString();
     };
 
-    const getStockText = (productStock) => {
-
-        if (productStock === 0) {
-            return "Agotado";
-        }
-
-        if (productStock <= 5) {
-            return `Bajo (${productStock})`;
-        }
-
-        return `Normal (${productStock})`;
-    };
 
     const activeCategories =
         categories.filter(category => category.active);
@@ -483,7 +525,10 @@ useEffect(() => {
     return (
         <div>
 
-            <h1>Productos</h1>
+            <PageHeader
+    title="Productos"
+    subtitle="Consulta y administración del inventario"
+/>
          <AlertMessage
     type="success"
     message={message}
@@ -493,193 +538,40 @@ useEffect(() => {
     type="error"
     message={errorMessage}
 />
-
-            {
-    canWriteProduct && (
-
-        <>
-            <h2>
-                {
-                    editingId
-                        ? "Editar Producto"
-                        : "Nuevo Producto"
-                }
-            </h2>
-
-            <input
-                type="text"
-                placeholder="Nombre"
-                value={name}
-                onChange={(e) =>
-                    setName(e.target.value)
-                }
-            />
-
-            <br />
-            <br />
-
-            <input
-                type="text"
-                placeholder="Descripción"
-                value={description}
-                onChange={(e) =>
-                    setDescription(e.target.value)
-                }
-            />
-
-            <br />
-            <br />
-
-            <input
-                type="number"
-                placeholder="Precio"
-                value={price}
-                min="0"
-                onChange={(e) =>
-                    setPrice(e.target.value)
-                }
-            />
-
-            <br />
-            <br />
-
-            {
-                editingId ? (
-
-                    <p>
-                        <strong>Stock actual:</strong>
-                        {" "}
-                        {getStockText(Number(stock))}
-                        <br />
-                        <small>
-                            El stock se modifica desde Movimientos.
-                        </small>
-                    </p>
-
-                ) : (
-
-                    <input
-                        type="number"
-                        placeholder="Stock inicial"
-                        value={stock}
-                        min="0"
-                        onChange={(e) =>
-                            setStock(e.target.value)
-                        }
-                    />
-                )
-            }
-
-            <br />
-            <br />
-
-            <select
-                value={categoryId}
-                onChange={(e) =>
-                    setCategoryId(e.target.value)
-                }
-            >
-                <option value="">
-                    Seleccione categoría
-                </option>
-
-                {
-                    activeCategories.map(category => (
-
-                        <option
-                            key={category.id}
-                            value={category.id}
-                        >
-                            {category.name}
-                        </option>
-                    ))
-                }
-            </select>
-
-            <br />
-            <br />
-
-            <select
-                value={supplierId}
-                onChange={(e) =>
-                    setSupplierId(e.target.value)
-                }
-            >
-                <option value="">
-                    Seleccione proveedor
-                </option>
-
-                {
-                    activeSuppliers.map(supplier => (
-
-                        <option
-                            key={supplier.id}
-                            value={supplier.id}
-                        >
-                            {supplier.name}
-                        </option>
-                    ))
-                }
-            </select>
-
-            <br />
-            <br />
-
-                            <ActionButton
-                    variant="primary"
-                    onClick={handleSaveProduct}
-                    disabled={loading}
-                >
-                {
-                    editingId
-                        ? "Actualizar Producto"
-                        : "Crear Producto"
-                }
-            </ActionButton>
-
-            {
-                editingId && (
-
-                        <ActionButton
-                        variant="secondary"
-                        onClick={clearForm}
-                        disabled={loading}
-                    >
-                        Cancelar
-                    </ActionButton>
-                )
-            }
-
-            <hr />
-        </>
-    )
-}
-
-            <input
-                type="text"
-                placeholder="Buscar producto..."
+<ProductForm
+    canWriteProduct={canWriteProduct}
+    editingId={editingId}
+    name={name}
+    setName={setName}
+    description={description}
+    setDescription={setDescription}
+    price={price}
+    setPrice={setPrice}
+    stock={stock}
+    setStock={setStock}
+    categoryId={categoryId}
+    setCategoryId={setCategoryId}
+    supplierId={supplierId}
+    setSupplierId={setSupplierId}
+    activeCategories={activeCategories}
+    activeSuppliers={activeSuppliers}
+    loading={loading}
+    handleSaveProduct={handleSaveProduct}
+    clearForm={clearForm}
+/>
+            <SearchInput
                 value={search}
-                onChange={(e) =>
-                    setSearch(e.target.value)
-                }
+                onChange={setSearch}
+                placeholder="Buscar producto..."
             />
 
             <br />
             <br />
 
-            <label>
-
-                <input
-                    type="checkbox"
-                    checked={showInactive}
-                    onChange={() =>
-                        setShowInactive(!showInactive)
-                    }
-                />
-
-                Mostrar inactivos
-
-            </label>
+            <ShowInactiveCheckbox
+                checked={showInactive}
+                onChange={setShowInactive}
+            />
 
             <br />
             <br />
@@ -825,6 +717,18 @@ useEffect(() => {
                 </tbody>
 
             </table>
+
+
+            <ConfirmDialog
+                isOpen={confirmDialog.isOpen}
+                title={confirmDialog.title}
+                message={confirmDialog.message}
+                confirmText={confirmDialog.confirmText}
+                variant={confirmDialog.variant}
+                loading={loading}
+                onConfirm={handleConfirmDialog}
+                onCancel={closeConfirmDialog}
+            />
 
         </div>
     );

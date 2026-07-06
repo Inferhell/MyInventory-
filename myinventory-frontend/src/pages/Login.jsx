@@ -1,14 +1,21 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import {
+    useState
+} from "react";
+
+import {
+    useNavigate
+} from "react-router-dom";
 
 import {
     useAuth
 } from "../hooks/useAuth";
+
 import {
     getApiErrorMessage
 } from "../utils/getApiErrorMessage";
 
 import AlertMessage from "../components/AlertMessage";
+import ActionButton from "../components/ActionButton";
 
 function Login() {
 
@@ -28,11 +35,15 @@ function Login() {
     const [errorMessage, setErrorMessage] =
         useState("");
 
+    const [loading, setLoading] =
+        useState(false);
+
     const handleLogin = async (event) => {
 
         event.preventDefault();
 
         setErrorMessage("");
+        setLoading(true);
 
         try {
 
@@ -41,8 +52,6 @@ function Login() {
                 password
             });
 
-        
-
             navigate("/dashboard");
 
         } catch (error) {
@@ -50,11 +59,15 @@ function Login() {
             console.error(error);
 
             setErrorMessage(
-    getApiErrorMessage(
-        error,
-        "Credenciales inválidas o usuario inactivo"
-    )
-);
+                getApiErrorMessage(
+                    error,
+                    "Correo o contraseña incorrectos"
+                )
+            );
+
+        } finally {
+
+            setLoading(false);
         }
     };
 
@@ -67,42 +80,53 @@ function Login() {
             </h1>
 
             <AlertMessage
-    type="error"
-    message={errorMessage}
-/>
-            <input
-                type="email"
-                placeholder="Correo"
-                value={email}
-                onChange={(e) =>
-                    setEmail(
-                        e.target.value
-                    )
-                }
+                type="error"
+                message={errorMessage}
             />
 
-            <br />
-            <br />
+            <form onSubmit={handleLogin}>
 
-            <input
-                type="password"
-                placeholder="Contraseña"
-                value={password}
-                onChange={(e) =>
-                    setPassword(
-                        e.target.value
-                    )
-                }
-            />
+                <input
+                    type="email"
+                    placeholder="Correo"
+                    value={email}
+                    onChange={(event) =>
+                        setEmail(event.target.value)
+                    }
+                    disabled={loading}
+                    required
+                />
 
-            <br />
-            <br />
+                <br />
+                <br />
 
-            <button
-                onClick={handleLogin}
-            >
-                Iniciar Sesión
-            </button>
+                <input
+                    type="password"
+                    placeholder="Contraseña"
+                    value={password}
+                    onChange={(event) =>
+                        setPassword(event.target.value)
+                    }
+                    disabled={loading}
+                    required
+                />
+
+                <br />
+                <br />
+
+                <ActionButton
+                    type="submit"
+                    variant="primary"
+                    disabled={loading}
+                >
+                    {
+                        loading
+                            ? "Ingresando..."
+                            : "Iniciar Sesión"
+                    }
+                </ActionButton>
+
+            </form>
 
         </div>
     );

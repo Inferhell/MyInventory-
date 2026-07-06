@@ -16,9 +16,17 @@ import {
 
 import ActionButton from "../components/ActionButton";
 
+import ConfirmDialog from "../components/ConfirmDialog";
+
 import StatusBadge from "../components/StatusBadge";
 
 import AlertMessage from "../components/AlertMessage";
+
+import PageHeader from "../components/PageHeader";
+
+import SearchInput from "../components/SearchInput";
+
+import ShowInactiveCheckbox from "../components/ShowInactiveCheckbox";
 
 function Categories() {
 
@@ -61,6 +69,17 @@ const canChangeCategoryStatus =
 
     const [errorMessage, setErrorMessage] =
         useState("");
+
+    const [confirmDialog, setConfirmDialog] =
+        useState({
+            isOpen: false,
+            title: "",
+            message: "",
+            confirmText: "Confirmar",
+            variant: "danger",
+            onConfirm: null
+        });
+
 
     const loadCategories = async () => {
 
@@ -118,6 +137,28 @@ useEffect(() => {
         setMessage("");
         setErrorMessage("");
     };
+
+    const closeConfirmDialog = () => {
+
+        setConfirmDialog({
+            isOpen: false,
+            title: "",
+            message: "",
+            confirmText: "Confirmar",
+            variant: "danger",
+            onConfirm: null
+        });
+    };
+
+    const handleConfirmDialog = async () => {
+
+        if (confirmDialog.onConfirm) {
+            await confirmDialog.onConfirm();
+        }
+
+        closeConfirmDialog();
+    };
+
 
     const resetForm = () => {
 
@@ -235,83 +276,94 @@ useEffect(() => {
         setDescription(category.description || "");
     };
 
-    const handleDisableCategory = async (id) => {
+    const handleDisableCategory = (id) => {
 
         clearMessages();
 
-        const confirmDisable =
-            window.confirm(
-                "¿Seguro que deseas desactivar esta categoría?"
-            );
+        setConfirmDialog({
+            isOpen: true,
+            title: "Desactivar categoría",
+            message: "¿Seguro que deseas desactivar esta categoría?",
+            confirmText: "Desactivar",
+            variant: "danger",
+            onConfirm: async () => {
 
-        if (!confirmDisable) {
-            return;
-        }
+                try {
 
-        try {
+                    setLoading(true);
 
-            setLoading(true);
+                    await disableCategory(id);
 
-            await disableCategory(id);
+                    await loadCategories();
 
-            await loadCategories();
+                    setMessage(
+                        "Categoría desactivada correctamente"
+                    );
 
-            setMessage(
-                "Categoría desactivada correctamente"
-            );
+                    if (editingId === id) {
+                        resetForm();
+                    }
 
-            if (editingId === id) {
-                resetForm();
+                } catch (error) {
+
+                    console.error(error);
+
+                    setErrorMessage(
+                        getErrorMessage(
+                            error,
+                            "Error al desactivar categoría"
+                        )
+                    );
+
+                } finally {
+
+                    setLoading(false);
+                }
             }
-
-        } catch (error) {
-
-            console.error(error);
-
-            setErrorMessage(
-                getErrorMessage(
-                    error,
-                    "Error al desactivar categoría"
-                )
-            );
-
-        } finally {
-
-            setLoading(false);
-        }
+        });
     };
 
-    const handleEnableCategory = async (id) => {
+    const handleEnableCategory = (id) => {
 
         clearMessages();
 
-        try {
+        setConfirmDialog({
+            isOpen: true,
+            title: "Reactivar categoría",
+            message: "¿Seguro que deseas reactivar esta categoría?",
+            confirmText: "Reactivar",
+            variant: "success",
+            onConfirm: async () => {
 
-            setLoading(true);
+                try {
 
-            await enableCategory(id);
+                    setLoading(true);
 
-            await loadCategories();
+                    await enableCategory(id);
 
-            setMessage(
-                "Categoría reactivada correctamente"
-            );
+                    await loadCategories();
 
-        } catch (error) {
+                    setMessage(
+                        "Categoría reactivada correctamente"
+                    );
 
-            console.error(error);
+                } catch (error) {
 
-            setErrorMessage(
-                getErrorMessage(
-                    error,
-                    "Error al reactivar categoría"
-                )
-            );
+                    console.error(error);
 
-        } finally {
+                    setErrorMessage(
+                        getErrorMessage(
+                            error,
+                            "Error al reactivar categoría"
+                        )
+                    );
 
-            setLoading(false);
-        }
+                } finally {
+
+                    setLoading(false);
+                }
+            }
+        });
     };
 
     const formatDate = (date) => {
@@ -350,9 +402,10 @@ useEffect(() => {
 
         <div>
 
-            <h1>
-                Categorías
-            </h1>
+            <PageHeader
+                title="Categorías"
+                subtitle="Administra las categorías de productos"
+            />
 
             <AlertMessage
     type="success"
@@ -428,33 +481,19 @@ useEffect(() => {
                 )
             }
 
-            <input
-                type="text"
-                placeholder="Buscar categoría..."
+            <SearchInput
                 value={search}
-                onChange={(e) =>
-                    setSearch(e.target.value)
-                }
+                onChange={setSearch}
+                placeholder="Buscar categoría..."
             />
 
             <br />
             <br />
 
-            <label>
-
-                <input
-                    type="checkbox"
-                    checked={showInactive}
-                    onChange={() =>
-                        setShowInactive(
-                            !showInactive
-                        )
-                    }
-                />
-
-                Mostrar inactivos
-
-            </label>
+            <ShowInactiveCheckbox
+                checked={showInactive}
+                onChange={setShowInactive}
+            />
 
             <br />
             <br />
@@ -595,6 +634,18 @@ useEffect(() => {
                 </tbody>
 
             </table>
+
+
+            <ConfirmDialog
+                isOpen={confirmDialog.isOpen}
+                title={confirmDialog.title}
+                message={confirmDialog.message}
+                confirmText={confirmDialog.confirmText}
+                variant={confirmDialog.variant}
+                loading={loading}
+                onConfirm={handleConfirmDialog}
+                onCancel={closeConfirmDialog}
+            />
 
         </div>
     );

@@ -18,9 +18,17 @@ import RoleBadge from "../components/RoleBadge";
 
 import ActionButton from "../components/ActionButton";
 
+import ConfirmDialog from "../components/ConfirmDialog";
+
 import {
     useAuth
 } from "../hooks/useAuth";
+
+import PageHeader from "../components/PageHeader";
+
+import SearchInput from "../components/SearchInput";
+
+import ShowInactiveCheckbox from "../components/ShowInactiveCheckbox";
 
 function Users() {
 
@@ -56,6 +64,17 @@ const canChangeUserStatus =
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
+
+    const [confirmDialog, setConfirmDialog] =
+        useState({
+            isOpen: false,
+            title: "",
+            message: "",
+            confirmText: "Confirmar",
+            variant: "danger",
+            onConfirm: null
+        });
+
 
    
    const loadUsers = async () => {
@@ -113,6 +132,28 @@ const canChangeUserStatus =
         setMessage("");
         setErrorMessage("");
     };
+
+    const closeConfirmDialog = () => {
+
+        setConfirmDialog({
+            isOpen: false,
+            title: "",
+            message: "",
+            confirmText: "Confirmar",
+            variant: "danger",
+            onConfirm: null
+        });
+    };
+
+    const handleConfirmDialog = async () => {
+
+        if (confirmDialog.onConfirm) {
+            await confirmDialog.onConfirm();
+        }
+
+        closeConfirmDialog();
+    };
+
 
     const resetForm = () => {
 
@@ -287,83 +328,94 @@ const canChangeUserStatus =
         setPassword("");
     };
 
-    const handleDisableUser = async (id) => {
+    const handleDisableUser = (id) => {
 
         clearMessages();
 
-        const confirmDisable =
-            window.confirm(
-                "¿Seguro que deseas desactivar este usuario?"
-            );
+        setConfirmDialog({
+            isOpen: true,
+            title: "Desactivar usuario",
+            message: "¿Seguro que deseas desactivar este usuario?",
+            confirmText: "Desactivar",
+            variant: "danger",
+            onConfirm: async () => {
 
-        if (!confirmDisable) {
-            return;
-        }
+                try {
 
-        try {
+                    setLoading(true);
 
-            setLoading(true);
+                    await disableUser(id);
 
-            await disableUser(id);
+                    await loadUsers();
 
-            await loadUsers();
+                    setMessage(
+                        "Usuario desactivado correctamente"
+                    );
 
-            setMessage(
-                "Usuario desactivado correctamente"
-            );
+                    if (editingId === id) {
+                        resetForm();
+                    }
 
-            if (editingId === id) {
-                resetForm();
+                } catch (error) {
+
+                    console.error(error);
+
+                    setErrorMessage(
+                        getErrorMessage(
+                            error,
+                            "Error al desactivar usuario"
+                        )
+                    );
+
+                } finally {
+
+                    setLoading(false);
+                }
             }
-
-        } catch (error) {
-
-            console.error(error);
-
-            setErrorMessage(
-                getErrorMessage(
-                    error,
-                    "Error al desactivar usuario"
-                )
-            );
-
-        } finally {
-
-            setLoading(false);
-        }
+        });
     };
 
-    const handleEnableUser = async (id) => {
+    const handleEnableUser = (id) => {
 
         clearMessages();
 
-        try {
+        setConfirmDialog({
+            isOpen: true,
+            title: "Reactivar usuario",
+            message: "¿Seguro que deseas reactivar este usuario?",
+            confirmText: "Reactivar",
+            variant: "success",
+            onConfirm: async () => {
 
-            setLoading(true);
+                try {
 
-            await enableUser(id);
+                    setLoading(true);
 
-            await loadUsers();
+                    await enableUser(id);
 
-            setMessage(
-                "Usuario reactivado correctamente"
-            );
+                    await loadUsers();
 
-        } catch (error) {
+                    setMessage(
+                        "Usuario reactivado correctamente"
+                    );
 
-            console.error(error);
+                } catch (error) {
 
-            setErrorMessage(
-                getErrorMessage(
-                    error,
-                    "Error al reactivar usuario"
-                )
-            );
+                    console.error(error);
 
-        } finally {
+                    setErrorMessage(
+                        getErrorMessage(
+                            error,
+                            "Error al reactivar usuario"
+                        )
+                    );
 
-            setLoading(false);
-        }
+                } finally {
+
+                    setLoading(false);
+                }
+            }
+        });
     };
 
     const formatDate = (date) => {
@@ -408,9 +460,10 @@ const canChangeUserStatus =
 
         <div>
 
-            <h1>
-                Usuarios
-            </h1>
+            <PageHeader
+                title="Usuarios"
+                subtitle="Administra usuarios, roles y estado de acceso"
+            />
 
             <AlertMessage
     type="success"
@@ -521,31 +574,19 @@ const canChangeUserStatus =
                 )
             }
 
-            <input
-                type="text"
-                placeholder="Buscar usuario..."
+            <SearchInput
                 value={search}
-                onChange={(e) =>
-                    setSearch(e.target.value)
-                }
+                onChange={setSearch}
+                placeholder="Buscar usuario..."
             />
 
             <br />
             <br />
 
-            <label>
-
-                <input
-                    type="checkbox"
-                    checked={showInactive}
-                    onChange={() =>
-                        setShowInactive(!showInactive)
-                    }
-                />
-
-                Mostrar inactivos
-
-            </label>
+            <ShowInactiveCheckbox
+                checked={showInactive}
+                onChange={setShowInactive}
+            />
 
             <br />
             <br />
@@ -695,6 +736,18 @@ const canChangeUserStatus =
                 </tbody>
 
             </table>
+
+
+            <ConfirmDialog
+                isOpen={confirmDialog.isOpen}
+                title={confirmDialog.title}
+                message={confirmDialog.message}
+                confirmText={confirmDialog.confirmText}
+                variant={confirmDialog.variant}
+                loading={loading}
+                onConfirm={handleConfirmDialog}
+                onCancel={closeConfirmDialog}
+            />
 
         </div>
     );

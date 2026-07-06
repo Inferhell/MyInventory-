@@ -24,6 +24,10 @@ import {
     useAuth
 } from "../hooks/useAuth";
 
+import PageHeader from "../components/PageHeader";
+
+import SearchInput from "../components/SearchInput";
+
 function Movements() {
 
     const {
@@ -373,9 +377,10 @@ const canCreateMovement =
 
         <div>
 
-            <h1>
-                Movimientos
-            </h1>
+            <PageHeader
+                title="Movimientos"
+                subtitle="Registra entradas y salidas, y consulta el historial"
+            />
 
             <AlertMessage
     type="success"
@@ -520,13 +525,10 @@ const canCreateMovement =
                 Historial de Movimientos
             </h2>
 
-            <input
-                type="text"
-                placeholder="Buscar movimiento..."
+            <SearchInput
                 value={search}
-                onChange={(e) =>
-                    setSearch(e.target.value)
-                }
+                onChange={setSearch}
+                placeholder="Buscar movimiento..."
             />
 
             <br />
