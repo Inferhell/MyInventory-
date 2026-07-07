@@ -11,11 +11,11 @@ import {
     getApiErrorMessage
 } from "../utils/getApiErrorMessage";
 
-import ActionButton from "../components/ActionButton";
+import SupplierForm from "../components/SupplierForm";
+import SupplierTable from "../components/SupplierTable";
+
 
 import ConfirmDialog from "../components/ConfirmDialog";
-
-import StatusBadge from "../components/StatusBadge";
 
 import AlertMessage from "../components/AlertMessage";
 
@@ -397,14 +397,6 @@ const canChangeSupplierStatus =
         });
     };
 
-    const formatDate = (date) => {
-
-        if (!date) {
-            return "-";
-        }
-
-        return new Date(date).toLocaleString();
-    };
 
     const filteredSuppliers =
         suppliers.filter(supplier => {
@@ -460,93 +452,21 @@ const canChangeSupplierStatus =
     message={errorMessage}
 />
 
-            {
-                canWriteSupplier && (
-                    <>
-                        <h2>
-                            {
-                                editingId
-                                    ? "Editar Proveedor"
-                                    : "Nuevo Proveedor"
-                            }
-                        </h2>
-
-                        <input
-                            type="text"
-                            placeholder="Nombre"
-                            value={name}
-                            onChange={(e) =>
-                                setName(e.target.value)
-                            }
-                        />
-
-                        <br />
-                        <br />
-
-                        <input
-                            type="text"
-                            placeholder="Teléfono"
-                            value={phone}
-                            onChange={(e) =>
-                                setPhone(e.target.value)
-                            }
-                        />
-
-                        <br />
-                        <br />
-
-                        <input
-                            type="email"
-                            placeholder="Correo"
-                            value={email}
-                            onChange={(e) =>
-                                setEmail(e.target.value)
-                            }
-                        />
-
-                        <br />
-                        <br />
-
-                        <input
-                            type="text"
-                            placeholder="Dirección"
-                            value={address}
-                            onChange={(e) =>
-                                setAddress(e.target.value)
-                            }
-                        />
-
-                        <br />
-                        <br />
-
-                        <ActionButton
-                         variant="primary"
-                        onClick={handleSaveSupplier}
-                         disabled={loading}
-                                        >
-                            {
-                                editingId
-                                    ? "Actualizar Proveedor"
-                                    : "Crear Proveedor"
-                            }
-                        </ActionButton>
-
-                        {
-                            editingId && (
-                                <ActionButton
-                                variant="secondary"
-                                onClick={clearForm}
-                                disabled={loading}
-                            >
-                                Cancelar
-                            </ActionButton>
-                                                        )
-                        }
-
-                        <hr />
-                    </>
-                )
-            }
+          <SupplierForm
+    canWriteSupplier={canWriteSupplier}
+    editingId={editingId}
+    name={name}
+    setName={setName}
+    email={email}
+    setEmail={setEmail}
+    phone={phone}
+    setPhone={setPhone}
+    address={address}
+    setAddress={setAddress}
+    loading={loading}
+    handleSaveSupplier={handleSaveSupplier}
+    clearForm={clearForm}
+/>
 
             <SearchInput
                 value={search}
@@ -565,152 +485,16 @@ const canChangeSupplierStatus =
             <br />
             <br />
 
-            <table border="1">
-
-                <thead>
-
-                    <tr>
-                        <th>ID</th>
-                        <th>Nombre</th>
-                        <th>Teléfono</th>
-                        <th>Correo</th>
-                        <th>Dirección</th>
-                        <th>Activo</th>
-                        <th>Creado</th>
-                        <th>Actualizado</th>
-    {
-                            showSupplierActions && (
-                                <th>Acciones</th>
-                            )
-                        }
-                    </tr>
-
-                </thead>
-
-                <tbody>
-
-                    {
-                        filteredSuppliers.length === 0 ? (
-
-                            <tr>
-                                <td colSpan={showSupplierActions ? 9 : 8}>
-                                    No hay proveedores para mostrar
-                                </td>
-                            </tr>
-
-                        ) : (
-
-                            filteredSuppliers.map(supplier => (
-
-                                <tr key={supplier.id}>
-
-                                    <td>
-                                        {supplier.id}
-                                    </td>
-
-                                    <td>
-                                        {supplier.name}
-                                    </td>
-
-                                    <td>
-                                        {supplier.phone}
-                                    </td>
-
-                                    <td>
-                                        {supplier.email}
-                                    </td>
-
-                                    <td>
-                                        {supplier.address}
-                                    </td>
-
-                                    <td>
-                                        <StatusBadge active={supplier.active} />
-                                    </td>
-
-                                    <td>
-                                        {
-                                            formatDate(
-                                                supplier.createdAt
-                                            )
-                                        }
-                                    </td>
-
-                                    <td>
-                                        {
-                                            formatDate(
-                                                supplier.updatedAt
-                                            )
-                                        }
-                                    </td>
-
-                                    {
-                                        showSupplierActions && (
-
-                                            <td>
-                                        {
-    canWriteSupplier && supplier.active ? (
-
-                               <ActionButton
-                                variant="primary"
-                                onClick={() =>handleEditSupplier(supplier.id)
-                                }
-                                disabled={loading}
-                            >
-                                Editar
-                            </ActionButton>
-
-    ) : !supplier.active && canWriteSupplier ? (
-
-        <span>
-            Reactivar para editar
-        </span>
-
-    ) : null
-}
-
-                                        {
-    canChangeSupplierStatus && (
-
-        supplier.active ? (
-
-                    <ActionButton
-                        variant="danger"
-                        onClick={() =>
-                           handleDisableSupplier(supplier.id)
-                        }
-                        disabled={loading}
-                    >
-                        Desactivar
-                    </ActionButton>
-
-        ) : (
-
-            <ActionButton
-                variant="success"
-                onClick={() =>
-                    handleEnableSupplier(supplier.id)
-                }
-                disabled={loading}
-            >
-                Reactivar
-            </ActionButton>
-        )
-    )
-}
-
-                                            </td>
-                                        )
-                                    }
-
-                                </tr>
-                            ))
-                        )
-                    }
-
-                </tbody>
-
-            </table>
+           <SupplierTable
+    suppliers={filteredSuppliers}
+    loading={loading}
+    showSupplierActions={showSupplierActions}
+    canWriteSupplier={canWriteSupplier}
+    canChangeSupplierStatus={canChangeSupplierStatus}
+    handleEditSupplier={handleEditSupplier}
+    handleDisableSupplier={handleDisableSupplier}
+    handleEnableSupplier={handleEnableSupplier}
+/>
 
 
             <ConfirmDialog
