@@ -9,8 +9,8 @@ function Sidebar() {
     } = useAuth();
 
     return (
-
-        <aside>
+          <aside className="sidebar">
+        
 
             <nav>
 

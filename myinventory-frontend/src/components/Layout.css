@@ -1,0 +1,76 @@
+.app-layout {
+    display: flex;
+    min-height: 100vh;
+    background-color: #f4f6f8;
+}
+
+.sidebar {
+    width: 240px;
+    min-height: 100vh;
+    background-color: #102a43;
+    color: #ffffff;
+    padding: 20px 16px;
+}
+
+.sidebar h2 {
+    color: #ffffff;
+    margin-top: 0;
+    margin-bottom: 24px;
+    font-size: 22px;
+}
+
+.sidebar nav {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.sidebar a {
+    display: block;
+    padding: 10px 12px;
+    border-radius: 6px;
+    color: #d9e2ec;
+    font-weight: 600;
+}
+
+.sidebar a:hover {
+    background-color: #243b53;
+    color: #ffffff;
+}
+
+.main-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.header {
+    height: 64px;
+    background-color: #ffffff;
+    border-bottom: 1px solid #d9e2ec;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.header-user {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #334e68;
+    font-size: 14px;
+}
+
+.page-wrapper {
+    padding: 24px;
+}
+
+.page-card {
+    background-color: #ffffff;
+    border: 1px solid #d9e2ec;
+    border-radius: 10px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(16, 42, 67, 0.06);
+}

@@ -1,18 +1,26 @@
-import Sidebar from "./Sidebar";
 import Header from "./Header";
+import Sidebar from "./Sidebar";
 
-function Layout({ children }) {
+import "./Layout.css";
+
+function Layout({
+    children
+}) {
 
     return (
-        <div>
+        <div className="app-layout">
 
             <Sidebar />
 
-            <div>
+            <div className="main-area">
 
                 <Header />
 
-                {children}
+                <main className="page-wrapper">
+                    <div className="page-card">
+                        {children}
+                    </div>
+                </main>
 
             </div>
 

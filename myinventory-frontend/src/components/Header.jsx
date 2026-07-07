@@ -25,7 +25,7 @@ function Header() {
 
     return (
 
-        <header>
+        <header className="header">
 
             <h2>
                 MyInventory
