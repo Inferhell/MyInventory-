@@ -1,3 +1,6 @@
+import MovementForm from "../components/MovementForm";
+import MovementTable from "../components/MovementTable";
+
 import { useEffect, useState } from "react";
 
 import {
@@ -8,7 +11,6 @@ import {
 
 import AlertMessage from "../components/AlertMessage";
 
-import MovementTypeBadge from "../components/MovementTypeBadge";
 
 import {
     getProducts
@@ -18,7 +20,6 @@ import {
     getApiErrorMessage
 } from "../utils/getApiErrorMessage";
 
-import ActionButton from "../components/ActionButton";
 
 import {
     useAuth
@@ -281,48 +282,6 @@ const canCreateMovement =
         }
     };
 
-    const formatDate = (date) => {
-
-        if (!date) {
-            return "-";
-        }
-
-        return new Date(date).toLocaleString();
-    };
-
-
-
-  const getTypeIcon = (movementType) => {
-
-    if (movementType === "ENTRY") {
-        return "";
-    }
-
-    if (movementType === "EXIT") {
-        return "";
-    }
-
-    if (movementType === "INITIAL_BALANCE") {
-        return "";
-    }
-
-    return "";
-};
-
-
-    const getStockText = (stock) => {
-
-        if (stock === 0) {
-            return "Agotado";
-        }
-
-        if (stock <= 5) {
-            return `Bajo (${stock})`;
-        }
-
-        return `Normal (${stock})`;
-    };
-
     const filteredMovements =
         movements.filter(movement => {
 
@@ -392,134 +351,20 @@ const canCreateMovement =
     message={errorMessage}
 />
 
-            {
-                canCreateMovement && (
-                    <>
-                        <h2>
-                            Registrar Movimiento
-                        </h2>
-
-                        <select
-                            value={productId}
-                            onChange={(e) =>
-                                setProductId(e.target.value)
-                            }
-                        >
-                            <option value="">
-                                Seleccione producto
-                            </option>
-
-                            {
-                                activeProducts.map(product => (
-                                    <option
-                                        key={product.id}
-                                        value={product.id}
-                                    >
-                                        {product.name}
-                                        {" "}
-                                        | Stock:
-                                        {" "}
-                                        {product.stock}
-                                        {" "}
-                                        | Proveedor:
-                                        {" "}
-                                        {product.supplierName || "-"}
-                                    </option>
-                                ))
-                            }
-                        </select>
-
-                        <br />
-                        <br />
-
-                        {
-                            selectedProduct && (
-                                <div>
-                                    <strong>
-                                        Producto seleccionado:
-                                    </strong>
-
-                                    <p>
-                                        Nombre: {selectedProduct.name}
-                                    </p>
-
-                                    <p>
-                                        Categoría: {selectedProduct.categoryName || "-"}
-                                    </p>
-
-                                    <p>
-                                        Proveedor: {selectedProduct.supplierName || "-"}
-                                    </p>
-
-                                    <p>
-                                        Stock actual: {getStockText(selectedProduct.stock)}
-                                    </p>
-                                </div>
-                            )
-                        }
-
-                        <input
-                            type="number"
-                            placeholder="Cantidad"
-                            value={quantity}
-                            min="1"
-                            onChange={(e) =>
-                                setQuantity(e.target.value)
-                            }
-                        />
-
-                        <br />
-                        <br />
-
-                        <input
-                            type="text"
-                            placeholder="Observación"
-                            value={observation}
-                            onChange={(e) =>
-                                setObservation(e.target.value)
-                            }
-                        />
-
-                        <br />
-                        <br />
-
-                        <select
-                            value={type}
-                            onChange={(e) =>
-                                setType(e.target.value)
-                            }
-                        >
-                            <option value="ENTRY">
-                                Entrada
-                            </option>
-
-                            <option value="EXIT">
-                                Salida
-                            </option>
-                        </select>
-
-                        <br />
-                        <br />
-
-                       <ActionButton
-                        variant="primary"
-                        onClick={handleSubmit}
-                        disabled={loading}
-                    >
-                            {
-                                loading
-                                    ? "Registrando..."
-                                    : "Registrar Movimiento"
-                            }
-                        </ActionButton>
-
-
-                        
-
-                        <hr />
-                    </>
-                )
-            }
+<MovementForm
+    canCreateMovement={canCreateMovement}
+    productId={productId}
+    setProductId={setProductId}
+    quantity={quantity}
+    setQuantity={setQuantity}
+    observation={observation}
+    setObservation={setObservation}
+    movementType={type}
+    setMovementType={setType}
+    activeProducts={activeProducts}
+    loading={loading}
+    handleRegisterMovement={handleSubmit}
+/>
 
             <h2>
                 Historial de Movimientos
@@ -586,107 +431,9 @@ const canCreateMovement =
             <br />
             <br />
 
-            <table border="1">
-
-                <thead>
-
-                    <tr>
-                        <th>ID</th>
-                        <th>Producto</th>
-                        <th>Categoría</th>
-                        <th>Proveedor</th>
-                        <th>Tipo</th>
-                        <th>Cantidad</th>
-                        <th>Stock antes</th>
-                        <th>Stock después</th>
-                        <th>Usuario</th>
-                        <th>Fecha</th>
-                        <th>Observación</th>
-                    </tr>
-
-                </thead>
-
-                <tbody>
-
-                    {
-                        filteredMovements.length === 0 ? (
-
-                            <tr>
-                                <td colSpan="11">
-                                    No hay movimientos para mostrar
-                                </td>
-                            </tr>
-
-                        ) : (
-
-                            filteredMovements.map(movement => (
-
-                                <tr key={movement.id}>
-
-                                    <td>
-                                        {movement.id}
-                                    </td>
-
-                                    <td>
-                                        {movement.productName || "-"}
-                                    </td>
-
-                                    <td>
-                                        {movement.categoryName || "-"}
-                                    </td>
-
-                                    <td>
-                                        {movement.supplierName || "-"}
-                                    </td>
-
-                                    <td>
-                                        {getTypeIcon(movement.type)}
-                                        {" "}
-                                       <MovementTypeBadge type={movement.type} />
-                                    </td>
-
-                                    <td>
-                                        {movement.quantity}
-                                    </td>
-
-                                    <td>
-    {
-        movement.stockBefore !== null
-        && movement.stockBefore !== undefined
-            ? movement.stockBefore
-            : "-"
-    }
-</td>
-
-<td>
-    {
-        movement.stockAfter !== null
-        && movement.stockAfter !== undefined
-            ? getStockText(movement.stockAfter)
-            : "-"
-    }
-</td>
-
-                                    <td>
-                                        {movement.userName || "-"}
-                                    </td>
-
-                                    <td>
-                                        {formatDate(movement.createdAt)}
-                                    </td>
-
-                                    <td>
-                                        {movement.observation || "-"}
-                                    </td>
-
-                                </tr>
-                            ))
-                        )
-                    }
-
-                </tbody>
-
-            </table>
+<MovementTable
+    movements={filteredMovements}
+/>
 
         </div>
     );
