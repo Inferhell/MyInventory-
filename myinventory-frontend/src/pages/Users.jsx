@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
 
+import UserForm from "../components/UserForm";
+import UserTable from "../components/UserTable";
+
 import {
     getUsers,
     createUser,
@@ -13,10 +16,7 @@ import {
 
 import AlertMessage from "../components/AlertMessage";
 
-import StatusBadge from "../components/StatusBadge";
-import RoleBadge from "../components/RoleBadge";
 
-import ActionButton from "../components/ActionButton";
 
 import ConfirmDialog from "../components/ConfirmDialog";
 
@@ -418,15 +418,6 @@ const canChangeUserStatus =
         });
     };
 
-    const formatDate = (date) => {
-
-        if (!date) {
-            return "-";
-        }
-
-        return new Date(date).toLocaleString();
-    };
-
     const filteredUsers =
         users.filter(user => {
 
@@ -475,104 +466,22 @@ const canChangeUserStatus =
     message={errorMessage}
 />
 
-            {
-                (
-                    (!editingId && canCreateUser)
-                    || (editingId && canEditUser)
-                ) && (
-                    <>
-                        <h2>
-                            {
-                                editingId
-                                    ? "Editar Usuario"
-                                    : "Nuevo Usuario"
-                            }
-                        </h2>
-
-                        <input
-                            type="text"
-                            placeholder="Nombre"
-                            value={name}
-                            onChange={(e) =>
-                                setName(e.target.value)
-                            }
-                        />
-
-                        <br />
-                        <br />
-
-                        <input
-                            type="email"
-                            placeholder="Correo"
-                            value={email}
-                            onChange={(e) =>
-                                setEmail(e.target.value)
-                            }
-                        />
-
-                        <br />
-                        <br />
-
-                        {
-                            !editingId && (
-                                <>
-                                    <input
-                                        type="password"
-                                        placeholder="Contraseña"
-                                        value={password}
-                                        onChange={(e) =>
-                                            setPassword(e.target.value)
-                                        }
-                                    />
-
-                                    <br />
-                                    <br />
-                                </>
-                            )
-                        }
-
-                        <select
-                            value={role}
-                            onChange={(e) =>
-                                setRole(e.target.value)
-                            }
-                        >
-                            <option value="ADMIN">ADMIN</option>
-                            <option value="SUPERVISOR">SUPERVISOR</option>
-                            <option value="EMPLOYEE">EMPLOYEE</option>
-                        </select>
-
-                        <br />
-                        <br />
-
-                         <ActionButton
-                         variant="primary"
-                         onClick={handleSaveUser}
-                         disabled={loading}
-                                        >
-                            {
-                                editingId
-                                    ? "Actualizar Usuario"
-                                    : "Crear Usuario"
-                            }
-                        </ActionButton>
-
-                        {
-                            editingId && (
-                            <ActionButton
-                                variant="secondary"
-                                onClick={clearForm}
-                                disabled={loading}
-                            >
-                                Cancelar
-                            </ActionButton>
-                            )
-                        }
-
-                        <hr />
-                    </>
-                )
-            }
+            <UserForm
+    canCreateUser={canCreateUser}
+    canEditUser={canEditUser}
+    editingId={editingId}
+    name={name}
+    setName={setName}
+    email={email}
+    setEmail={setEmail}
+    password={password}
+    setPassword={setPassword}
+    role={role}
+    setRole={setRole}
+    loading={loading}
+    handleSaveUser={handleSaveUser}
+    clearForm={clearForm}
+/>
 
             <SearchInput
                 value={search}
@@ -591,151 +500,17 @@ const canChangeUserStatus =
             <br />
             <br />
 
-            <table border="1">
-
-                <thead>
-
-                    <tr>
-                        <th>ID</th>
-                        <th>Nombre</th>
-                        <th>Email</th>
-                        <th>Rol</th>
-                        <th>Activo</th>
-                        <th>Creado</th>
-                        <th>Actualizado</th>
-                      {
-                            showUserActions && (
-                                <th>Acciones</th>
-                            )
-                        }
-                    </tr>
-
-                </thead>
-
-                <tbody>
-
-                    {
-                        filteredUsers.length === 0 ? (
-
-                            <tr>
-                                <td colSpan={showUserActions ? 8 : 7}>
-                                    No hay usuarios para mostrar
-                                </td>
-                            </tr>
-
-                        ) : (
-
-                            filteredUsers.map(user => (
-
-                                <tr key={user.id}>
-
-                                    <td>
-                                        {user.id}
-                                    </td>
-
-                                    <td>
-                                        {user.name}
-                                    </td>
-
-                                    <td>
-                                        {user.email}
-                                    </td>
-
-                                    <td>
-                                      <RoleBadge role={user.role} />
-                                    </td>
-
-                                    <td>
-                                        <StatusBadge active={user.active} />
-                                    </td>
-
-                                    <td>
-                                        {
-                                            formatDate(
-                                                user.createdAt
-                                            )
-                                        }
-                                    </td>
-
-                                    <td>
-                                        {
-                                            formatDate(
-                                                user.updatedAt
-                                            )
-                                        }
-                                    </td>
-
-                                    {
-                                        showUserActions && (
-
-                                            <td>
-                                        {
-    canEditUser && user.active ? (
-
-                               <ActionButton
-                                variant="primary"
-                                onClick={() =>
-                                    handleEditUser(user)
-                                }
-                                disabled={loading}
-                            >
-                                Editar
-                            </ActionButton>
-
-    ) : !user.active && canEditUser ? (
-
-        <span>
-            Reactivar para editar
-        </span>
-
-    ) : null
-}
-
-                                      {
-    canChangeUserStatus && (
-
-        user.active ? (
-
-            user.email !== currentUser?.email && (
-
-               <ActionButton
-                        variant="danger"
-                        onClick={() =>
-                            handleDisableUser(user.id)
-                        }
-                        disabled={loading}
-                    >
-                        Desactivar
-                    </ActionButton>
-            )
-
-        ) : (
-
-            <ActionButton
-                variant="success"
-                onClick={() =>
-                     handleEnableUser(user.id)
-                }
-                disabled={loading}
-            >
-                Reactivar
-            </ActionButton>
-        )
-    )
-}
-
-                                            </td>
-                                        )
-                                    }
-
-                                </tr>
-                            ))
-                        )
-                    }
-
-                </tbody>
-
-            </table>
+            <UserTable
+    users={filteredUsers}
+    loading={loading}
+    currentUser={currentUser}
+    showUserActions={showUserActions}
+    canEditUser={canEditUser}
+    canChangeUserStatus={canChangeUserStatus}
+    handleEditUser={handleEditUser}
+    handleDisableUser={handleDisableUser}
+    handleEnableUser={handleEnableUser}
+/>
 
 
             <ConfirmDialog
