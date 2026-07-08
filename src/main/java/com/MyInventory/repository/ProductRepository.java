@@ -21,6 +21,10 @@ public interface ProductRepository
 
     long countBySupplierIdAndActiveTrue(Long supplierId);
 
+    List<Product> findTop5ByActiveTrueAndStockLessThanEqualOrderByStockAsc(
+            Integer stock
+    );
+
     @Query("""
             SELECT COALESCE(SUM(p.stock), 0)
             FROM Product p

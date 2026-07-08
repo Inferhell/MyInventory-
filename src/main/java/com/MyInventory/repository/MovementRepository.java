@@ -12,4 +12,6 @@ public interface MovementRepository
     long countByType(MovementType type);
 
     List<Movement> findAllByOrderByCreatedAtDesc();
+
+    List<Movement> findTop5ByOrderByCreatedAtDesc();
 }

@@ -1,0 +1,10 @@
+package com.myinventory.dto;
+
+public record DashboardLowStockProductResponse(
+        Long id,
+        String name,
+        Integer stock,
+        String categoryName,
+        String supplierName
+) {
+}

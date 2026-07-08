@@ -14,6 +14,8 @@ import DashboardKpiGrid from "../components/DashboardKpiGrid";
 import DashboardSection from "../components/DashboardSection";
 import EntriesVsExitsChart from "../components/EntriesVsExitsChart";
 import MovementsByTypeChart from "../components/MovementsByTypeChart";
+import DashboardRecentMovementsTable from "../components/DashboardRecentMovementsTable";
+import DashboardLowStockProductsTable from "../components/DashboardLowStockProductsTable";
 
 function Dashboard() {
 
@@ -154,6 +156,17 @@ function Dashboard() {
                                 totalEntries={dashboard.totalEntries ?? 0}
                                 totalExits={dashboard.totalExits ?? 0}
                             />
+                        <DashboardSection title="Últimos movimientos">
+                            <DashboardRecentMovementsTable
+                                movements={dashboard.recentMovements || []}
+                            />
+                        </DashboardSection>
+
+                        <DashboardSection title="Productos críticos">
+                            <DashboardLowStockProductsTable
+                                products={dashboard.lowStockProducts || []}
+                            />
+                        </DashboardSection>
                         </DashboardSection>
 
                     </>
