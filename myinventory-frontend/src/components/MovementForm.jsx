@@ -1,4 +1,6 @@
 import ActionButton from "./ActionButton";
+import FormActions from "./FormActions";
+import FormGroup from "./FormGroup";
 
 function MovementForm({
     canCreateMovement,
@@ -25,86 +27,84 @@ function MovementForm({
                 Registrar Movimiento
             </h2>
 
-            <select
-                value={productId}
-                onChange={(event) =>
-                    setProductId(event.target.value)
-                }
-                disabled={loading}
-            >
-                <option value="">
-                    Seleccione producto
-                </option>
+            <FormGroup label="Producto">
+                <select
+                    value={productId}
+                    onChange={(event) =>
+                        setProductId(event.target.value)
+                    }
+                    disabled={loading}
+                >
+                    <option value="">
+                        Seleccione producto
+                    </option>
 
-                {
-                    activeProducts.map(product => (
+                    {
+                        activeProducts.map(product => (
 
-                        <option
-                            key={product.id}
-                            value={product.id}
-                        >
-                            {product.name}
-                        </option>
-                    ))
-                }
-            </select>
+                            <option
+                                key={product.id}
+                                value={product.id}
+                            >
+                                {product.name}
+                            </option>
+                        ))
+                    }
+                </select>
+            </FormGroup>
 
-            <br />
-            <br />
+            <FormGroup label="Cantidad">
+                <input
+                    type="number"
+                    placeholder="Cantidad"
+                    value={quantity}
+                    min="1"
+                    onChange={(event) =>
+                        setQuantity(event.target.value)
+                    }
+                    disabled={loading}
+                />
+            </FormGroup>
 
-            <input
-                type="number"
-                placeholder="Cantidad"
-                value={quantity}
-                min="1"
-                onChange={(event) =>
-                    setQuantity(event.target.value)
-                }
-                disabled={loading}
-            />
+            <FormGroup label="Observación">
+                <input
+                    type="text"
+                    placeholder="Observación"
+                    value={observation}
+                    onChange={(event) =>
+                        setObservation(event.target.value)
+                    }
+                    disabled={loading}
+                />
+            </FormGroup>
 
-            <br />
-            <br />
+            <FormGroup label="Tipo de movimiento">
+                <select
+                    value={movementType}
+                    onChange={(event) =>
+                        setMovementType(event.target.value)
+                    }
+                    disabled={loading}
+                >
+                    <option value="ENTRY">
+                        Entrada
+                    </option>
 
-            <input
-                type="text"
-                placeholder="Observación"
-                value={observation}
-                onChange={(event) =>
-                    setObservation(event.target.value)
-                }
-                disabled={loading}
-            />
+                    <option value="EXIT">
+                        Salida
+                    </option>
+                </select>
+            </FormGroup>
 
-            <br />
-            <br />
-
-            <select
-                value={movementType}
-                onChange={(event) =>
-                    setMovementType(event.target.value)
-                }
-                disabled={loading}
-            >
-                <option value="ENTRY">
-                    Entrada
-                </option>
-
-                <option value="EXIT">
-                    Salida
-                </option>
-            </select>
-
-            <br />
-            <br />
-
-            <ActionButton
-                variant="primary"
-                onClick={handleRegisterMovement}
-                disabled={loading}
-            >
-                Registrar Movimiento
-            </ActionButton>
+            <FormActions>
+                <ActionButton
+                    variant="primary"
+                    onClick={handleRegisterMovement}
+                    disabled={loading}
+                >
+                    Registrar Movimiento
+                </ActionButton>
+            </FormActions>
 
             <hr />
         </>

@@ -1,4 +1,6 @@
 import ActionButton from "./ActionButton";
+import FormActions from "./FormActions";
+import FormGroup from "./FormGroup";
 
 function SupplierForm({
     canWriteSupplier,
@@ -30,81 +32,79 @@ function SupplierForm({
                 }
             </h2>
 
-            <input
-                type="text"
-                placeholder="Nombre"
-                value={name}
-                onChange={(event) =>
-                    setName(event.target.value)
-                }
-                disabled={loading}
-            />
+            <FormGroup label="Nombre">
+                <input
+                    type="text"
+                    placeholder="Nombre"
+                    value={name}
+                    onChange={(event) =>
+                        setName(event.target.value)
+                    }
+                    disabled={loading}
+                />
+            </FormGroup>
 
-            <br />
-            <br />
+            <FormGroup label="Correo">
+                <input
+                    type="email"
+                    placeholder="Correo"
+                    value={email}
+                    onChange={(event) =>
+                        setEmail(event.target.value)
+                    }
+                    disabled={loading}
+                />
+            </FormGroup>
 
-            <input
-                type="email"
-                placeholder="Correo"
-                value={email}
-                onChange={(event) =>
-                    setEmail(event.target.value)
-                }
-                disabled={loading}
-            />
+            <FormGroup label="Teléfono">
+                <input
+                    type="text"
+                    placeholder="Teléfono"
+                    value={phone}
+                    onChange={(event) =>
+                        setPhone(event.target.value)
+                    }
+                    disabled={loading}
+                />
+            </FormGroup>
 
-            <br />
-            <br />
+            <FormGroup label="Dirección">
+                <input
+                    type="text"
+                    placeholder="Dirección"
+                    value={address}
+                    onChange={(event) =>
+                        setAddress(event.target.value)
+                    }
+                    disabled={loading}
+                />
+            </FormGroup>
 
-            <input
-                type="text"
-                placeholder="Teléfono"
-                value={phone}
-                onChange={(event) =>
-                    setPhone(event.target.value)
-                }
-                disabled={loading}
-            />
+            <FormActions>
+                <ActionButton
+                    variant="primary"
+                    onClick={handleSaveSupplier}
+                    disabled={loading}
+                >
+                    {
+                        editingId
+                            ? "Actualizar Proveedor"
+                            : "Crear Proveedor"
+                    }
+                </ActionButton>
 
-            <br />
-            <br />
-
-            <input
-                type="text"
-                placeholder="Dirección"
-                value={address}
-                onChange={(event) =>
-                    setAddress(event.target.value)
-                }
-                disabled={loading}
-            />
-
-            <br />
-            <br />
-
-            <ActionButton
-                variant="primary"
-                onClick={handleSaveSupplier}
-                disabled={loading}
-            >
                 {
-                    editingId
-                        ? "Actualizar Proveedor"
-                        : "Crear Proveedor"
+                    editingId && (
+                        <ActionButton
+                            variant="secondary"
+                            onClick={clearForm}
+                            disabled={loading}
+                        >
+                            Cancelar
+                        </ActionButton>
+                    )
                 }
-            </ActionButton>
-
-            {
-                editingId && (
-                    <ActionButton
-                        variant="secondary"
-                        onClick={clearForm}
-                        disabled={loading}
-                    >
-                        Cancelar
-                    </ActionButton>
-                )
-            }
+            </FormActions>
 
             <hr />
         </>

@@ -1,4 +1,6 @@
 import ActionButton from "./ActionButton";
+import FormActions from "./FormActions";
+import FormGroup from "./FormGroup";
 
 function CategoryForm({
     canWriteCategory,
@@ -26,55 +28,55 @@ function CategoryForm({
                 }
             </h2>
 
-            <input
-                type="text"
-                placeholder="Nombre"
-                value={name}
-                onChange={(event) =>
-                    setName(event.target.value)
-                }
-                disabled={loading}
-            />
+            <FormGroup label="Nombre">
+                <input
+                    type="text"
+                    placeholder="Nombre"
+                    value={name}
+                    onChange={(event) =>
+                        setName(event.target.value)
+                    }
+                    disabled={loading}
+                />
+            </FormGroup>
 
-            <br />
-            <br />
+            <FormGroup label="Descripción">
+                <input
+                    type="text"
+                    placeholder="Descripción"
+                    value={description}
+                    onChange={(event) =>
+                        setDescription(event.target.value)
+                    }
+                    disabled={loading}
+                />
+            </FormGroup>
 
-            <input
-                type="text"
-                placeholder="Descripción"
-                value={description}
-                onChange={(event) =>
-                    setDescription(event.target.value)
-                }
-                disabled={loading}
-            />
+            <FormActions>
+                <ActionButton
+                    variant="primary"
+                    onClick={handleSaveCategory}
+                    disabled={loading}
+                >
+                    {
+                        editingId
+                            ? "Actualizar Categoría"
+                            : "Crear Categoría"
+                    }
+                </ActionButton>
 
-            <br />
-            <br />
-
-            <ActionButton
-                variant="primary"
-                onClick={handleSaveCategory}
-                disabled={loading}
-            >
                 {
-                    editingId
-                        ? "Actualizar Categoría"
-                        : "Crear Categoría"
+                    editingId && (
+                        <ActionButton
+                            variant="secondary"
+                            onClick={clearForm}
+                            disabled={loading}
+                        >
+                            Cancelar
+                        </ActionButton>
+                    )
                 }
-            </ActionButton>
-
-            {
-                editingId && (
-                    <ActionButton
-                        variant="secondary"
-                        onClick={clearForm}
-                        disabled={loading}
-                    >
-                        Cancelar
-                    </ActionButton>
-                )
-            }
+            </FormActions>
 
             <hr />
         </>

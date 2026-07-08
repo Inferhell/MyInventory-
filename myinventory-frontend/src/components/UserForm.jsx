@@ -1,4 +1,6 @@
 import ActionButton from "./ActionButton";
+import FormActions from "./FormActions";
+import FormGroup from "./FormGroup";
 
 function UserForm({
     canCreateUser,
@@ -35,36 +37,34 @@ function UserForm({
                 }
             </h2>
 
-            <input
-                type="text"
-                placeholder="Nombre"
-                value={name}
-                onChange={(event) =>
-                    setName(event.target.value)
-                }
-                disabled={loading}
-            />
+            <FormGroup label="Nombre">
+                <input
+                    type="text"
+                    placeholder="Nombre"
+                    value={name}
+                    onChange={(event) =>
+                        setName(event.target.value)
+                    }
+                    disabled={loading}
+                />
+            </FormGroup>
 
-            <br />
-            <br />
-
-            <input
-                type="email"
-                placeholder="Correo"
-                value={email}
-                onChange={(event) =>
-                    setEmail(event.target.value)
-                }
-                disabled={loading}
-            />
-
-            <br />
-            <br />
+            <FormGroup label="Correo">
+                <input
+                    type="email"
+                    placeholder="Correo"
+                    value={email}
+                    onChange={(event) =>
+                        setEmail(event.target.value)
+                    }
+                    disabled={loading}
+                />
+            </FormGroup>
 
             {
                 !editingId && (
 
-                    <>
+                    <FormGroup label="Contraseña">
                         <input
                             type="password"
                             placeholder="Contraseña"
@@ -74,60 +74,58 @@ function UserForm({
                             }
                             disabled={loading}
                         />
-
-                        <br />
-                        <br />
-                    </>
+                    </FormGroup>
                 )
             }
 
-            <select
-                value={role}
-                onChange={(event) =>
-                    setRole(event.target.value)
-                }
-                disabled={loading}
-            >
-                <option value="ADMIN">
-                    Administrador
-                </option>
+            <FormGroup label="Rol">
+                <select
+                    value={role}
+                    onChange={(event) =>
+                        setRole(event.target.value)
+                    }
+                    disabled={loading}
+                >
+                    <option value="ADMIN">
+                        Administrador
+                    </option>
 
-                <option value="SUPERVISOR">
-                    Supervisor
-                </option>
+                    <option value="SUPERVISOR">
+                        Supervisor
+                    </option>
 
-                <option value="EMPLOYEE">
-                    Empleado
-                </option>
-            </select>
+                    <option value="EMPLOYEE">
+                        Empleado
+                    </option>
+                </select>
+            </FormGroup>
 
-            <br />
-            <br />
+            <FormActions>
+                <ActionButton
+                    variant="primary"
+                    onClick={handleSaveUser}
+                    disabled={loading}
+                >
+                    {
+                        editingId
+                            ? "Actualizar Usuario"
+                            : "Crear Usuario"
+                    }
+                </ActionButton>
 
-            <ActionButton
-                variant="primary"
-                onClick={handleSaveUser}
-                disabled={loading}
-            >
                 {
-                    editingId
-                        ? "Actualizar Usuario"
-                        : "Crear Usuario"
+                    editingId && (
+
+                        <ActionButton
+                            variant="secondary"
+                            onClick={clearForm}
+                            disabled={loading}
+                        >
+                            Cancelar
+                        </ActionButton>
+                    )
                 }
-            </ActionButton>
-
-            {
-                editingId && (
-
-                    <ActionButton
-                        variant="secondary"
-                        onClick={clearForm}
-                        disabled={loading}
-                    >
-                        Cancelar
-                    </ActionButton>
-                )
-            }
+            </FormActions>
 
             <hr />
         </>
