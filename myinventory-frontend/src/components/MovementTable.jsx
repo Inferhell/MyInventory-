@@ -4,11 +4,14 @@ import {
     formatDate
 } from "../utils/formatDate";
 
+import TableContainer from "./TableContainer";
+
 function MovementTable({
     movements
 }) {
 
     return (
+        <TableContainer>
         <table border="1">
 
             <thead>
@@ -94,6 +97,7 @@ function MovementTable({
             </tbody>
 
         </table>
+        </TableContainer>
     );
 }
 

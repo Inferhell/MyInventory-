@@ -1,6 +1,7 @@
 import ActionButton from "./ActionButton";
 import RoleBadge from "./RoleBadge";
 import StatusBadge from "./StatusBadge";
+import TableContainer from "./TableContainer";
 
 import {
     formatDate
@@ -19,6 +20,7 @@ function UserTable({
 }) {
 
     return (
+        <TableContainer>
         <table border="1">
 
             <thead>
@@ -154,6 +156,8 @@ function UserTable({
             </tbody>
 
         </table>
+        </TableContainer>
+
     );
 }
 

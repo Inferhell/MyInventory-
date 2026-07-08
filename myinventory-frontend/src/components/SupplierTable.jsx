@@ -5,6 +5,8 @@ import {
     formatDate
 } from "../utils/formatDate";
 
+import TableContainer from "./TableContainer";
+
 function SupplierTable({
     suppliers,
     loading,
@@ -17,6 +19,7 @@ function SupplierTable({
 }) {
 
     return (
+        <TableContainer>
         <table border="1">
 
             <thead>
@@ -154,6 +157,7 @@ function SupplierTable({
             </tbody>
 
         </table>
+        </TableContainer>
     );
 }
 

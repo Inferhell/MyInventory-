@@ -1,6 +1,8 @@
 import ActionButton from "./ActionButton";
 import StatusBadge from "./StatusBadge";
 import StockBadge from "./StockBadge";
+import TableContainer from "./TableContainer";
+
 
 import {
     formatCurrency
@@ -22,6 +24,7 @@ function ProductTable({
 }) {
 
     return (
+        <TableContainer>
         <table border="1">
 
             <thead>
@@ -166,6 +169,7 @@ function ProductTable({
             </tbody>
 
         </table>
+        </TableContainer>
     );
 }
 

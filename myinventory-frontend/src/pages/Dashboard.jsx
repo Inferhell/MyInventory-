@@ -1,9 +1,18 @@
 import { useEffect, useState } from "react";
 import { getDashboard } from "../services/dashboardService";
+import PageHeader from "../components/PageHeader";
+import AlertMessage from "../components/AlertMessage";
+import DashboardKpiCard from "../components/DashboardKpiCard";
+import DashboardKpiGrid from "../components/DashboardKpiGrid";
+
 
 function Dashboard() {
 
-    const [dashboard, setDashboard] = useState(null);
+    const [dashboard, setDashboard] =
+        useState(null);
+
+    const [error, setError] =
+        useState("");
 
     useEffect(() => {
 
@@ -11,8 +20,9 @@ function Dashboard() {
 
             try {
 
-                const data = await getDashboard();
-                
+                const data =
+                    await getDashboard();
+
                 console.log(data);
 
                 setDashboard(data);
@@ -20,6 +30,10 @@ function Dashboard() {
             } catch (error) {
 
                 console.error(error);
+
+                setError(
+                    "Error al cargar el dashboard"
+                );
             }
         };
 
@@ -32,28 +46,85 @@ function Dashboard() {
         return <p>Cargando dashboard...</p>;
     }
 
-    return (
+   return (
+    <div>
 
-        
-        <div>
-            <h1>Dashboard</h1>
+        <PageHeader
+            title="Dashboard"
+            subtitle="Resumen general del inventario"
+        />
 
-            <p>Total Productos: {dashboard.totalProducts}</p>
+        <AlertMessage
+            type="error"
+            message={error}
+        />
 
-            <p>Total Categorías: {dashboard.totalCategories}</p>
+        {
+            dashboard ? (
 
-            <p>Total Proveedores: {dashboard.totalSuppliers}</p>
+                <p>
+                    Cargando dashboard...
+                </p>
 
-            <p>Total Movimientos: {dashboard.totalMovements}</p>
+            ) : (
 
-            <p>Total Entradas: {dashboard.totalEntries}</p>
+                <DashboardKpiGrid>
 
-            <p>Total Salidas: {dashboard.totalExits}</p>
+                    <DashboardKpiCard
+                        title="Productos"
+                        value={dashboard?.totalProducts}
+                        description="Productos registrados"
+                        variant="products"
+                    />
 
-            <p>Stock Total: {dashboard.totalStock}</p>
+                    <DashboardKpiCard
+                        title="Categorías"
+                        value={dashboard?.totalCategories}
+                        description="Categorías registradas"
+                        variant="categories"
+                    />
 
-        </div>
-    );
+                    <DashboardKpiCard
+                        title="Proveedores"
+                        value={dashboard?.totalSuppliers}
+                        description="Proveedores registrados"
+                        variant="suppliers"
+                    />
+
+                    <DashboardKpiCard
+                        title="Movimientos"
+                        value={dashboard?.totalMovements}
+                        description="Movimientos registrados"
+                        variant="movements"
+                    />
+
+                    <DashboardKpiCard
+                        title="Entradas"
+                        value={dashboard?.totalEntries}
+                        description="Movimientos de entrada"
+                        variant="entries"
+                    />
+
+                    <DashboardKpiCard
+                        title="Salidas"
+                        value={dashboard?.totalExits}
+                        description="Movimientos de salida"
+                        variant="exits"
+                    />
+
+                    <DashboardKpiCard
+                        title="Stock total"
+                        value={dashboard?.totalStock}
+                        description="Unidades en inventario"
+                        variant="stock"
+                    />
+
+                </DashboardKpiGrid>
+            )
+        }
+
+    </div>
+);
 }
 
 export default Dashboard;

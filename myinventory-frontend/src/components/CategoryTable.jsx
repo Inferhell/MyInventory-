@@ -1,5 +1,6 @@
 import ActionButton from "./ActionButton";
 import StatusBadge from "./StatusBadge";
+import TableContainer from "./TableContainer";
 
 import {
     formatDate
@@ -17,6 +18,7 @@ function CategoryTable({
 }) {
 
     return (
+        <TableContainer>
         <table border="1">
 
             <thead>
@@ -144,6 +146,7 @@ function CategoryTable({
             </tbody>
 
         </table>
+        </TableContainer>
     );
 }
 
