@@ -33,6 +33,15 @@ import {
 import {
     useAuth
 } from "../hooks/useAuth";
+import FilterSelect from "../components/FilterSelect";
+import TableToolbar from "../components/TableToolbar";
+
+import {
+    compareDate,
+    compareNumber,
+    compareText,
+    sortByOption
+} from "../utils/sortUtils";
 
 import ProductTable from "../components/ProductTable";
 
@@ -53,6 +62,12 @@ const canChangeProductStatus =
 
     const showProductActions =
     canWriteProduct || canChangeProductStatus;
+
+    const [sortOption, setSortOption] =
+    useState("nameAsc");
+
+const [statusOrder, setStatusOrder] =
+    useState("default");
 
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
@@ -85,7 +100,55 @@ const canChangeProductStatus =
         });
 
 
+const productSortOptions = [
+    {
+        value: "nameAsc",
+        label: "Nombre A-Z"
+    },
+    {
+        value: "nameDesc",
+        label: "Nombre Z-A"
+    },
+    {
+        value: "priceAsc",
+        label: "Precio menor a mayor"
+    },
+    {
+        value: "priceDesc",
+        label: "Precio mayor a menor"
+    },
+    {
+        value: "stockAsc",
+        label: "Stock menor a mayor"
+    },
+    {
+        value: "stockDesc",
+        label: "Stock mayor a menor"
+    },
+    {
+        value: "recent",
+        label: "Más recientes"
+    },
+    {
+        value: "oldest",
+        label: "Más antiguos"
+    }
+];
 
+const statusOrderOptions = [
+    {
+        value: "default",
+        label: "Estado sin prioridad"
+    },
+    {
+        value: "activeFirst",
+        label: "Activos primero"
+    },
+    {
+        value: "inactiveFirst",
+        label: "Inactivos primero"
+    }
+];
 
     const loadProducts = async () => {
 
@@ -507,6 +570,81 @@ useEffect(() => {
 
             return matchesSearch && matchesStatus;
         });
+        const productSorters = {
+    nameAsc: (first, second) =>
+        compareText(
+            first.name,
+            second.name
+        ),
+
+    nameDesc: (first, second) =>
+        compareText(
+            second.name,
+            first.name
+        ),
+
+    priceAsc: (first, second) =>
+        compareNumber(
+            first.price,
+            second.price
+        ),
+
+    priceDesc: (first, second) =>
+        compareNumber(
+            second.price,
+            first.price
+        ),
+
+    stockAsc: (first, second) =>
+        compareNumber(
+            first.stock,
+            second.stock
+        ),
+
+    stockDesc: (first, second) =>
+        compareNumber(
+            second.stock,
+            first.stock
+        ),
+
+    recent: (first, second) =>
+        compareDate(
+            second.createdAt,
+            first.createdAt
+        ),
+
+    oldest: (first, second) =>
+        compareDate(
+            first.createdAt,
+            second.createdAt
+        )
+};
+
+const sortedProducts = (() => {
+
+    const sortedBySelectedOption =
+        sortByOption(
+            filteredProducts,
+            sortOption,
+            productSorters
+        );
+
+    if (statusOrder === "activeFirst") {
+        return [...sortedBySelectedOption].sort(
+            (first, second) =>
+                Number(second.active) - Number(first.active)
+        );
+    }
+
+    if (statusOrder === "inactiveFirst") {
+        return [...sortedBySelectedOption].sort(
+            (first, second) =>
+                Number(first.active) - Number(second.active)
+        );
+    }
+
+    return sortedBySelectedOption;
+})();
 
     return (
         <div>
@@ -545,25 +683,39 @@ useEffect(() => {
     handleSaveProduct={handleSaveProduct}
     clearForm={clearForm}
 />
-            <SearchInput
-                value={search}
-                onChange={setSearch}
-                placeholder="Buscar producto..."
-            />
+            <TableToolbar>
 
-            <br />
-            <br />
+    <SearchInput
+        value={search}
+        onChange={setSearch}
+        placeholder="Buscar producto..."
+    />
 
-            <ShowInactiveCheckbox
-                checked={showInactive}
-                onChange={setShowInactive}
-            />
+    <ShowInactiveCheckbox
+        checked={showInactive}
+        onChange={setShowInactive}
+    />
 
+    <FilterSelect
+        label="Ordenar por"
+        value={sortOption}
+        onChange={setSortOption}
+        options={productSortOptions}
+    />
+
+    <FilterSelect
+        label="Prioridad de estado"
+        value={statusOrder}
+        onChange={setStatusOrder}
+        options={statusOrderOptions}
+    />
+
+</TableToolbar>
             <br />
             <br />
 
 <ProductTable
-    products={filteredProducts}
+    products={sortedProducts}
     loading={loading}
     showProductActions={showProductActions}
     canWriteProduct={canWriteProduct}

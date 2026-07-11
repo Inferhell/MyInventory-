@@ -5,16 +5,17 @@ function FormGroup({
 
     return (
         <div style={{
-            marginBottom: "14px",
+            marginBottom: "16px",
             display: "flex",
             flexDirection: "column",
-            gap: "6px"
+            gap: "7px"
         }}>
             {
                 label && (
                     <label style={{
-                        fontWeight: "600",
-                        color: "#334e68"
+                        fontSize: "13px",
+                        fontWeight: "700",
+                        color: "#334155"
                     }}>
                         {label}
                     </label>

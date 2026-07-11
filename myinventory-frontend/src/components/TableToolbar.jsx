@@ -1,19 +1,19 @@
-function FormActions({
+function TableToolbar({
     children
 }) {
 
     return (
         <div style={{
             display: "flex",
+            alignItems: "flex-end",
+            gap: "16px",
             flexWrap: "wrap",
-            gap: "10px",
-            alignItems: "center",
             marginTop: "18px",
-            marginBottom: "24px"
+            marginBottom: "18px"
         }}>
             {children}
         </div>
     );
 }
 
-export default FormActions;
+export default TableToolbar;

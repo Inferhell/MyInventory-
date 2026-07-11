@@ -5,18 +5,20 @@ function DashboardSection({
 
     return (
         <section style={{
-            marginTop: "24px"
+            marginTop: "32px"
         }}>
-            <h2>
+            <h2 style={{
+                marginBottom: "14px"
+            }}>
                 {title}
             </h2>
 
             <div style={{
                 backgroundColor: "#ffffff",
-                border: "1px solid #d9e2ec",
-                borderRadius: "10px",
-                padding: "20px",
-                boxShadow: "0 2px 8px rgba(16, 42, 67, 0.06)"
+                borderRadius: "14px",
+                padding: "24px",
+                boxShadow: "0 4px 6px -1px rgba(15, 23, 42, 0.03), 0 2px 4px -2px rgba(15, 23, 42, 0.03)",
+                border: "1px solid #f1f5f9"
             }}>
                 {children}
             </div>

@@ -1,6 +1,7 @@
 import ActionButton from "./ActionButton";
 import StatusBadge from "./StatusBadge";
 import TableContainer from "./TableContainer";
+import TableActions from "./TableActions";
 
 import {
     formatDate
@@ -81,10 +82,11 @@ function CategoryTable({
                                 {
                                     showCategoryActions && (
 
-                                        <td>
+                                <td>
+                                            <TableActions>
 
-                                            {
-                                                canWriteCategory && category.active ? (
+                                                {
+                                                    canWriteCategory && category.active ? (
 
                                                     <ActionButton
                                                         variant="primary"
@@ -131,10 +133,11 @@ function CategoryTable({
                                                         >
                                                             Reactivar
                                                         </ActionButton>
+                                                        )
                                                     )
-                                                )
-                                            }
+                                                }
 
+                                            </TableActions>
                                         </td>
                                     )
                                 }

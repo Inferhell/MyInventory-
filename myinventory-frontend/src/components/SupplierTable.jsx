@@ -1,5 +1,6 @@
 import ActionButton from "./ActionButton";
 import StatusBadge from "./StatusBadge";
+import TableActions from "./TableActions";
 
 import {
     formatDate
@@ -92,10 +93,11 @@ function SupplierTable({
                                 {
                                     showSupplierActions && (
 
-                                        <td>
+                                <td>
+                                            <TableActions>
 
-                                            {
-                                                canWriteSupplier && supplier.active ? (
+                                                {
+                                                     canWriteSupplier && supplier.active ? (
 
                                                     <ActionButton
                                                         variant="primary"
@@ -142,10 +144,11 @@ function SupplierTable({
                                                         >
                                                             Reactivar
                                                         </ActionButton>
+                                                        )
                                                     )
-                                                )
-                                            }
+                                                }
 
+                                            </TableActions>
                                         </td>
                                     )
                                 }

@@ -9,7 +9,16 @@ import {
     registerExit
 } from "../services/movementService";
 
+import {
+    compareDate,
+    compareNumber,
+    sortByOption
+} from "../utils/sortUtils";
+
 import AlertMessage from "../components/AlertMessage";
+
+import FilterSelect from "../components/FilterSelect";
+import TableToolbar from "../components/TableToolbar";
 
 
 import {
@@ -74,6 +83,9 @@ const canCreateMovement =
     const [errorMessage, setErrorMessage] =
         useState("");
 
+    const [sortOption, setSortOption] =
+        useState("recent");
+
          const loadMovements = async () => {
 
         try {
@@ -92,6 +104,26 @@ const canCreateMovement =
             );
         }
     };
+
+
+    const movementSortOptions = [
+    {
+        value: "recent",
+        label: "Más recientes"
+    },
+    {
+        value: "oldest",
+        label: "Más antiguos"
+    },
+    {
+        value: "quantityAsc",
+        label: "Cantidad menor a mayor"
+    },
+    {
+        value: "quantityDesc",
+        label: "Cantidad mayor a menor"
+    }
+];
 
     const loadProducts = async () => {
 
@@ -332,6 +364,28 @@ const canCreateMovement =
             );
         });
 
+
+        const movementSorters = {
+    recent: (first, second) =>
+        compareDate(second.createdAt, first.createdAt),
+
+    oldest: (first, second) =>
+        compareDate(first.createdAt, second.createdAt),
+
+    quantityAsc: (first, second) =>
+        compareNumber(first.quantity, second.quantity),
+
+    quantityDesc: (first, second) =>
+        compareNumber(second.quantity, first.quantity)
+};
+
+const sortedMovements =
+    sortByOption(
+        filteredMovements,
+        sortOption,
+        movementSorters
+    );
+
     return (
 
         <div>
@@ -370,69 +424,68 @@ const canCreateMovement =
                 Historial de Movimientos
             </h2>
 
-            <SearchInput
-                value={search}
-                onChange={setSearch}
-                placeholder="Buscar movimiento..."
-            />
+<TableToolbar>
 
-            <br />
-            <br />
+    <SearchInput
+        value={search}
+        onChange={setSearch}
+        placeholder="Buscar movimiento..."
+    />
 
-            <select
-                value={typeFilter}
-                onChange={(e) =>
-                    setTypeFilter(e.target.value)
-                }
-            >
+    <FilterSelect
+        label="Tipo"
+        value={typeFilter}
+        onChange={setTypeFilter}
+        options={[
+            {
+                value: "ALL",
+                label: "Todos los tipos"
+            },
+            {
+                value: "ENTRY",
+                label: "Entradas"
+            },
+            {
+                value: "EXIT",
+                label: "Salidas"
+            },
+            {
+                value: "INITIAL_BALANCE",
+                label: "Saldos iniciales"
+            }
+        ]}
+    />
 
-                <option value="ALL">
-                    Todos los tipos
-                </option>
+    <FilterSelect
+        label="Producto"
+        value={productFilter}
+        onChange={setProductFilter}
+        options={[
+            {
+                value: "ALL",
+                label: "Todos los productos"
+            },
+            ...products.map(product => ({
+                value: String(product.id),
+                label: product.name
+            }))
+        ]}
+    />
 
-                <option value="ENTRY">
-                    Entradas
-                </option>
+    <FilterSelect
+        label="Ordenar por"
+        value={sortOption}
+        onChange={setSortOption}
+        options={movementSortOptions}
+    />
 
-                <option value="EXIT">
-                    Salidas
-                </option>
-
-            </select>
-
-            <br />
-            <br />
-
-            <select
-                value={productFilter}
-                onChange={(e) =>
-                    setProductFilter(e.target.value)
-                }
-            >
-
-                <option value="ALL">
-                    Todos los productos
-                </option>
-
-                {
-                    products.map(product => (
-
-                        <option
-                            key={product.id}
-                            value={product.id}
-                        >
-                            {product.name}
-                        </option>
-                    ))
-                }
-
-            </select>
+</TableToolbar>
 
             <br />
             <br />
 
 <MovementTable
-    movements={filteredMovements}
+    movements={sortedMovements}
 />
 
         </div>

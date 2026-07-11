@@ -11,6 +11,15 @@ import {
     getApiErrorMessage
 } from "../utils/getApiErrorMessage";
 
+import FilterSelect from "../components/FilterSelect";
+import TableToolbar from "../components/TableToolbar";
+
+import {
+    compareDate,
+    compareText,
+    sortByOption
+} from "../utils/sortUtils";
+
 import SupplierForm from "../components/SupplierForm";
 import SupplierTable from "../components/SupplierTable";
 
@@ -60,6 +69,12 @@ const canChangeSupplierStatus =
     const [message, setMessage] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
 
+    const [sortOption, setSortOption] =
+    useState("nameAsc");
+
+const [statusOrder, setStatusOrder] =
+    useState("default");
+
     const [confirmDialog, setConfirmDialog] =
         useState({
             isOpen: false,
@@ -100,6 +115,40 @@ const canChangeSupplierStatus =
 }, []);
 
         
+
+const supplierSortOptions = [
+    {
+        value: "nameAsc",
+        label: "Nombre A-Z"
+    },
+    {
+        value: "nameDesc",
+        label: "Nombre Z-A"
+    },
+    {
+        value: "recent",
+        label: "Más recientes"
+    },
+    {
+        value: "oldest",
+        label: "Más antiguos"
+    }
+];
+
+const statusOrderOptions = [
+    {
+        value: "default",
+        label: "Estado sin prioridad"
+    },
+    {
+        value: "activeFirst",
+        label: "Activos primero"
+    },
+    {
+        value: "inactiveFirst",
+        label: "Inactivos primero"
+    }
+];
 
     const loadSuppliers = async () => {
 
@@ -433,6 +482,48 @@ const canChangeSupplierStatus =
             return matchesSearch && matchesStatus;
         });
 
+
+const supplierSorters = {
+    nameAsc: (first, second) =>
+        compareText(first.name, second.name),
+
+    nameDesc: (first, second) =>
+        compareText(second.name, first.name),
+
+    recent: (first, second) =>
+        compareDate(second.createdAt, first.createdAt),
+
+    oldest: (first, second) =>
+        compareDate(first.createdAt, second.createdAt)
+};
+
+const sortedSuppliers = (() => {
+
+    const sortedBySelectedOption =
+        sortByOption(
+            filteredSuppliers,
+            sortOption,
+            supplierSorters
+        );
+
+    if (statusOrder === "activeFirst") {
+        return [...sortedBySelectedOption].sort(
+            (first, second) =>
+                Number(second.active) - Number(first.active)
+        );
+    }
+
+    if (statusOrder === "inactiveFirst") {
+        return [...sortedBySelectedOption].sort(
+            (first, second) =>
+                Number(first.active) - Number(second.active)
+        );
+    }
+
+    return sortedBySelectedOption;
+})();
+
+
     return (
 
         <div>
@@ -468,25 +559,40 @@ const canChangeSupplierStatus =
     clearForm={clearForm}
 />
 
-            <SearchInput
-                value={search}
-                onChange={setSearch}
-                placeholder="Buscar proveedor..."
-            />
+            <TableToolbar>
 
-            <br />
-            <br />
+    <SearchInput
+        value={search}
+        onChange={setSearch}
+        placeholder="Buscar proveedor..."
+    />
 
-            <ShowInactiveCheckbox
-                checked={showInactive}
-                onChange={setShowInactive}
-            />
+    <ShowInactiveCheckbox
+        checked={showInactive}
+        onChange={setShowInactive}
+    />
+
+    <FilterSelect
+        label="Ordenar por"
+        value={sortOption}
+        onChange={setSortOption}
+        options={supplierSortOptions}
+    />
+
+    <FilterSelect
+        label="Prioridad de estado"
+        value={statusOrder}
+        onChange={setStatusOrder}
+        options={statusOrderOptions}
+    />
+
+</TableToolbar>
 
             <br />
             <br />
 
            <SupplierTable
-    suppliers={filteredSuppliers}
+    suppliers={sortedSuppliers}
     loading={loading}
     showSupplierActions={showSupplierActions}
     canWriteSupplier={canWriteSupplier}

@@ -6,44 +6,48 @@ function DashboardKpiCard({
 }) {
 
     const variants = {
-        products: "#1976d2",
-        categories: "#7b1fa2",
-        suppliers: "#00897b",
-        movements: "#5d4037",
-        entries: "#2e7d32",
-        exits: "#c62828",
-        stock: "#f9a825",
-        default: "#607d8b"
+        products: "#4f46e5",
+        categories: "#7c3aed",
+        suppliers: "#0f766e",
+        movements: "#475569",
+        entries: "#16a34a",
+        exits: "#dc2626",
+        stock: "#d97706",
+        default: "#64748b"
     };
 
     const cardStyle = {
         backgroundColor: "#ffffff",
-        border: "1px solid #d9e2ec",
-        borderRadius: "10px",
-        padding: "18px",
-        boxShadow: "0 2px 8px rgba(16, 42, 67, 0.06)",
+        borderRadius: "14px",
+        padding: "24px",
+        boxShadow: "0 4px 6px -1px rgba(15, 23, 42, 0.03), 0 2px 4px -2px rgba(15, 23, 42, 0.03)",
+        border: "1px solid #f1f5f9",
         borderTop: `4px solid ${variants[variant] || variants.default}`
     };
 
     const titleStyle = {
         margin: 0,
-        color: "#627d98",
-        fontSize: "14px",
-        fontWeight: "700"
+        color: "#64748b",
+        fontSize: "13px",
+        fontWeight: "700",
+        textTransform: "uppercase",
+        letterSpacing: "0.04em"
     };
 
     const valueStyle = {
-        margin: "10px 0 6px",
-        color: "#102a43",
-        fontSize: "30px",
-        fontWeight: "800"
+        margin: "12px 0 8px",
+        color: "#0f172a",
+        fontSize: "32px",
+        fontWeight: "800",
+        letterSpacing: "-0.04em"
     };
 
-    const descriptionStyle = {
-        margin: 0,
-        color: "#829ab1",
-        fontSize: "13px"
-    };
+   const descriptionStyle = {
+    margin: 0,
+    color: "#64748b",
+    fontSize: "13px",
+    fontWeight: "500"
+};
 
     return (
         <div style={cardStyle}>
@@ -52,9 +56,7 @@ function DashboardKpiCard({
             </p>
 
             <p style={valueStyle}>
-                {
-                    value ?? 0
-                }
+                {value ?? 0}
             </p>
 
             {

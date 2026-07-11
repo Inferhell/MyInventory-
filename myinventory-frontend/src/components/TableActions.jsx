@@ -1,19 +1,18 @@
-function FormActions({
+function TableActions({
     children
 }) {
 
     return (
         <div style={{
             display: "flex",
-            flexWrap: "wrap",
-            gap: "10px",
             alignItems: "center",
-            marginTop: "18px",
-            marginBottom: "24px"
+            gap: "8px",
+            flexWrap: "wrap",
+            minWidth: "150px"
         }}>
             {children}
         </div>
     );
 }
 
-export default FormActions;
+export default TableActions;

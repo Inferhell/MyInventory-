@@ -2,6 +2,7 @@ import ActionButton from "./ActionButton";
 import RoleBadge from "./RoleBadge";
 import StatusBadge from "./StatusBadge";
 import TableContainer from "./TableContainer";
+import TableActions from "./TableActions";
 
 import {
     formatDate
@@ -88,7 +89,8 @@ function UserTable({
                                 {
                                     showUserActions && (
 
-                                        <td>
+                                         <td>
+                                        <TableActions>
 
                                             {
                                                 canEditUser && user.active ? (
@@ -145,7 +147,8 @@ function UserTable({
                                                 )
                                             }
 
-                                        </td>
+                                        </TableActions>
+                                    </td>
                                     )
                                 }
 

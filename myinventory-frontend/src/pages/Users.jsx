@@ -16,7 +16,14 @@ import {
 
 import AlertMessage from "../components/AlertMessage";
 
+import FilterSelect from "../components/FilterSelect";
+import TableToolbar from "../components/TableToolbar";
 
+import {
+    compareDate,
+    compareText,
+    sortByOption
+} from "../utils/sortUtils";
 
 import ConfirmDialog from "../components/ConfirmDialog";
 
@@ -65,6 +72,15 @@ const canChangeUserStatus =
     const [message, setMessage] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
 
+    const [sortOption, setSortOption] =
+    useState("nameAsc");
+
+const [statusOrder, setStatusOrder] =
+    useState("default");
+
+const [roleFilter, setRoleFilter] =
+    useState("ALL");
+
     const [confirmDialog, setConfirmDialog] =
         useState({
             isOpen: false,
@@ -75,7 +91,58 @@ const canChangeUserStatus =
             onConfirm: null
         });
 
+const userSortOptions = [
+    {
+        value: "nameAsc",
+        label: "Nombre A-Z"
+    },
+    {
+        value: "nameDesc",
+        label: "Nombre Z-A"
+    },
+    {
+        value: "recent",
+        label: "Más recientes"
+    },
+    {
+        value: "oldest",
+        label: "Más antiguos"
+    }
+];
 
+const roleFilterOptions = [
+    {
+        value: "ALL",
+        label: "Todos los roles"
+    },
+    {
+        value: "ADMIN",
+        label: "Administradores"
+    },
+    {
+        value: "SUPERVISOR",
+        label: "Supervisores"
+    },
+    {
+        value: "EMPLOYEE",
+        label: "Empleados"
+    }
+];
+
+const statusOrderOptions = [
+    {
+        value: "default",
+        label: "Estado sin prioridad"
+    },
+    {
+        value: "activeFirst",
+        label: "Activos primero"
+    },
+    {
+        value: "inactiveFirst",
+        label: "Inactivos primero"
+    }
+];
    
    const loadUsers = async () => {
 
@@ -441,11 +508,59 @@ const canChangeUserStatus =
                     ?.toLowerCase()
                     .includes(searchText);
 
+            const matchesRole =
+            roleFilter === "ALL"
+            || user.role === roleFilter;
+
             const matchesStatus =
                 showInactive || user.active;
 
-            return matchesSearch && matchesStatus;
+            return (
+                matchesSearch
+                && matchesRole
+                && matchesStatus
+            );
         });
+
+        const userSorters = {
+    nameAsc: (first, second) =>
+        compareText(first.name, second.name),
+
+    nameDesc: (first, second) =>
+        compareText(second.name, first.name),
+
+    recent: (first, second) =>
+        compareDate(second.createdAt, first.createdAt),
+
+    oldest: (first, second) =>
+        compareDate(first.createdAt, second.createdAt)
+};
+
+const sortedUsers = (() => {
+
+    const sortedBySelectedOption =
+        sortByOption(
+            filteredUsers,
+            sortOption,
+            userSorters
+        );
+
+    if (statusOrder === "activeFirst") {
+        return [...sortedBySelectedOption].sort(
+            (first, second) =>
+                Number(second.active) - Number(first.active)
+        );
+    }
+
+    if (statusOrder === "inactiveFirst") {
+        return [...sortedBySelectedOption].sort(
+            (first, second) =>
+                Number(first.active) - Number(second.active)
+        );
+    }
+
+    return sortedBySelectedOption;
+})();
 
     return (
 
@@ -483,25 +598,47 @@ const canChangeUserStatus =
     clearForm={clearForm}
 />
 
-            <SearchInput
-                value={search}
-                onChange={setSearch}
-                placeholder="Buscar usuario..."
-            />
+           <TableToolbar>
 
-            <br />
-            <br />
+    <SearchInput
+        value={search}
+        onChange={setSearch}
+        placeholder="Buscar usuario..."
+    />
 
-            <ShowInactiveCheckbox
-                checked={showInactive}
-                onChange={setShowInactive}
-            />
+    <ShowInactiveCheckbox
+        checked={showInactive}
+        onChange={setShowInactive}
+    />
+
+    <FilterSelect
+        label="Rol"
+        value={roleFilter}
+        onChange={setRoleFilter}
+        options={roleFilterOptions}
+    />
+
+    <FilterSelect
+        label="Ordenar por"
+        value={sortOption}
+        onChange={setSortOption}
+        options={userSortOptions}
+    />
+
+    <FilterSelect
+        label="Prioridad de estado"
+        value={statusOrder}
+        onChange={setStatusOrder}
+        options={statusOrderOptions}
+    />
+
+</TableToolbar>
 
             <br />
             <br />
 
             <UserTable
-    users={filteredUsers}
+    users={sortedUsers}
     loading={loading}
     currentUser={currentUser}
     showUserActions={showUserActions}

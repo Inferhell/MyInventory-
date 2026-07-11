@@ -2,6 +2,8 @@ import ActionButton from "./ActionButton";
 import StatusBadge from "./StatusBadge";
 import StockBadge from "./StockBadge";
 import TableContainer from "./TableContainer";
+import TableActions from "./TableActions";
+import ActionHint from "./ActionHint";
 
 
 import {
@@ -103,60 +105,62 @@ function ProductTable({
                                 {
                                     showProductActions && (
 
-                                        <td>
+                                <td>
+                                            <TableActions>
 
-                                            {
-                                                canWriteProduct && product.active ? (
-
-                                                    <ActionButton
-                                                        variant="primary"
-                                                        onClick={() =>
-                                                            handleEditProduct(product)
-                                                        }
-                                                        disabled={loading}
-                                                    >
-                                                        Editar
-                                                    </ActionButton>
-
-                                                ) : !product.active && canWriteProduct ? (
-
-                                                    <span>
-                                                        Reactivar para editar
-                                                    </span>
-
-                                                ) : null
-                                            }
-
-                                            {
-                                                canChangeProductStatus && (
-
-                                                    product.active ? (
+                                                {
+                                                    canWriteProduct && product.active ? (
 
                                                         <ActionButton
-                                                            variant="danger"
+                                                            variant="primary"
                                                             onClick={() =>
-                                                                handleDisableProduct(product.id)
+                                                                handleEditProduct(product)
                                                             }
                                                             disabled={loading}
                                                         >
-                                                            Desactivar
+                                                            Editar
                                                         </ActionButton>
 
-                                                    ) : (
+                                                    ) : !product.active && canWriteProduct ? (
 
-                                                        <ActionButton
-                                                            variant="success"
-                                                            onClick={() =>
-                                                                handleEnableProduct(product.id)
-                                                            }
-                                                            disabled={loading}
-                                                        >
-                                                            Reactivar
-                                                        </ActionButton>
+                                                        <ActionHint>
+                                                            Reactivar para editar
+                                                        </ActionHint>
+
+                                                    ) : null
+                                                }
+
+                                                {
+                                                    canChangeProductStatus && (
+
+                                                        product.active ? (
+
+                                                            <ActionButton
+                                                                variant="danger"
+                                                                onClick={() =>
+                                                                    handleDisableProduct(product.id)
+                                                                }
+                                                                disabled={loading}
+                                                            >
+                                                                Desactivar
+                                                            </ActionButton>
+
+                                                        ) : (
+
+                                                            <ActionButton
+                                                                variant="success"
+                                                                onClick={() =>
+                                                                    handleEnableProduct(product.id)
+                                                                }
+                                                                disabled={loading}
+                                                            >
+                                                                Reactivar
+                                                            </ActionButton>
+                                                        )
                                                     )
-                                                )
-                                            }
+                                                }
 
+                                            </TableActions>
                                         </td>
                                     )
                                 }

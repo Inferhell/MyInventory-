@@ -3,6 +3,15 @@ import { useEffect, useState } from "react";
 import CategoryForm from "../components/CategoryForm";
 import CategoryTable from "../components/CategoryTable";
 
+import FilterSelect from "../components/FilterSelect";
+import TableToolbar from "../components/TableToolbar";
+
+import {
+    compareDate,
+    compareText,
+    sortByOption
+} from "../utils/sortUtils";
+
 import {
     getCategories,
     createCategory,
@@ -43,6 +52,12 @@ const canChangeCategoryStatus =
     const showCategoryActions =
     canWriteCategory || canChangeCategoryStatus;
 
+    const [sortOption, setSortOption] =
+    useState("nameAsc");
+
+    const [statusOrder, setStatusOrder] =
+    useState("default");
+    
     const [categories, setCategories] =
         useState([]);
 
@@ -80,6 +95,40 @@ const canChangeCategoryStatus =
             onConfirm: null
         });
 
+
+        const categorySortOptions = [
+    {
+        value: "nameAsc",
+        label: "Nombre A-Z"
+    },
+    {
+        value: "nameDesc",
+        label: "Nombre Z-A"
+    },
+    {
+        value: "recent",
+        label: "Más recientes"
+    },
+    {
+        value: "oldest",
+        label: "Más antiguos"
+    }
+];
+
+const statusOrderOptions = [
+    {
+        value: "default",
+        label: "Estado sin prioridad"
+    },
+    {
+        value: "activeFirst",
+        label: "Activas primero"
+    },
+    {
+        value: "inactiveFirst",
+        label: "Inactivas primero"
+    }
+];
 
     const loadCategories = async () => {
 
@@ -390,6 +439,46 @@ useEffect(() => {
             return matchesSearch && matchesStatus;
         });
 
+        const categorySorters = {
+    nameAsc: (first, second) =>
+        compareText(first.name, second.name),
+
+    nameDesc: (first, second) =>
+        compareText(second.name, first.name),
+
+    recent: (first, second) =>
+        compareDate(second.createdAt, first.createdAt),
+
+    oldest: (first, second) =>
+        compareDate(first.createdAt, second.createdAt)
+};
+
+const sortedCategories = (() => {
+
+    const sortedBySelectedOption =
+        sortByOption(
+            filteredCategories,
+            sortOption,
+            categorySorters
+        );
+
+    if (statusOrder === "activeFirst") {
+        return [...sortedBySelectedOption].sort(
+            (first, second) =>
+                Number(second.active) - Number(first.active)
+        );
+    }
+
+    if (statusOrder === "inactiveFirst") {
+        return [...sortedBySelectedOption].sort(
+            (first, second) =>
+                Number(first.active) - Number(second.active)
+        );
+    }
+
+    return sortedBySelectedOption;
+})();
+
     return (
 
         <div>
@@ -421,25 +510,40 @@ useEffect(() => {
     clearForm={clearForm}
 />
 
-            <SearchInput
-                value={search}
-                onChange={setSearch}
-                placeholder="Buscar categoría..."
-            />
+            <TableToolbar>
 
-            <br />
-            <br />
+    <SearchInput
+        value={search}
+        onChange={setSearch}
+        placeholder="Buscar categoría..."
+    />
 
-            <ShowInactiveCheckbox
-                checked={showInactive}
-                onChange={setShowInactive}
-            />
+    <ShowInactiveCheckbox
+        checked={showInactive}
+        onChange={setShowInactive}
+    />
+
+    <FilterSelect
+        label="Ordenar por"
+        value={sortOption}
+        onChange={setSortOption}
+        options={categorySortOptions}
+    />
+
+    <FilterSelect
+        label="Prioridad de estado"
+        value={statusOrder}
+        onChange={setStatusOrder}
+        options={statusOrderOptions}
+    />
+
+</TableToolbar>
 
             <br />
             <br />
 
             <CategoryTable
-    categories={filteredCategories}
+    categories={sortedCategories}
     loading={loading}
     showCategoryActions={showCategoryActions}
     canWriteCategory={canWriteCategory}

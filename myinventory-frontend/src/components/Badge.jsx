@@ -5,43 +5,40 @@ function Badge({
 
     const variants = {
         success: {
-            backgroundColor: "#e8f5e9",
-            color: "#1b5e20",
-            border: "1px solid #81c784"
+            backgroundColor: "#dcfce7",
+            color: "#166534"
         },
         danger: {
-            backgroundColor: "#ffebee",
-            color: "#b71c1c",
-            border: "1px solid #e57373"
+            backgroundColor: "#fee2e2",
+            color: "#991b1b"
         },
         warning: {
-            backgroundColor: "#fff8e1",
-            color: "#795548",
-            border: "1px solid #ffd54f"
+            backgroundColor: "#fef3c7",
+            color: "#92400e"
         },
         info: {
-            backgroundColor: "#e3f2fd",
-            color: "#0d47a1",
-            border: "1px solid #64b5f6"
+            backgroundColor: "#dbeafe",
+            color: "#1e40af"
         },
         neutral: {
-            backgroundColor: "#f5f5f5",
-            color: "#424242",
-            border: "1px solid #bdbdbd"
+            backgroundColor: "#f1f5f9",
+            color: "#475569"
         },
         default: {
-            backgroundColor: "#eeeeee",
-            color: "#212121",
-            border: "1px solid #bdbdbd"
+            backgroundColor: "#f1f5f9",
+            color: "#334155"
         }
     };
 
     const style = {
-        display: "inline-block",
-        padding: "4px 8px",
-        borderRadius: "999px",
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "4px 10px",
+        borderRadius: "9999px",
         fontSize: "12px",
-        fontWeight: "600",
+        fontWeight: "700",
+        lineHeight: "1",
         whiteSpace: "nowrap",
         ...variants[variant]
     };

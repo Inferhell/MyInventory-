@@ -8,46 +8,46 @@ function ActionButton({
     fullWidth = false
 }) {
 
-    const variants = {
-        primary: {
-            backgroundColor: "#1976d2",
-            color: "#ffffff",
-            border: "1px solid #1565c0"
-        },
-        secondary: {
-            backgroundColor: "#f5f5f5",
-            color: "#212121",
-            border: "1px solid #bdbdbd"
-        },
-        success: {
-            backgroundColor: "#2e7d32",
-            color: "#ffffff",
-            border: "1px solid #1b5e20"
-        },
-        danger: {
-            backgroundColor: "#c62828",
-            color: "#ffffff",
-            border: "1px solid #b71c1c"
-        },
-        warning: {
-            backgroundColor: "#f9a825",
-            color: "#212121",
-            border: "1px solid #f57f17"
-        }
-    };
+const variants = {
+    primary: {
+        backgroundColor: "#4f46e5",
+        color: "#ffffff"
+    },
+    secondary: {
+        backgroundColor: "#ffffff",
+        color: "#334155",
+        border: "1px solid #e2e8f0"
+    },
+    success: {
+        backgroundColor: "#16a34a",
+        color: "#ffffff"
+    },
+    danger: {
+        backgroundColor: "#dc2626",
+        color: "#ffffff"
+    },
+    warning: {
+        backgroundColor: "#f59e0b",
+        color: "#ffffff"
+    }
+};
 
-    const style = {
-        padding: "7px 12px",
-        borderRadius: "6px",
-        fontSize: "14px",
-        fontWeight: "600",
-        cursor: disabled ? "not-allowed" : "pointer",
-        opacity: disabled ? 0.6 : 1,
-        marginRight: "6px",
-        marginBottom: "6px",
-        width: fullWidth ? "100%" : "auto",
-        ...variants[variant]
-    };
+const style = {
+    padding: "6px 11px",
+    borderRadius: "6px",
+    border: variants[variant]?.border || "none",
+    fontSize: "13px",
+    fontWeight: "600",
+    cursor: disabled ? "not-allowed" : "pointer",
+    opacity: disabled ? 0.6 : 1,
+    width: fullWidth ? "100%" : "auto",
+    boxShadow: disabled
+        ? "none"
+        : "0 1px 2px rgba(15, 23, 42, 0.08)",
+    transition:
+        "transform 0.12s ease, box-shadow 0.12s ease, opacity 0.12s ease",
+    ...variants[variant]
+};
 
     return (
         <button
