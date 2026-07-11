@@ -14,11 +14,11 @@ function DashboardSection({
             </h2>
 
             <div style={{
-                backgroundColor: "#ffffff",
+                backgroundColor: "var(--color-surface)",
                 borderRadius: "14px",
                 padding: "24px",
-                boxShadow: "0 4px 6px -1px rgba(15, 23, 42, 0.03), 0 2px 4px -2px rgba(15, 23, 42, 0.03)",
-                border: "1px solid #f1f5f9"
+                boxShadow: "var(--shadow-soft)",
+                border: "1px solid var(--color-border-soft)"
             }}>
                 {children}
             </div>

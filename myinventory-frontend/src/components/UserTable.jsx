@@ -22,7 +22,7 @@ function UserTable({
 
     return (
         <TableContainer>
-        <table border="1">
+        <table>
 
             <thead>
                 <tr>

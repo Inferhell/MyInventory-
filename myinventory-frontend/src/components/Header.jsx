@@ -5,6 +5,7 @@ import {
 } from "../hooks/useAuth";
 
 import ActionButton from "../components/ActionButton";
+import ThemeToggle from "./ThemeToggle";
 
 function Header() {
 
@@ -34,7 +35,9 @@ function Header() {
             {
                 user && (
 
-                    <div>
+                    <div className="header-user">
+
+                        <ThemeToggle />
 
                         <span>
                             {user.email}
@@ -44,14 +47,12 @@ function Header() {
                             {user.role}
                         </span>
 
-                        {" "}
-
-                    <ActionButton
-                        variant="secondary"
-                        onClick={handleLogout}
-                    >
-                        Cerrar sesión
-                    </ActionButton>
+                        <ActionButton
+                            variant="secondary"
+                            onClick={handleLogout}
+                        >
+                            Cerrar sesión
+                        </ActionButton>
 
                     </div>
                 )

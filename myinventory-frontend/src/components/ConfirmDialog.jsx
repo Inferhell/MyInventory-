@@ -22,7 +22,7 @@ function ConfirmDialog({
         left: 0,
         right: 0,
         bottom: 0,
-        backgroundColor: "rgba(15, 23, 42, 0.45)",
+        backgroundColor: "rgba(2, 6, 23, 0.62)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -31,25 +31,27 @@ function ConfirmDialog({
     };
 
     const dialogStyle = {
-        backgroundColor: "#ffffff",
+        backgroundColor: "var(--color-surface)",
+        color: "var(--color-text-soft)",
         padding: "26px",
         borderRadius: "16px",
         width: "100%",
         maxWidth: "440px",
-        boxShadow: "0 20px 25px -5px rgba(15, 23, 42, 0.12), 0 8px 10px -6px rgba(15, 23, 42, 0.08)"
+        border: "1px solid var(--color-border)",
+        boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.28), 0 8px 10px -6px rgba(0, 0, 0, 0.22)"
     };
 
     const titleStyle = {
         marginTop: 0,
         marginBottom: "10px",
-        color: "#0f172a",
+        color: "var(--color-text)",
         fontSize: "20px",
         fontWeight: "800"
     };
 
     const messageStyle = {
         margin: 0,
-        color: "#475569",
+        color: "var(--color-text-soft)",
         fontSize: "14px",
         lineHeight: 1.6
     };

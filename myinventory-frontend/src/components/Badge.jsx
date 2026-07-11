@@ -3,32 +3,32 @@ function Badge({
     variant = "default"
 }) {
 
-    const variants = {
-        success: {
-            backgroundColor: "#dcfce7",
-            color: "#166534"
-        },
-        danger: {
-            backgroundColor: "#fee2e2",
-            color: "#991b1b"
-        },
-        warning: {
-            backgroundColor: "#fef3c7",
-            color: "#92400e"
-        },
-        info: {
-            backgroundColor: "#dbeafe",
-            color: "#1e40af"
-        },
-        neutral: {
-            backgroundColor: "#f1f5f9",
-            color: "#475569"
-        },
-        default: {
-            backgroundColor: "#f1f5f9",
-            color: "#334155"
-        }
-    };
+const variants = {
+    success: {
+        backgroundColor: "var(--badge-success-bg)",
+        color: "var(--badge-success-text)"
+    },
+    danger: {
+        backgroundColor: "var(--badge-danger-bg)",
+        color: "var(--badge-danger-text)"
+    },
+    warning: {
+        backgroundColor: "var(--badge-warning-bg)",
+        color: "var(--badge-warning-text)"
+    },
+    info: {
+        backgroundColor: "var(--badge-info-bg)",
+        color: "var(--badge-info-text)"
+    },
+    neutral: {
+        backgroundColor: "var(--badge-neutral-bg)",
+        color: "var(--badge-neutral-text)"
+    },
+    default: {
+        backgroundColor: "var(--badge-neutral-bg)",
+        color: "var(--badge-neutral-text)"
+    }
+};
 
     const style = {
         display: "inline-flex",

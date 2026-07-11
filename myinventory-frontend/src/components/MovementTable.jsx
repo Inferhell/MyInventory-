@@ -12,7 +12,7 @@ function MovementTable({
 
     return (
         <TableContainer>
-        <table border="1">
+        <table>
 
             <thead>
                 <tr>

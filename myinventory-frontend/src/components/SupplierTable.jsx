@@ -21,7 +21,7 @@ function SupplierTable({
 
     return (
         <TableContainer>
-        <table border="1">
+        <table>
 
             <thead>
                 <tr>

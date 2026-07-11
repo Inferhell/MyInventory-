@@ -14,7 +14,7 @@ function PageHeader({
                 subtitle && (
                     <p style={{
                         marginTop: 0,
-                        color: "#666666"
+                        color: "var(--color-text-soft)"
                     }}>
                         {subtitle}
                     </p>

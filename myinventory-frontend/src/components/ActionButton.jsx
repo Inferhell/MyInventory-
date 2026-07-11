@@ -10,24 +10,24 @@ function ActionButton({
 
 const variants = {
     primary: {
-        backgroundColor: "#4f46e5",
+        backgroundColor: "var(--color-primary)",
         color: "#ffffff"
     },
     secondary: {
-        backgroundColor: "#ffffff",
-        color: "#334155",
-        border: "1px solid #e2e8f0"
+        backgroundColor: "var(--color-surface)",
+        color: "var(--color-text-soft)",
+        border: "1px solid var(--color-border)"
     },
     success: {
-        backgroundColor: "#16a34a",
+        backgroundColor: "var(--color-success)",
         color: "#ffffff"
     },
     danger: {
-        backgroundColor: "#dc2626",
+        backgroundColor: "var(--color-danger)",
         color: "#ffffff"
     },
     warning: {
-        backgroundColor: "#f59e0b",
+        backgroundColor: "var(--color-warning)",
         color: "#ffffff"
     }
 };
