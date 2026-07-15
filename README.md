@@ -106,3 +106,94 @@ Acceso a datos mediante Spring Data JPA.
 
 Separan las entidades JPA de la API pública.
 
+## Arquitectura frontend
+
+El frontend sigue una estructura simple y mantenible:
+
+Pages -> Components -> Services -> Axios -> Backend REST API
+
+El frontend consume DTOs del backend y no depende directamente de entidades JPA.
+
+---
+
+### Roles y permisos
+##ADMIN
+
+Puede administrar todo el sistema:
+
+- Dashboard.
+- Productos.
+- Categorías.
+- Proveedores.
+- Movimientos.
+- Usuarios.
+
+# Restricciones:
+
+- No puede desactivarse a sí mismo.
+- No puede desactivar el último administrador activo.
+- No puede cambiar el rol del último administrador activo.
+- SUPERVISOR
+
+Puede gestionar el inventario operativo:
+
+- Dashboard.
+- Productos.
+- Categorías.
+- Proveedores.
+- Movimientos.
+
+No puede gestionar usuarios.
+
+## EMPLOYEE
+
+Puede operar y consultar:
+
+- Dashboard.
+- Productos en modo lectura.
+- Movimientos.
+
+No puede administrar productos, categorías, proveedores ni usuarios.
+
+---
+
+### Reglas de negocio importantes
+## Soft delete
+
+Las entidades principales no se eliminan físicamente.
+
+Usan:
+
+active = true / false
+
+Aplicado a:
+
+Users
+Products
+Categories
+Suppliers
+Entidades inactivas
+
+Una entidad inactiva no se edita directamente.
+
+Regla:
+
+Activo → editable
+Inactivo → primero reactivar
+Stock trazable
+
+El stock no se modifica directamente desde productos.
+
+El stock cambia únicamente mediante movimientos:
+
+INITIAL_BALANCE
+ENTRY
+EXIT
+
+Cada movimiento guarda:
+
+Stock antes.
+Stock después.
+Usuario.
+Fecha.
+Producto.
