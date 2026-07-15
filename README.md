@@ -80,10 +80,29 @@ El sistema está pensado para pequeñas y medianas empresas que necesitan contro
 
 El backend sigue una arquitectura por capas:
 
-Controller
-↓
-Service
-↓
-Repository
-↓
-Database
+Controller -> Service -> Repository -> Database
+
+---
+### Responsabilidades
+
+## Controller:
+
+- Expone endpoints REST.
+- Recibe requests HTTP.
+- Aplica validaciones.
+- Aplica autorización con @PreAuthorize.
+
+## Service
+
+Contiene reglas de negocio.
+Maneja transacciones.
+Lanza excepciones de dominio.
+
+## Repository
+
+Acceso a datos mediante Spring Data JPA.
+
+## DTOs
+
+Separan las entidades JPA de la API pública.
+
