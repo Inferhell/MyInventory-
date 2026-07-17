@@ -1,5 +1,17 @@
 import { useEffect, useState } from "react";
 
+import CategoryForm from "../components/CategoryForm";
+import CategoryTable from "../components/CategoryTable";
+
+import FilterSelect from "../components/FilterSelect";
+import TableToolbar from "../components/TableToolbar";
+
+import {
+    compareDate,
+    compareText,
+    sortByOption
+} from "../utils/sortUtils";
+
 import {
     getCategories,
     createCategory,
@@ -13,6 +25,17 @@ import {
 import {
     useAuth
 } from "../hooks/useAuth";
+
+
+import ConfirmDialog from "../components/ConfirmDialog";
+
+import AlertMessage from "../components/AlertMessage";
+
+import PageHeader from "../components/PageHeader";
+
+import SearchInput from "../components/SearchInput";
+
+import ShowInactiveCheckbox from "../components/ShowInactiveCheckbox";
 
 function Categories() {
 
@@ -29,6 +52,12 @@ const canChangeCategoryStatus =
     const showCategoryActions =
     canWriteCategory || canChangeCategoryStatus;
 
+    const [sortOption, setSortOption] =
+    useState("nameAsc");
+
+    const [statusOrder, setStatusOrder] =
+    useState("default");
+    
     const [categories, setCategories] =
         useState([]);
 
@@ -55,6 +84,51 @@ const canChangeCategoryStatus =
 
     const [errorMessage, setErrorMessage] =
         useState("");
+
+    const [confirmDialog, setConfirmDialog] =
+        useState({
+            isOpen: false,
+            title: "",
+            message: "",
+            confirmText: "Confirmar",
+            variant: "danger",
+            onConfirm: null
+        });
+
+
+        const categorySortOptions = [
+    {
+        value: "nameAsc",
+        label: "Nombre A-Z"
+    },
+    {
+        value: "nameDesc",
+        label: "Nombre Z-A"
+    },
+    {
+        value: "recent",
+        label: "Más recientes"
+    },
+    {
+        value: "oldest",
+        label: "Más antiguos"
+    }
+];
+
+const statusOrderOptions = [
+    {
+        value: "default",
+        label: "Estado sin prioridad"
+    },
+    {
+        value: "activeFirst",
+        label: "Activas primero"
+    },
+    {
+        value: "inactiveFirst",
+        label: "Inactivas primero"
+    }
+];
 
     const loadCategories = async () => {
 
@@ -112,6 +186,28 @@ useEffect(() => {
         setMessage("");
         setErrorMessage("");
     };
+
+    const closeConfirmDialog = () => {
+
+        setConfirmDialog({
+            isOpen: false,
+            title: "",
+            message: "",
+            confirmText: "Confirmar",
+            variant: "danger",
+            onConfirm: null
+        });
+    };
+
+    const handleConfirmDialog = async () => {
+
+        if (confirmDialog.onConfirm) {
+            await confirmDialog.onConfirm();
+        }
+
+        closeConfirmDialog();
+    };
+
 
     const resetForm = () => {
 
@@ -229,93 +325,96 @@ useEffect(() => {
         setDescription(category.description || "");
     };
 
-    const handleDisableCategory = async (id) => {
+    const handleDisableCategory = (id) => {
 
         clearMessages();
 
-        const confirmDisable =
-            window.confirm(
-                "¿Seguro que deseas desactivar esta categoría?"
-            );
+        setConfirmDialog({
+            isOpen: true,
+            title: "Desactivar categoría",
+            message: "¿Seguro que deseas desactivar esta categoría?",
+            confirmText: "Desactivar",
+            variant: "danger",
+            onConfirm: async () => {
 
-        if (!confirmDisable) {
-            return;
-        }
+                try {
 
-        try {
+                    setLoading(true);
 
-            setLoading(true);
+                    await disableCategory(id);
 
-            await disableCategory(id);
+                    await loadCategories();
 
-            await loadCategories();
+                    setMessage(
+                        "Categoría desactivada correctamente"
+                    );
 
-            setMessage(
-                "Categoría desactivada correctamente"
-            );
+                    if (editingId === id) {
+                        resetForm();
+                    }
 
-            if (editingId === id) {
-                resetForm();
+                } catch (error) {
+
+                    console.error(error);
+
+                    setErrorMessage(
+                        getErrorMessage(
+                            error,
+                            "Error al desactivar categoría"
+                        )
+                    );
+
+                } finally {
+
+                    setLoading(false);
+                }
             }
-
-        } catch (error) {
-
-            console.error(error);
-
-            setErrorMessage(
-                getErrorMessage(
-                    error,
-                    "Error al desactivar categoría"
-                )
-            );
-
-        } finally {
-
-            setLoading(false);
-        }
+        });
     };
 
-    const handleEnableCategory = async (id) => {
+    const handleEnableCategory = (id) => {
 
         clearMessages();
 
-        try {
+        setConfirmDialog({
+            isOpen: true,
+            title: "Reactivar categoría",
+            message: "¿Seguro que deseas reactivar esta categoría?",
+            confirmText: "Reactivar",
+            variant: "success",
+            onConfirm: async () => {
 
-            setLoading(true);
+                try {
 
-            await enableCategory(id);
+                    setLoading(true);
 
-            await loadCategories();
+                    await enableCategory(id);
 
-            setMessage(
-                "Categoría reactivada correctamente"
-            );
+                    await loadCategories();
 
-        } catch (error) {
+                    setMessage(
+                        "Categoría reactivada correctamente"
+                    );
 
-            console.error(error);
+                } catch (error) {
 
-            setErrorMessage(
-                getErrorMessage(
-                    error,
-                    "Error al reactivar categoría"
-                )
-            );
+                    console.error(error);
 
-        } finally {
+                    setErrorMessage(
+                        getErrorMessage(
+                            error,
+                            "Error al reactivar categoría"
+                        )
+                    );
 
-            setLoading(false);
-        }
+                } finally {
+
+                    setLoading(false);
+                }
+            }
+        });
     };
 
-    const formatDate = (date) => {
-
-        if (!date) {
-            return "-";
-        }
-
-        return new Date(date).toLocaleString();
-    };
 
     const filteredCategories =
         categories.filter(category => {
@@ -340,261 +439,131 @@ useEffect(() => {
             return matchesSearch && matchesStatus;
         });
 
+        const categorySorters = {
+    nameAsc: (first, second) =>
+        compareText(first.name, second.name),
+
+    nameDesc: (first, second) =>
+        compareText(second.name, first.name),
+
+    recent: (first, second) =>
+        compareDate(second.createdAt, first.createdAt),
+
+    oldest: (first, second) =>
+        compareDate(first.createdAt, second.createdAt)
+};
+
+const sortedCategories = (() => {
+
+    const sortedBySelectedOption =
+        sortByOption(
+            filteredCategories,
+            sortOption,
+            categorySorters
+        );
+
+    if (statusOrder === "activeFirst") {
+        return [...sortedBySelectedOption].sort(
+            (first, second) =>
+                Number(second.active) - Number(first.active)
+        );
+    }
+
+    if (statusOrder === "inactiveFirst") {
+        return [...sortedBySelectedOption].sort(
+            (first, second) =>
+                Number(first.active) - Number(second.active)
+        );
+    }
+
+    return sortedBySelectedOption;
+})();
+
     return (
 
         <div>
 
-            <h1>
-                Categorías
-            </h1>
-
-            {
-                message && (
-                    <p style={{ color: "green" }}>
-                        {message}
-                    </p>
-                )
-            }
-
-            {
-                errorMessage && (
-                    <p style={{ color: "red" }}>
-                        {errorMessage}
-                    </p>
-                )
-            }
-
-            {
-                canWriteCategory && (
-                    <>
-                        <h2>
-                            {
-                                editingId
-                                    ? "Editar Categoría"
-                                    : "Nueva Categoría"
-                            }
-                        </h2>
-
-                        <input
-                            type="text"
-                            placeholder="Nombre"
-                            value={name}
-                            onChange={(e) =>
-                                setName(e.target.value)
-                            }
-                        />
-
-                        <br />
-                        <br />
-
-                        <input
-                            type="text"
-                            placeholder="Descripción"
-                            value={description}
-                            onChange={(e) =>
-                                setDescription(e.target.value)
-                            }
-                        />
-
-                        <br />
-                        <br />
-
-                        <button
-                            onClick={handleSaveCategory}
-                            disabled={loading}
-                        >
-                            {
-                                editingId
-                                    ? "Actualizar Categoría"
-                                    : "Crear Categoría"
-                            }
-                        </button>
-
-                        {
-                            editingId && (
-                                <button
-                                    onClick={clearForm}
-                                    disabled={loading}
-                                >
-                                    Cancelar
-                                </button>
-                            )
-                        }
-
-                        <hr />
-                    </>
-                )
-            }
-
-            <input
-                type="text"
-                placeholder="Buscar categoría..."
-                value={search}
-                onChange={(e) =>
-                    setSearch(e.target.value)
-                }
+            <PageHeader
+                title="Categorías"
+                subtitle="Administra las categorías de productos"
             />
 
+            <AlertMessage
+    type="success"
+    message={message}
+/>
+
+<AlertMessage
+    type="error"
+    message={errorMessage}
+/>
+
+            <CategoryForm
+    canWriteCategory={canWriteCategory}
+    editingId={editingId}
+    name={name}
+    setName={setName}
+    description={description}
+    setDescription={setDescription}
+    loading={loading}
+    handleSaveCategory={handleSaveCategory}
+    clearForm={clearForm}
+/>
+
+            <TableToolbar>
+
+    <SearchInput
+        value={search}
+        onChange={setSearch}
+        placeholder="Buscar categoría..."
+    />
+
+    <ShowInactiveCheckbox
+        checked={showInactive}
+        onChange={setShowInactive}
+    />
+
+    <FilterSelect
+        label="Ordenar por"
+        value={sortOption}
+        onChange={setSortOption}
+        options={categorySortOptions}
+    />
+
+    <FilterSelect
+        label="Prioridad de estado"
+        value={statusOrder}
+        onChange={setStatusOrder}
+        options={statusOrderOptions}
+    />
+
+</TableToolbar>
+
             <br />
             <br />
 
-            <label>
+            <CategoryTable
+    categories={sortedCategories}
+    loading={loading}
+    showCategoryActions={showCategoryActions}
+    canWriteCategory={canWriteCategory}
+    canChangeCategoryStatus={canChangeCategoryStatus}
+    handleEditCategory={handleEditCategory}
+    handleDisableCategory={handleDisableCategory}
+    handleEnableCategory={handleEnableCategory}
+/>
 
-                <input
-                    type="checkbox"
-                    checked={showInactive}
-                    onChange={() =>
-                        setShowInactive(
-                            !showInactive
-                        )
-                    }
-                />
 
-                Mostrar inactivos
-
-            </label>
-
-            <br />
-            <br />
-
-            <table border="1">
-
-                <thead>
-
-                    <tr>
-                        <th>ID</th>
-                        <th>Nombre</th>
-                        <th>Descripción</th>
-                        <th>Activo</th>
-                        <th>Creado</th>
-                        <th>Actualizado</th>
-   {
-                            showCategoryActions && (
-                                <th>Acciones</th>
-                            )
-                        }
-                    </tr>
-
-                </thead>
-
-                <tbody>
-
-                    {
-                        filteredCategories.length === 0 ? (
-
-                            <tr>
-                                <td colSpan={showCategoryActions ? 7 : 6}>
-                                    No hay categorías para mostrar
-                                </td>
-                            </tr>
-
-                        ) : (
-
-                            filteredCategories.map(category => (
-
-                                <tr key={category.id}>
-
-                                    <td>
-                                        {category.id}
-                                    </td>
-
-                                    <td>
-                                        {category.name}
-                                    </td>
-
-                                    <td>
-                                        {category.description || "-"}
-                                    </td>
-
-                                    <td>
-                                        {
-                                            category.active
-                                                ? "Sí"
-                                                : "No"
-                                        }
-                                    </td>
-
-                                    <td>
-                                        {
-                                            formatDate(
-                                                category.createdAt
-                                            )
-                                        }
-                                    </td>
-
-                                    <td>
-                                        {
-                                            formatDate(
-                                                category.updatedAt
-                                            )
-                                        }
-                                    </td>
-
-                                    {
-                                        showCategoryActions && (
-
-                                            <td>
-                                        {
-    canWriteCategory && category.active ? (
-
-        <button
-            onClick={() =>
-                handleEditCategory(category)
-            }
-            disabled={loading}
-        >
-            Editar
-        </button>
-
-    ) : !category.active && canWriteCategory ? (
-
-        <span>
-            Reactivar para editar
-        </span>
-
-    ) : null
-}
-
-                                        {
-    canChangeCategoryStatus && (
-
-        category.active ? (
-
-            <button
-                onClick={() =>
-                    handleDisableCategory(category.id)
-                }
-                disabled={loading}
-            >
-                Desactivar
-            </button>
-
-        ) : (
-
-            <button
-                onClick={() =>
-                    handleEnableCategory(category.id)
-                }
-                disabled={loading}
-            >
-                Reactivar
-            </button>
-        )
-    )
-}
-
-                                            </td>
-                                        )
-                                    }
-
-                                </tr>
-                            ))
-                        )
-                    }
-
-                </tbody>
-
-            </table>
+            <ConfirmDialog
+                isOpen={confirmDialog.isOpen}
+                title={confirmDialog.title}
+                message={confirmDialog.message}
+                confirmText={confirmDialog.confirmText}
+                variant={confirmDialog.variant}
+                loading={loading}
+                onConfirm={handleConfirmDialog}
+                onCancel={closeConfirmDialog}
+            />
 
         </div>
     );

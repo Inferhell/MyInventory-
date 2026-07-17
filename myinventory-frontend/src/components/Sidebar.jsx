@@ -1,6 +1,8 @@
-import { Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 
 import { useAuth } from "../hooks/useAuth";
+
+
 
 function Sidebar() {
 
@@ -9,17 +11,17 @@ function Sidebar() {
     } = useAuth();
 
     return (
-
-        <aside>
+          <aside className="sidebar">
+        
 
             <nav>
 
                 {
                     hasPermission("DASHBOARD_READ") && (
                         <>
-                            <Link to="/dashboard">
+                            <NavLink to="/dashboard">
                                 Dashboard
-                            </Link>
+                            </NavLink>
                             <br />
                         </>
                     )
@@ -28,9 +30,9 @@ function Sidebar() {
                 {
                     hasPermission("PRODUCT_READ") && (
                         <>
-                            <Link to="/products">
+                            <NavLink to="/products">
                                 Productos
-                            </Link>
+                            </NavLink>
                             <br />
                         </>
                     )
@@ -39,9 +41,9 @@ function Sidebar() {
                 {
                     hasPermission("CATEGORY_READ") && (
                         <>
-                            <Link to="/categories">
+                            <NavLink to="/categories">
                                 Categorías
-                            </Link>
+                            </NavLink>
                             <br />
                         </>
                     )
@@ -50,9 +52,9 @@ function Sidebar() {
                 {
                     hasPermission("SUPPLIER_READ") && (
                         <>
-                            <Link to="/suppliers">
+                            <NavLink to="/suppliers">
                                 Proveedores
-                            </Link>
+                            </NavLink>
                             <br />
                         </>
                     )
@@ -61,9 +63,9 @@ function Sidebar() {
                 {
                     hasPermission("MOVEMENT_READ") && (
                         <>
-                            <Link to="/movements">
+                            <NavLink to="/movements">
                                 Movimientos
-                            </Link>
+                            </NavLink>
                             <br />
                         </>
                     )
@@ -72,9 +74,9 @@ function Sidebar() {
                 {
                     hasPermission("USER_READ") && (
                         <>
-                            <Link to="/users">
+                            <NavLink to="/users">
                                 Usuarios
-                            </Link>
+                            </NavLink>
                             <br />
                         </>
                     )

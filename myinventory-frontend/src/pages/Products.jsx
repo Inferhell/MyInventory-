@@ -8,6 +8,18 @@ import {
     enableProduct
 } from "../services/productService";
 
+import ProductForm from "../components/ProductForm";
+
+import AlertMessage from "../components/AlertMessage";
+
+
+import PageHeader from "../components/PageHeader";
+
+import SearchInput from "../components/SearchInput";
+import ShowInactiveCheckbox from "../components/ShowInactiveCheckbox";
+
+
+import ConfirmDialog from "../components/ConfirmDialog";
 import {
     getCategories
 } from "../services/categoryService";
@@ -21,6 +33,17 @@ import {
 import {
     useAuth
 } from "../hooks/useAuth";
+import FilterSelect from "../components/FilterSelect";
+import TableToolbar from "../components/TableToolbar";
+
+import {
+    compareDate,
+    compareNumber,
+    compareText,
+    sortByOption
+} from "../utils/sortUtils";
+
+import ProductTable from "../components/ProductTable";
 
 
 function Products() {
@@ -30,6 +53,7 @@ function Products() {
     hasPermission
 } = useAuth();
 
+
 const canWriteProduct =
     hasPermission("PRODUCT_WRITE");
 
@@ -38,6 +62,12 @@ const canChangeProductStatus =
 
     const showProductActions =
     canWriteProduct || canChangeProductStatus;
+
+    const [sortOption, setSortOption] =
+    useState("nameAsc");
+
+const [statusOrder, setStatusOrder] =
+    useState("default");
 
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
@@ -59,7 +89,66 @@ const canChangeProductStatus =
     const [message, setMessage] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
 
+    const [confirmDialog, setConfirmDialog] =
+        useState({
+            isOpen: false,
+            title: "",
+            message: "",
+            confirmText: "Confirmar",
+            variant: "danger",
+            onConfirm: null
+        });
 
+
+const productSortOptions = [
+    {
+        value: "nameAsc",
+        label: "Nombre A-Z"
+    },
+    {
+        value: "nameDesc",
+        label: "Nombre Z-A"
+    },
+    {
+        value: "priceAsc",
+        label: "Precio menor a mayor"
+    },
+    {
+        value: "priceDesc",
+        label: "Precio mayor a menor"
+    },
+    {
+        value: "stockAsc",
+        label: "Stock menor a mayor"
+    },
+    {
+        value: "stockDesc",
+        label: "Stock mayor a menor"
+    },
+    {
+        value: "recent",
+        label: "Más recientes"
+    },
+    {
+        value: "oldest",
+        label: "Más antiguos"
+    }
+];
+
+const statusOrderOptions = [
+    {
+        value: "default",
+        label: "Estado sin prioridad"
+    },
+    {
+        value: "activeFirst",
+        label: "Activos primero"
+    },
+    {
+        value: "inactiveFirst",
+        label: "Inactivos primero"
+    }
+];
 
     const loadProducts = async () => {
 
@@ -173,6 +262,28 @@ useEffect(() => {
         setMessage("");
         setErrorMessage("");
     };
+
+    const closeConfirmDialog = () => {
+
+        setConfirmDialog({
+            isOpen: false,
+            title: "",
+            message: "",
+            confirmText: "Confirmar",
+            variant: "danger",
+            onConfirm: null
+        });
+    };
+
+    const handleConfirmDialog = async () => {
+
+        if (confirmDialog.onConfirm) {
+            await confirmDialog.onConfirm();
+        }
+
+        closeConfirmDialog();
+    };
+
 
     const resetForm = () => {
 
@@ -310,83 +421,94 @@ useEffect(() => {
         }
     };
 
-    const handleDisableProduct = async (id) => {
+    const handleDisableProduct = (id) => {
 
         clearMessages();
 
-        const confirmDisable =
-            window.confirm(
-                "¿Seguro que deseas desactivar este producto?"
-            );
+        setConfirmDialog({
+            isOpen: true,
+            title: "Desactivar producto",
+            message: "¿Seguro que deseas desactivar este producto?",
+            confirmText: "Desactivar",
+            variant: "danger",
+            onConfirm: async () => {
 
-        if (!confirmDisable) {
-            return;
-        }
+                try {
 
-        try {
+                    setLoading(true);
 
-            setLoading(true);
+                    await disableProduct(id);
 
-            await disableProduct(id);
+                    await loadProducts();
 
-            await loadProducts();
+                    setMessage(
+                        "Producto desactivado correctamente"
+                    );
 
-            setMessage(
-                "Producto desactivado correctamente"
-            );
+                    if (editingId === id) {
+                        resetForm();
+                    }
 
-            if (editingId === id) {
-                resetForm();
+                } catch (error) {
+
+                    console.error(error);
+
+                    setErrorMessage(
+                        getErrorMessage(
+                            error,
+                            "Error al desactivar producto"
+                        )
+                    );
+
+                } finally {
+
+                    setLoading(false);
+                }
             }
-
-        } catch (error) {
-
-            console.error(error);
-
-            setErrorMessage(
-                getErrorMessage(
-                    error,
-                    "Error al desactivar producto"
-                )
-            );
-
-        } finally {
-
-            setLoading(false);
-        }
+        });
     };
 
-    const handleEnableProduct = async (id) => {
+    const handleEnableProduct = (id) => {
 
         clearMessages();
 
-        try {
+        setConfirmDialog({
+            isOpen: true,
+            title: "Reactivar producto",
+            message: "¿Seguro que deseas reactivar este producto?",
+            confirmText: "Reactivar",
+            variant: "success",
+            onConfirm: async () => {
 
-            setLoading(true);
+                try {
 
-            await enableProduct(id);
+                    setLoading(true);
 
-            await loadProducts();
+                    await enableProduct(id);
 
-            setMessage(
-                "Producto reactivado correctamente"
-            );
+                    await loadProducts();
 
-        } catch (error) {
+                    setMessage(
+                        "Producto reactivado correctamente"
+                    );
 
-            console.error(error);
+                } catch (error) {
 
-            setErrorMessage(
-                getErrorMessage(
-                    error,
-                    "Error al reactivar producto"
-                )
-            );
+                    console.error(error);
 
-        } finally {
+                    setErrorMessage(
+                        getErrorMessage(
+                            error,
+                            "Error al reactivar producto"
+                        )
+                    );
 
-            setLoading(false);
-        }
+                } finally {
+
+                    setLoading(false);
+                }
+            }
+        });
     };
 
     const handleEditProduct = (product) => {
@@ -412,27 +534,7 @@ useEffect(() => {
         setSupplierId(product.supplierId || "");
     };
 
-    const formatDate = (date) => {
 
-        if (!date) {
-            return "-";
-        }
-
-        return new Date(date).toLocaleString();
-    };
-
-    const getStockText = (productStock) => {
-
-        if (productStock === 0) {
-            return "🔴 Agotado";
-        }
-
-        if (productStock <= 5) {
-            return `🟡 Bajo (${productStock})`;
-        }
-
-        return `🟢 Normal (${productStock})`;
-    };
 
     const activeCategories =
         categories.filter(category => category.active);
@@ -468,361 +570,172 @@ useEffect(() => {
 
             return matchesSearch && matchesStatus;
         });
+        const productSorters = {
+    nameAsc: (first, second) =>
+        compareText(
+            first.name,
+            second.name
+        ),
+
+    nameDesc: (first, second) =>
+        compareText(
+            second.name,
+            first.name
+        ),
+
+    priceAsc: (first, second) =>
+        compareNumber(
+            first.price,
+            second.price
+        ),
+
+    priceDesc: (first, second) =>
+        compareNumber(
+            second.price,
+            first.price
+        ),
+
+    stockAsc: (first, second) =>
+        compareNumber(
+            first.stock,
+            second.stock
+        ),
+
+    stockDesc: (first, second) =>
+        compareNumber(
+            second.stock,
+            first.stock
+        ),
+
+    recent: (first, second) =>
+        compareDate(
+            second.createdAt,
+            first.createdAt
+        ),
+
+    oldest: (first, second) =>
+        compareDate(
+            first.createdAt,
+            second.createdAt
+        )
+};
+
+const sortedProducts = (() => {
+
+    const sortedBySelectedOption =
+        sortByOption(
+            filteredProducts,
+            sortOption,
+            productSorters
+        );
+
+    if (statusOrder === "activeFirst") {
+        return [...sortedBySelectedOption].sort(
+            (first, second) =>
+                Number(second.active) - Number(first.active)
+        );
+    }
+
+    if (statusOrder === "inactiveFirst") {
+        return [...sortedBySelectedOption].sort(
+            (first, second) =>
+                Number(first.active) - Number(second.active)
+        );
+    }
+
+    return sortedBySelectedOption;
+})();
 
     return (
         <div>
 
-            <h1>Productos</h1>
-            {
-    message && (
-        <p style={{ color: "green" }}>
-            {message}
-        </p>
-    )
-}
+            <PageHeader
+    title="Productos"
+    subtitle="Consulta y administración del inventario"
+/>
+         <AlertMessage
+    type="success"
+    message={message}
+/>
 
-{
-    errorMessage && (
-        <p style={{ color: "red" }}>
-            {errorMessage}
-        </p>
-    )
-}
+<AlertMessage
+    type="error"
+    message={errorMessage}
+/>
+<ProductForm
+    canWriteProduct={canWriteProduct}
+    editingId={editingId}
+    name={name}
+    setName={setName}
+    description={description}
+    setDescription={setDescription}
+    price={price}
+    setPrice={setPrice}
+    stock={stock}
+    setStock={setStock}
+    categoryId={categoryId}
+    setCategoryId={setCategoryId}
+    supplierId={supplierId}
+    setSupplierId={setSupplierId}
+    activeCategories={activeCategories}
+    activeSuppliers={activeSuppliers}
+    loading={loading}
+    handleSaveProduct={handleSaveProduct}
+    clearForm={clearForm}
+/>
+            <TableToolbar>
 
-            {
-    canWriteProduct && (
+    <SearchInput
+        value={search}
+        onChange={setSearch}
+        placeholder="Buscar producto..."
+    />
 
-        <>
-            <h2>
-                {
-                    editingId
-                        ? "Editar Producto"
-                        : "Nuevo Producto"
-                }
-            </h2>
+    <ShowInactiveCheckbox
+        checked={showInactive}
+        onChange={setShowInactive}
+    />
 
-            <input
-                type="text"
-                placeholder="Nombre"
-                value={name}
-                onChange={(e) =>
-                    setName(e.target.value)
-                }
+    <FilterSelect
+        label="Ordenar por"
+        value={sortOption}
+        onChange={setSortOption}
+        options={productSortOptions}
+    />
+
+    <FilterSelect
+        label="Prioridad de estado"
+        value={statusOrder}
+        onChange={setStatusOrder}
+        options={statusOrderOptions}
+    />
+
+</TableToolbar>
+            <br />
+            <br />
+
+<ProductTable
+    products={sortedProducts}
+    loading={loading}
+    showProductActions={showProductActions}
+    canWriteProduct={canWriteProduct}
+    canChangeProductStatus={canChangeProductStatus}
+    handleEditProduct={handleEditProduct}
+    handleDisableProduct={handleDisableProduct}
+    handleEnableProduct={handleEnableProduct}
+/>
+
+
+            <ConfirmDialog
+                isOpen={confirmDialog.isOpen}
+                title={confirmDialog.title}
+                message={confirmDialog.message}
+                confirmText={confirmDialog.confirmText}
+                variant={confirmDialog.variant}
+                loading={loading}
+                onConfirm={handleConfirmDialog}
+                onCancel={closeConfirmDialog}
             />
-
-            <br />
-            <br />
-
-            <input
-                type="text"
-                placeholder="Descripción"
-                value={description}
-                onChange={(e) =>
-                    setDescription(e.target.value)
-                }
-            />
-
-            <br />
-            <br />
-
-            <input
-                type="number"
-                placeholder="Precio"
-                value={price}
-                min="0"
-                onChange={(e) =>
-                    setPrice(e.target.value)
-                }
-            />
-
-            <br />
-            <br />
-
-            {
-                editingId ? (
-
-                    <p>
-                        <strong>Stock actual:</strong>
-                        {" "}
-                        {getStockText(Number(stock))}
-                        <br />
-                        <small>
-                            El stock se modifica desde Movimientos.
-                        </small>
-                    </p>
-
-                ) : (
-
-                    <input
-                        type="number"
-                        placeholder="Stock inicial"
-                        value={stock}
-                        min="0"
-                        onChange={(e) =>
-                            setStock(e.target.value)
-                        }
-                    />
-                )
-            }
-
-            <br />
-            <br />
-
-            <select
-                value={categoryId}
-                onChange={(e) =>
-                    setCategoryId(e.target.value)
-                }
-            >
-                <option value="">
-                    Seleccione categoría
-                </option>
-
-                {
-                    activeCategories.map(category => (
-
-                        <option
-                            key={category.id}
-                            value={category.id}
-                        >
-                            {category.name}
-                        </option>
-                    ))
-                }
-            </select>
-
-            <br />
-            <br />
-
-            <select
-                value={supplierId}
-                onChange={(e) =>
-                    setSupplierId(e.target.value)
-                }
-            >
-                <option value="">
-                    Seleccione proveedor
-                </option>
-
-                {
-                    activeSuppliers.map(supplier => (
-
-                        <option
-                            key={supplier.id}
-                            value={supplier.id}
-                        >
-                            {supplier.name}
-                        </option>
-                    ))
-                }
-            </select>
-
-            <br />
-            <br />
-
-            <button
-                onClick={handleSaveProduct}
-                disabled={loading}
-            >
-                {
-                    editingId
-                        ? "Actualizar Producto"
-                        : "Crear Producto"
-                }
-            </button>
-
-            {
-                editingId && (
-
-                    <button
-                        onClick={clearForm}
-                        disabled={loading}
-                    >
-                        Cancelar
-                    </button>
-                )
-            }
-
-            <hr />
-        </>
-    )
-}
-
-            <input
-                type="text"
-                placeholder="Buscar producto..."
-                value={search}
-                onChange={(e) =>
-                    setSearch(e.target.value)
-                }
-            />
-
-            <br />
-            <br />
-
-            <label>
-
-                <input
-                    type="checkbox"
-                    checked={showInactive}
-                    onChange={() =>
-                        setShowInactive(!showInactive)
-                    }
-                />
-
-                Mostrar inactivos
-
-            </label>
-
-            <br />
-            <br />
-
-            <table border="1">
-
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Nombre</th>
-                        <th>Precio</th>
-                        <th>Stock</th>
-                        <th>Categoría</th>
-                        <th>Proveedor</th>
-                        <th>Activo</th>
-                        <th>Creado</th>
-                        <th>Actualizado</th>
-                               {
-                showProductActions && (
-                    <th>Acciones</th>
-                )
-            }
-                    </tr>
-                </thead>
-
-                <tbody>
-
-                    {
-                        filteredProducts.length === 0 ? (
-
-                            <tr>
-                                <td colSpan={showProductActions ? 10 : 9}>
-                                    No hay productos para mostrar
-                                </td>
-                            </tr>
-
-                        ) : (
-
-                            filteredProducts.map(product => (
-
-                                <tr key={product.id}>
-
-                                    <td>
-                                        {product.id}
-                                    </td>
-
-                                    <td>
-                                        {product.name}
-                                    </td>
-
-                                    <td>
-                                        {product.price}
-                                    </td>
-
-                                    <td>
-                                        {getStockText(product.stock)}
-                                    </td>
-
-                                    <td>
-                                        {product.categoryName || "-"}
-                                    </td>
-
-                                    <td>
-                                        {product.supplierName || "-"}
-                                    </td>
-
-                                    <td>
-                                        {
-                                            product.active
-                                                ? "Sí"
-                                                : "No"
-                                        }
-                                    </td>
-
-                                    <td>
-                                        {formatDate(product.createdAt)}
-                                    </td>
-
-                                    <td>
-                                        {formatDate(product.updatedAt)}
-                                    </td>
-
-                                    {
-                                        showProductActions && (
-
-                                            <td>
-                                       {
-                    canWriteProduct && product.active ? (
-
-                        <button
-                            onClick={() =>
-                                handleEditProduct(product)
-                            }
-                            disabled={loading}
-                        >
-                            Editar
-                        </button>
-
-                    ) : !product.active && canWriteProduct ? (
-
-                        <span>
-                            Reactivar para editar
-                        </span>
-
-                    ) : null
-                }
-{
-    canChangeProductStatus && (
-
-        product.active ? (
-
-            <button
-                onClick={() =>
-                    handleDisableProduct(
-                        product.id
-                    )
-                }
-                disabled={loading}
-            >
-                Desactivar
-            </button>
-
-        ) : (
-
-            <button
-                onClick={() =>
-                    handleEnableProduct(
-                        product.id
-                    )
-                }
-                disabled={loading}
-            >
-                Reactivar
-            </button>
-        )
-    )
-}
-
-                                            </td>
-                                        )
-                                    }
-
-                                </tr>
-                            ))
-                        )
-                    }
-
-                </tbody>
-
-            </table>
 
         </div>
     );

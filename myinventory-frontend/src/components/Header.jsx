@@ -4,6 +4,9 @@ import {
     useAuth
 } from "../hooks/useAuth";
 
+import ActionButton from "../components/ActionButton";
+import ThemeToggle from "./ThemeToggle";
+
 function Header() {
 
     const navigate =
@@ -23,7 +26,7 @@ function Header() {
 
     return (
 
-        <header>
+        <header className="header">
 
             <h2>
                 MyInventory
@@ -32,7 +35,9 @@ function Header() {
             {
                 user && (
 
-                    <div>
+                    <div className="header-user">
+
+                        <ThemeToggle />
 
                         <span>
                             {user.email}
@@ -42,13 +47,12 @@ function Header() {
                             {user.role}
                         </span>
 
-                        {" "}
-
-                        <button
+                        <ActionButton
+                            variant="secondary"
                             onClick={handleLogout}
                         >
-                            Cerrar Sesión
-                        </button>
+                            Cerrar sesión
+                        </ActionButton>
 
                     </div>
                 )

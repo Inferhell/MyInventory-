@@ -11,9 +11,32 @@ import {
     getApiErrorMessage
 } from "../utils/getApiErrorMessage";
 
+import FilterSelect from "../components/FilterSelect";
+import TableToolbar from "../components/TableToolbar";
+
+import {
+    compareDate,
+    compareText,
+    sortByOption
+} from "../utils/sortUtils";
+
+import SupplierForm from "../components/SupplierForm";
+import SupplierTable from "../components/SupplierTable";
+
+
+import ConfirmDialog from "../components/ConfirmDialog";
+
+import AlertMessage from "../components/AlertMessage";
+
 import {
     useAuth
 } from "../hooks/useAuth";
+
+import PageHeader from "../components/PageHeader";
+
+import SearchInput from "../components/SearchInput";
+
+import ShowInactiveCheckbox from "../components/ShowInactiveCheckbox";
 
 function Suppliers() {
 
@@ -46,6 +69,23 @@ const canChangeSupplierStatus =
     const [message, setMessage] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
 
+    const [sortOption, setSortOption] =
+    useState("nameAsc");
+
+const [statusOrder, setStatusOrder] =
+    useState("default");
+
+    const [confirmDialog, setConfirmDialog] =
+        useState({
+            isOpen: false,
+            title: "",
+            message: "",
+            confirmText: "Confirmar",
+            variant: "danger",
+            onConfirm: null
+        });
+
+
    useEffect(() => {
 
     let cancelled = false;
@@ -76,6 +116,40 @@ const canChangeSupplierStatus =
 
         
 
+const supplierSortOptions = [
+    {
+        value: "nameAsc",
+        label: "Nombre A-Z"
+    },
+    {
+        value: "nameDesc",
+        label: "Nombre Z-A"
+    },
+    {
+        value: "recent",
+        label: "Más recientes"
+    },
+    {
+        value: "oldest",
+        label: "Más antiguos"
+    }
+];
+
+const statusOrderOptions = [
+    {
+        value: "default",
+        label: "Estado sin prioridad"
+    },
+    {
+        value: "activeFirst",
+        label: "Activos primero"
+    },
+    {
+        value: "inactiveFirst",
+        label: "Inactivos primero"
+    }
+];
+
     const loadSuppliers = async () => {
 
         try {
@@ -101,6 +175,28 @@ const canChangeSupplierStatus =
         setMessage("");
         setErrorMessage("");
     };
+
+    const closeConfirmDialog = () => {
+
+        setConfirmDialog({
+            isOpen: false,
+            title: "",
+            message: "",
+            confirmText: "Confirmar",
+            variant: "danger",
+            onConfirm: null
+        });
+    };
+
+    const handleConfirmDialog = async () => {
+
+        if (confirmDialog.onConfirm) {
+            await confirmDialog.onConfirm();
+        }
+
+        closeConfirmDialog();
+    };
+
 
     const resetForm = () => {
 
@@ -260,93 +356,96 @@ const canChangeSupplierStatus =
         setAddress(supplier.address || "");
     };
 
-    const handleDisableSupplier = async (id) => {
+    const handleDisableSupplier = (id) => {
 
         clearMessages();
 
-        const confirmDisable =
-            window.confirm(
-                "¿Seguro que deseas desactivar este proveedor?"
-            );
+        setConfirmDialog({
+            isOpen: true,
+            title: "Desactivar proveedor",
+            message: "¿Seguro que deseas desactivar este proveedor?",
+            confirmText: "Desactivar",
+            variant: "danger",
+            onConfirm: async () => {
 
-        if (!confirmDisable) {
-            return;
-        }
+                try {
 
-        try {
+                    setLoading(true);
 
-            setLoading(true);
+                    await disableSupplier(id);
 
-            await disableSupplier(id);
+                    await loadSuppliers();
 
-            await loadSuppliers();
+                    setMessage(
+                        "Proveedor desactivado correctamente"
+                    );
 
-            setMessage(
-                "Proveedor desactivado correctamente"
-            );
+                    if (editingId === id) {
+                        resetForm();
+                    }
 
-            if (editingId === id) {
-                resetForm();
+                } catch (error) {
+
+                    console.error(error);
+
+                    setErrorMessage(
+                        getErrorMessage(
+                            error,
+                            "Error al desactivar proveedor"
+                        )
+                    );
+
+                } finally {
+
+                    setLoading(false);
+                }
             }
-
-        } catch (error) {
-
-            console.error(error);
-
-            setErrorMessage(
-                getErrorMessage(
-                    error,
-                    "Error al desactivar proveedor"
-                )
-            );
-
-        } finally {
-
-            setLoading(false);
-        }
+        });
     };
 
-    const handleEnableSupplier = async (id) => {
+    const handleEnableSupplier = (id) => {
 
         clearMessages();
 
-        try {
+        setConfirmDialog({
+            isOpen: true,
+            title: "Reactivar proveedor",
+            message: "¿Seguro que deseas reactivar este proveedor?",
+            confirmText: "Reactivar",
+            variant: "success",
+            onConfirm: async () => {
 
-            setLoading(true);
+                try {
 
-            await enableSupplier(id);
+                    setLoading(true);
 
-            await loadSuppliers();
+                    await enableSupplier(id);
 
-            setMessage(
-                "Proveedor reactivado correctamente"
-            );
+                    await loadSuppliers();
 
-        } catch (error) {
+                    setMessage(
+                        "Proveedor reactivado correctamente"
+                    );
 
-            console.error(error);
+                } catch (error) {
 
-            setErrorMessage(
-                getErrorMessage(
-                    error,
-                    "Error al reactivar proveedor"
-                )
-            );
+                    console.error(error);
 
-        } finally {
+                    setErrorMessage(
+                        getErrorMessage(
+                            error,
+                            "Error al reactivar proveedor"
+                        )
+                    );
 
-            setLoading(false);
-        }
+                } finally {
+
+                    setLoading(false);
+                }
+            }
+        });
     };
 
-    const formatDate = (date) => {
-
-        if (!date) {
-            return "-";
-        }
-
-        return new Date(date).toLocaleString();
-    };
 
     const filteredSuppliers =
         suppliers.filter(supplier => {
@@ -383,295 +482,137 @@ const canChangeSupplierStatus =
             return matchesSearch && matchesStatus;
         });
 
+
+const supplierSorters = {
+    nameAsc: (first, second) =>
+        compareText(first.name, second.name),
+
+    nameDesc: (first, second) =>
+        compareText(second.name, first.name),
+
+    recent: (first, second) =>
+        compareDate(second.createdAt, first.createdAt),
+
+    oldest: (first, second) =>
+        compareDate(first.createdAt, second.createdAt)
+};
+
+const sortedSuppliers = (() => {
+
+    const sortedBySelectedOption =
+        sortByOption(
+            filteredSuppliers,
+            sortOption,
+            supplierSorters
+        );
+
+    if (statusOrder === "activeFirst") {
+        return [...sortedBySelectedOption].sort(
+            (first, second) =>
+                Number(second.active) - Number(first.active)
+        );
+    }
+
+    if (statusOrder === "inactiveFirst") {
+        return [...sortedBySelectedOption].sort(
+            (first, second) =>
+                Number(first.active) - Number(second.active)
+        );
+    }
+
+    return sortedBySelectedOption;
+})();
+
+
     return (
 
         <div>
 
-            <h1>
-                Proveedores
-            </h1>
-
-            {
-                message && (
-                    <p style={{ color: "green" }}>
-                        {message}
-                    </p>
-                )
-            }
-
-            {
-                errorMessage && (
-                    <p style={{ color: "red" }}>
-                        {errorMessage}
-                    </p>
-                )
-            }
-
-            {
-                canWriteSupplier && (
-                    <>
-                        <h2>
-                            {
-                                editingId
-                                    ? "Editar Proveedor"
-                                    : "Nuevo Proveedor"
-                            }
-                        </h2>
-
-                        <input
-                            type="text"
-                            placeholder="Nombre"
-                            value={name}
-                            onChange={(e) =>
-                                setName(e.target.value)
-                            }
-                        />
-
-                        <br />
-                        <br />
-
-                        <input
-                            type="text"
-                            placeholder="Teléfono"
-                            value={phone}
-                            onChange={(e) =>
-                                setPhone(e.target.value)
-                            }
-                        />
-
-                        <br />
-                        <br />
-
-                        <input
-                            type="email"
-                            placeholder="Correo"
-                            value={email}
-                            onChange={(e) =>
-                                setEmail(e.target.value)
-                            }
-                        />
-
-                        <br />
-                        <br />
-
-                        <input
-                            type="text"
-                            placeholder="Dirección"
-                            value={address}
-                            onChange={(e) =>
-                                setAddress(e.target.value)
-                            }
-                        />
-
-                        <br />
-                        <br />
-
-                        <button
-                            onClick={handleSaveSupplier}
-                            disabled={loading}
-                        >
-                            {
-                                editingId
-                                    ? "Actualizar Proveedor"
-                                    : "Crear Proveedor"
-                            }
-                        </button>
-
-                        {
-                            editingId && (
-                                <button
-                                    onClick={clearForm}
-                                    disabled={loading}
-                                >
-                                    Cancelar
-                                </button>
-                            )
-                        }
-
-                        <hr />
-                    </>
-                )
-            }
-
-            <input
-                type="text"
-                placeholder="Buscar proveedor..."
-                value={search}
-                onChange={(e) =>
-                    setSearch(e.target.value)
-                }
+            <PageHeader
+                title="Proveedores"
+                subtitle="Administra los proveedores del inventario"
             />
 
+          <AlertMessage
+    type="success"
+    message={message}
+/>
+
+<AlertMessage
+    type="error"
+    message={errorMessage}
+/>
+
+          <SupplierForm
+    canWriteSupplier={canWriteSupplier}
+    editingId={editingId}
+    name={name}
+    setName={setName}
+    email={email}
+    setEmail={setEmail}
+    phone={phone}
+    setPhone={setPhone}
+    address={address}
+    setAddress={setAddress}
+    loading={loading}
+    handleSaveSupplier={handleSaveSupplier}
+    clearForm={clearForm}
+/>
+
+            <TableToolbar>
+
+    <SearchInput
+        value={search}
+        onChange={setSearch}
+        placeholder="Buscar proveedor..."
+    />
+
+    <ShowInactiveCheckbox
+        checked={showInactive}
+        onChange={setShowInactive}
+    />
+
+    <FilterSelect
+        label="Ordenar por"
+        value={sortOption}
+        onChange={setSortOption}
+        options={supplierSortOptions}
+    />
+
+    <FilterSelect
+        label="Prioridad de estado"
+        value={statusOrder}
+        onChange={setStatusOrder}
+        options={statusOrderOptions}
+    />
+
+</TableToolbar>
+
             <br />
             <br />
 
-            <label>
+           <SupplierTable
+    suppliers={sortedSuppliers}
+    loading={loading}
+    showSupplierActions={showSupplierActions}
+    canWriteSupplier={canWriteSupplier}
+    canChangeSupplierStatus={canChangeSupplierStatus}
+    handleEditSupplier={handleEditSupplier}
+    handleDisableSupplier={handleDisableSupplier}
+    handleEnableSupplier={handleEnableSupplier}
+/>
 
-                <input
-                    type="checkbox"
-                    checked={showInactive}
-                    onChange={() =>
-                        setShowInactive(
-                            !showInactive
-                        )
-                    }
-                />
 
-                Mostrar inactivos
-
-            </label>
-
-            <br />
-            <br />
-
-            <table border="1">
-
-                <thead>
-
-                    <tr>
-                        <th>ID</th>
-                        <th>Nombre</th>
-                        <th>Teléfono</th>
-                        <th>Correo</th>
-                        <th>Dirección</th>
-                        <th>Activo</th>
-                        <th>Creado</th>
-                        <th>Actualizado</th>
-    {
-                            showSupplierActions && (
-                                <th>Acciones</th>
-                            )
-                        }
-                    </tr>
-
-                </thead>
-
-                <tbody>
-
-                    {
-                        filteredSuppliers.length === 0 ? (
-
-                            <tr>
-                                <td colSpan={showSupplierActions ? 9 : 8}>
-                                    No hay proveedores para mostrar
-                                </td>
-                            </tr>
-
-                        ) : (
-
-                            filteredSuppliers.map(supplier => (
-
-                                <tr key={supplier.id}>
-
-                                    <td>
-                                        {supplier.id}
-                                    </td>
-
-                                    <td>
-                                        {supplier.name}
-                                    </td>
-
-                                    <td>
-                                        {supplier.phone}
-                                    </td>
-
-                                    <td>
-                                        {supplier.email}
-                                    </td>
-
-                                    <td>
-                                        {supplier.address}
-                                    </td>
-
-                                    <td>
-                                        {
-                                            supplier.active
-                                                ? "Sí"
-                                                : "No"
-                                        }
-                                    </td>
-
-                                    <td>
-                                        {
-                                            formatDate(
-                                                supplier.createdAt
-                                            )
-                                        }
-                                    </td>
-
-                                    <td>
-                                        {
-                                            formatDate(
-                                                supplier.updatedAt
-                                            )
-                                        }
-                                    </td>
-
-                                    {
-                                        showSupplierActions && (
-
-                                            <td>
-                                        {
-    canWriteSupplier && supplier.active ? (
-
-        <button
-            onClick={() =>
-                handleEditSupplier(supplier)
-            }
-            disabled={loading}
-        >
-            Editar
-        </button>
-
-    ) : !supplier.active && canWriteSupplier ? (
-
-        <span>
-            Reactivar para editar
-        </span>
-
-    ) : null
-}
-
-                                        {
-    canChangeSupplierStatus && (
-
-        supplier.active ? (
-
-            <button
-                onClick={() =>
-                    handleDisableSupplier(supplier.id)
-                }
-                disabled={loading}
-            >
-                Desactivar
-            </button>
-
-        ) : (
-
-            <button
-                onClick={() =>
-                    handleEnableSupplier(supplier.id)
-                }
-                disabled={loading}
-            >
-                Reactivar
-            </button>
-        )
-    )
-}
-
-                                            </td>
-                                        )
-                                    }
-
-                                </tr>
-                            ))
-                        )
-                    }
-
-                </tbody>
-
-            </table>
+            <ConfirmDialog
+                isOpen={confirmDialog.isOpen}
+                title={confirmDialog.title}
+                message={confirmDialog.message}
+                confirmText={confirmDialog.confirmText}
+                variant={confirmDialog.variant}
+                loading={loading}
+                onConfirm={handleConfirmDialog}
+                onCancel={closeConfirmDialog}
+            />
 
         </div>
     );

@@ -1,3 +1,6 @@
+import MovementForm from "../components/MovementForm";
+import MovementTable from "../components/MovementTable";
+
 import { useEffect, useState } from "react";
 
 import {
@@ -7,6 +10,18 @@ import {
 } from "../services/movementService";
 
 import {
+    compareDate,
+    compareNumber,
+    sortByOption
+} from "../utils/sortUtils";
+
+import AlertMessage from "../components/AlertMessage";
+
+import FilterSelect from "../components/FilterSelect";
+import TableToolbar from "../components/TableToolbar";
+
+
+import {
     getProducts
 } from "../services/productService";
 
@@ -14,9 +29,14 @@ import {
     getApiErrorMessage
 } from "../utils/getApiErrorMessage";
 
+
 import {
     useAuth
 } from "../hooks/useAuth";
+
+import PageHeader from "../components/PageHeader";
+
+import SearchInput from "../components/SearchInput";
 
 function Movements() {
 
@@ -63,6 +83,9 @@ const canCreateMovement =
     const [errorMessage, setErrorMessage] =
         useState("");
 
+    const [sortOption, setSortOption] =
+        useState("recent");
+
          const loadMovements = async () => {
 
         try {
@@ -81,6 +104,26 @@ const canCreateMovement =
             );
         }
     };
+
+
+    const movementSortOptions = [
+    {
+        value: "recent",
+        label: "Más recientes"
+    },
+    {
+        value: "oldest",
+        label: "Más antiguos"
+    },
+    {
+        value: "quantityAsc",
+        label: "Cantidad menor a mayor"
+    },
+    {
+        value: "quantityDesc",
+        label: "Cantidad mayor a menor"
+    }
+];
 
     const loadProducts = async () => {
 
@@ -271,63 +314,6 @@ const canCreateMovement =
         }
     };
 
-    const formatDate = (date) => {
-
-        if (!date) {
-            return "-";
-        }
-
-        return new Date(date).toLocaleString();
-    };
-
-    const formatType = (movementType) => {
-
-    if (movementType === "ENTRY") {
-        return "Entrada";
-    }
-
-    if (movementType === "EXIT") {
-        return "Salida";
-    }
-
-    if (movementType === "INITIAL_BALANCE") {
-        return "Stock inicial";
-    }
-
-    return movementType;
-};
-
-  const getTypeIcon = (movementType) => {
-
-    if (movementType === "ENTRY") {
-        return "🟢";
-    }
-
-    if (movementType === "EXIT") {
-        return "🔴";
-    }
-
-    if (movementType === "INITIAL_BALANCE") {
-        return "🔵";
-    }
-
-    return "";
-};
-
-
-    const getStockText = (stock) => {
-
-        if (stock === 0) {
-            return "🔴 Agotado";
-        }
-
-        if (stock <= 5) {
-            return `🟡 Bajo (${stock})`;
-        }
-
-        return `🟢 Normal (${stock})`;
-    };
-
     const filteredMovements =
         movements.filter(movement => {
 
@@ -378,324 +364,129 @@ const canCreateMovement =
             );
         });
 
+
+        const movementSorters = {
+    recent: (first, second) =>
+        compareDate(second.createdAt, first.createdAt),
+
+    oldest: (first, second) =>
+        compareDate(first.createdAt, second.createdAt),
+
+    quantityAsc: (first, second) =>
+        compareNumber(first.quantity, second.quantity),
+
+    quantityDesc: (first, second) =>
+        compareNumber(second.quantity, first.quantity)
+};
+
+const sortedMovements =
+    sortByOption(
+        filteredMovements,
+        sortOption,
+        movementSorters
+    );
+
     return (
 
         <div>
 
-            <h1>
-                Movimientos
-            </h1>
+            <PageHeader
+                title="Movimientos"
+                subtitle="Registra entradas y salidas, y consulta el historial"
+            />
 
-            {
-                message && (
-                    <p style={{ color: "green" }}>
-                        {message}
-                    </p>
-                )
-            }
+            <AlertMessage
+    type="success"
+    message={message}
+/>
 
-            {
-                errorMessage && (
-                    <p style={{ color: "red" }}>
-                        {errorMessage}
-                    </p>
-                )
-            }
+<AlertMessage
+    type="error"
+    message={errorMessage}
+/>
 
-            {
-                canCreateMovement && (
-                    <>
-                        <h2>
-                            Registrar Movimiento
-                        </h2>
-
-                        <select
-                            value={productId}
-                            onChange={(e) =>
-                                setProductId(e.target.value)
-                            }
-                        >
-                            <option value="">
-                                Seleccione producto
-                            </option>
-
-                            {
-                                activeProducts.map(product => (
-                                    <option
-                                        key={product.id}
-                                        value={product.id}
-                                    >
-                                        {product.name}
-                                        {" "}
-                                        | Stock:
-                                        {" "}
-                                        {product.stock}
-                                        {" "}
-                                        | Proveedor:
-                                        {" "}
-                                        {product.supplierName || "-"}
-                                    </option>
-                                ))
-                            }
-                        </select>
-
-                        <br />
-                        <br />
-
-                        {
-                            selectedProduct && (
-                                <div>
-                                    <strong>
-                                        Producto seleccionado:
-                                    </strong>
-
-                                    <p>
-                                        Nombre: {selectedProduct.name}
-                                    </p>
-
-                                    <p>
-                                        Categoría: {selectedProduct.categoryName || "-"}
-                                    </p>
-
-                                    <p>
-                                        Proveedor: {selectedProduct.supplierName || "-"}
-                                    </p>
-
-                                    <p>
-                                        Stock actual: {getStockText(selectedProduct.stock)}
-                                    </p>
-                                </div>
-                            )
-                        }
-
-                        <input
-                            type="number"
-                            placeholder="Cantidad"
-                            value={quantity}
-                            min="1"
-                            onChange={(e) =>
-                                setQuantity(e.target.value)
-                            }
-                        />
-
-                        <br />
-                        <br />
-
-                        <input
-                            type="text"
-                            placeholder="Observación"
-                            value={observation}
-                            onChange={(e) =>
-                                setObservation(e.target.value)
-                            }
-                        />
-
-                        <br />
-                        <br />
-
-                        <select
-                            value={type}
-                            onChange={(e) =>
-                                setType(e.target.value)
-                            }
-                        >
-                            <option value="ENTRY">
-                                Entrada
-                            </option>
-
-                            <option value="EXIT">
-                                Salida
-                            </option>
-                        </select>
-
-                        <br />
-                        <br />
-
-                        <button
-                            onClick={handleSubmit}
-                            disabled={loading}
-                        >
-                            {
-                                loading
-                                    ? "Registrando..."
-                                    : "Registrar Movimiento"
-                            }
-                        </button>
-
-                        <hr />
-                    </>
-                )
-            }
+<MovementForm
+    canCreateMovement={canCreateMovement}
+    productId={productId}
+    setProductId={setProductId}
+    quantity={quantity}
+    setQuantity={setQuantity}
+    observation={observation}
+    setObservation={setObservation}
+    movementType={type}
+    setMovementType={setType}
+    activeProducts={activeProducts}
+    loading={loading}
+    handleRegisterMovement={handleSubmit}
+/>
 
             <h2>
                 Historial de Movimientos
             </h2>
 
-            <input
-                type="text"
-                placeholder="Buscar movimiento..."
-                value={search}
-                onChange={(e) =>
-                    setSearch(e.target.value)
-                }
-            />
+<TableToolbar>
+
+    <SearchInput
+        value={search}
+        onChange={setSearch}
+        placeholder="Buscar movimiento..."
+    />
+
+    <FilterSelect
+        label="Tipo"
+        value={typeFilter}
+        onChange={setTypeFilter}
+        options={[
+            {
+                value: "ALL",
+                label: "Todos los tipos"
+            },
+            {
+                value: "ENTRY",
+                label: "Entradas"
+            },
+            {
+                value: "EXIT",
+                label: "Salidas"
+            },
+            {
+                value: "INITIAL_BALANCE",
+                label: "Saldos iniciales"
+            }
+        ]}
+    />
+
+    <FilterSelect
+        label="Producto"
+        value={productFilter}
+        onChange={setProductFilter}
+        options={[
+            {
+                value: "ALL",
+                label: "Todos los productos"
+            },
+            ...products.map(product => ({
+                value: String(product.id),
+                label: product.name
+            }))
+        ]}
+    />
+
+    <FilterSelect
+        label="Ordenar por"
+        value={sortOption}
+        onChange={setSortOption}
+        options={movementSortOptions}
+    />
+
+</TableToolbar>
 
             <br />
             <br />
 
-            <select
-                value={typeFilter}
-                onChange={(e) =>
-                    setTypeFilter(e.target.value)
-                }
-            >
-
-                <option value="ALL">
-                    Todos los tipos
-                </option>
-
-                <option value="ENTRY">
-                    Entradas
-                </option>
-
-                <option value="EXIT">
-                    Salidas
-                </option>
-
-            </select>
-
-            <br />
-            <br />
-
-            <select
-                value={productFilter}
-                onChange={(e) =>
-                    setProductFilter(e.target.value)
-                }
-            >
-
-                <option value="ALL">
-                    Todos los productos
-                </option>
-
-                {
-                    products.map(product => (
-
-                        <option
-                            key={product.id}
-                            value={product.id}
-                        >
-                            {product.name}
-                        </option>
-                    ))
-                }
-
-            </select>
-
-            <br />
-            <br />
-
-            <table border="1">
-
-                <thead>
-
-                    <tr>
-                        <th>ID</th>
-                        <th>Producto</th>
-                        <th>Categoría</th>
-                        <th>Proveedor</th>
-                        <th>Tipo</th>
-                        <th>Cantidad</th>
-                        <th>Stock antes</th>
-                        <th>Stock después</th>
-                        <th>Usuario</th>
-                        <th>Fecha</th>
-                        <th>Observación</th>
-                    </tr>
-
-                </thead>
-
-                <tbody>
-
-                    {
-                        filteredMovements.length === 0 ? (
-
-                            <tr>
-                                <td colSpan="11">
-                                    No hay movimientos para mostrar
-                                </td>
-                            </tr>
-
-                        ) : (
-
-                            filteredMovements.map(movement => (
-
-                                <tr key={movement.id}>
-
-                                    <td>
-                                        {movement.id}
-                                    </td>
-
-                                    <td>
-                                        {movement.productName || "-"}
-                                    </td>
-
-                                    <td>
-                                        {movement.categoryName || "-"}
-                                    </td>
-
-                                    <td>
-                                        {movement.supplierName || "-"}
-                                    </td>
-
-                                    <td>
-                                        {getTypeIcon(movement.type)}
-                                        {" "}
-                                        {formatType(movement.type)}
-                                    </td>
-
-                                    <td>
-                                        {movement.quantity}
-                                    </td>
-
-                                    <td>
-    {
-        movement.stockBefore !== null
-        && movement.stockBefore !== undefined
-            ? movement.stockBefore
-            : "-"
-    }
-</td>
-
-<td>
-    {
-        movement.stockAfter !== null
-        && movement.stockAfter !== undefined
-            ? getStockText(movement.stockAfter)
-            : "-"
-    }
-</td>
-
-                                    <td>
-                                        {movement.userName || "-"}
-                                    </td>
-
-                                    <td>
-                                        {formatDate(movement.createdAt)}
-                                    </td>
-
-                                    <td>
-                                        {movement.observation || "-"}
-                                    </td>
-
-                                </tr>
-                            ))
-                        )
-                    }
-
-                </tbody>
-
-            </table>
+<MovementTable
+    movements={sortedMovements}
+/>
 
         </div>
     );

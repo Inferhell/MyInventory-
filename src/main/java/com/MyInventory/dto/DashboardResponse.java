@@ -3,6 +3,8 @@ package com.myinventory.dto;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 @Builder
 public class DashboardResponse {
@@ -20,4 +22,8 @@ public class DashboardResponse {
     private Long totalExits;
 
     private Long totalStock;
+
+    private List<DashboardRecentMovementResponse> recentMovements;
+
+    private List<DashboardLowStockProductResponse> lowStockProducts;
 }

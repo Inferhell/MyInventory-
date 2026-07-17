@@ -1,7 +1,6 @@
-import axios from "axios";
-
-const API_URL =
-    "http://localhost:8080";
+import {
+    apiClient
+} from "./apiClient";
 
 export const loginRequest =
     async (credentials) => {
@@ -20,11 +19,10 @@ export const loginRequest =
         );
 
         const response =
-            await axios.post(
-                `${API_URL}/login`,
+            await apiClient.post(
+                "/login",
                 params,
                 {
-                    withCredentials: true,
                     headers: {
                         "Content-Type":
                             "application/x-www-form-urlencoded"
@@ -39,12 +37,8 @@ export const logoutRequest =
     async () => {
 
         const response =
-            await axios.post(
-                `${API_URL}/logout`,
-                {},
-                {
-                    withCredentials: true
-                }
+            await apiClient.post(
+                "/logout"
             );
 
         return response.data;
@@ -54,11 +48,8 @@ export const getCurrentUser =
     async () => {
 
         const response =
-            await axios.get(
-                `${API_URL}/auth/me`,
-                {
-                    withCredentials: true
-                }
+            await apiClient.get(
+                "/auth/me"
             );
 
         return response.data;

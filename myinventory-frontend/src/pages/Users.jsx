@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
 
+import UserForm from "../components/UserForm";
+import UserTable from "../components/UserTable";
+
 import {
     getUsers,
     createUser,
@@ -11,9 +14,28 @@ import {
     getApiErrorMessage
 } from "../utils/getApiErrorMessage";
 
+import AlertMessage from "../components/AlertMessage";
+
+import FilterSelect from "../components/FilterSelect";
+import TableToolbar from "../components/TableToolbar";
+
+import {
+    compareDate,
+    compareText,
+    sortByOption
+} from "../utils/sortUtils";
+
+import ConfirmDialog from "../components/ConfirmDialog";
+
 import {
     useAuth
 } from "../hooks/useAuth";
+
+import PageHeader from "../components/PageHeader";
+
+import SearchInput from "../components/SearchInput";
+
+import ShowInactiveCheckbox from "../components/ShowInactiveCheckbox";
 
 function Users() {
 
@@ -50,6 +72,77 @@ const canChangeUserStatus =
     const [message, setMessage] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
 
+    const [sortOption, setSortOption] =
+    useState("nameAsc");
+
+const [statusOrder, setStatusOrder] =
+    useState("default");
+
+const [roleFilter, setRoleFilter] =
+    useState("ALL");
+
+    const [confirmDialog, setConfirmDialog] =
+        useState({
+            isOpen: false,
+            title: "",
+            message: "",
+            confirmText: "Confirmar",
+            variant: "danger",
+            onConfirm: null
+        });
+
+const userSortOptions = [
+    {
+        value: "nameAsc",
+        label: "Nombre A-Z"
+    },
+    {
+        value: "nameDesc",
+        label: "Nombre Z-A"
+    },
+    {
+        value: "recent",
+        label: "Más recientes"
+    },
+    {
+        value: "oldest",
+        label: "Más antiguos"
+    }
+];
+
+const roleFilterOptions = [
+    {
+        value: "ALL",
+        label: "Todos los roles"
+    },
+    {
+        value: "ADMIN",
+        label: "Administradores"
+    },
+    {
+        value: "SUPERVISOR",
+        label: "Supervisores"
+    },
+    {
+        value: "EMPLOYEE",
+        label: "Empleados"
+    }
+];
+
+const statusOrderOptions = [
+    {
+        value: "default",
+        label: "Estado sin prioridad"
+    },
+    {
+        value: "activeFirst",
+        label: "Activos primero"
+    },
+    {
+        value: "inactiveFirst",
+        label: "Inactivos primero"
+    }
+];
    
    const loadUsers = async () => {
 
@@ -106,6 +199,28 @@ const canChangeUserStatus =
         setMessage("");
         setErrorMessage("");
     };
+
+    const closeConfirmDialog = () => {
+
+        setConfirmDialog({
+            isOpen: false,
+            title: "",
+            message: "",
+            confirmText: "Confirmar",
+            variant: "danger",
+            onConfirm: null
+        });
+    };
+
+    const handleConfirmDialog = async () => {
+
+        if (confirmDialog.onConfirm) {
+            await confirmDialog.onConfirm();
+        }
+
+        closeConfirmDialog();
+    };
+
 
     const resetForm = () => {
 
@@ -280,92 +395,94 @@ const canChangeUserStatus =
         setPassword("");
     };
 
-    const handleDisableUser = async (id) => {
+    const handleDisableUser = (id) => {
 
         clearMessages();
 
-        const confirmDisable =
-            window.confirm(
-                "¿Seguro que deseas desactivar este usuario?"
-            );
+        setConfirmDialog({
+            isOpen: true,
+            title: "Desactivar usuario",
+            message: "¿Seguro que deseas desactivar este usuario?",
+            confirmText: "Desactivar",
+            variant: "danger",
+            onConfirm: async () => {
 
-        if (!confirmDisable) {
-            return;
-        }
+                try {
 
-        try {
+                    setLoading(true);
 
-            setLoading(true);
+                    await disableUser(id);
 
-            await disableUser(id);
+                    await loadUsers();
 
-            await loadUsers();
+                    setMessage(
+                        "Usuario desactivado correctamente"
+                    );
 
-            setMessage(
-                "Usuario desactivado correctamente"
-            );
+                    if (editingId === id) {
+                        resetForm();
+                    }
 
-            if (editingId === id) {
-                resetForm();
+                } catch (error) {
+
+                    console.error(error);
+
+                    setErrorMessage(
+                        getErrorMessage(
+                            error,
+                            "Error al desactivar usuario"
+                        )
+                    );
+
+                } finally {
+
+                    setLoading(false);
+                }
             }
-
-        } catch (error) {
-
-            console.error(error);
-
-            setErrorMessage(
-                getErrorMessage(
-                    error,
-                    "Error al desactivar usuario"
-                )
-            );
-
-        } finally {
-
-            setLoading(false);
-        }
+        });
     };
 
-    const handleEnableUser = async (id) => {
+    const handleEnableUser = (id) => {
 
         clearMessages();
 
-        try {
+        setConfirmDialog({
+            isOpen: true,
+            title: "Reactivar usuario",
+            message: "¿Seguro que deseas reactivar este usuario?",
+            confirmText: "Reactivar",
+            variant: "success",
+            onConfirm: async () => {
 
-            setLoading(true);
+                try {
 
-            await enableUser(id);
+                    setLoading(true);
 
-            await loadUsers();
+                    await enableUser(id);
 
-            setMessage(
-                "Usuario reactivado correctamente"
-            );
+                    await loadUsers();
 
-        } catch (error) {
+                    setMessage(
+                        "Usuario reactivado correctamente"
+                    );
 
-            console.error(error);
+                } catch (error) {
 
-            setErrorMessage(
-                getErrorMessage(
-                    error,
-                    "Error al reactivar usuario"
-                )
-            );
+                    console.error(error);
 
-        } finally {
+                    setErrorMessage(
+                        getErrorMessage(
+                            error,
+                            "Error al reactivar usuario"
+                        )
+                    );
 
-            setLoading(false);
-        }
-    };
+                } finally {
 
-    const formatDate = (date) => {
-
-        if (!date) {
-            return "-";
-        }
-
-        return new Date(date).toLocaleString();
+                    setLoading(false);
+                }
+            }
+        });
     };
 
     const filteredUsers =
@@ -391,308 +508,158 @@ const canChangeUserStatus =
                     ?.toLowerCase()
                     .includes(searchText);
 
+            const matchesRole =
+            roleFilter === "ALL"
+            || user.role === roleFilter;
+
             const matchesStatus =
                 showInactive || user.active;
 
-            return matchesSearch && matchesStatus;
+            return (
+                matchesSearch
+                && matchesRole
+                && matchesStatus
+            );
         });
+
+        const userSorters = {
+    nameAsc: (first, second) =>
+        compareText(first.name, second.name),
+
+    nameDesc: (first, second) =>
+        compareText(second.name, first.name),
+
+    recent: (first, second) =>
+        compareDate(second.createdAt, first.createdAt),
+
+    oldest: (first, second) =>
+        compareDate(first.createdAt, second.createdAt)
+};
+
+const sortedUsers = (() => {
+
+    const sortedBySelectedOption =
+        sortByOption(
+            filteredUsers,
+            sortOption,
+            userSorters
+        );
+
+    if (statusOrder === "activeFirst") {
+        return [...sortedBySelectedOption].sort(
+            (first, second) =>
+                Number(second.active) - Number(first.active)
+        );
+    }
+
+    if (statusOrder === "inactiveFirst") {
+        return [...sortedBySelectedOption].sort(
+            (first, second) =>
+                Number(first.active) - Number(second.active)
+        );
+    }
+
+    return sortedBySelectedOption;
+})();
 
     return (
 
         <div>
 
-            <h1>
-                Usuarios
-            </h1>
-
-            {
-                message && (
-                    <p style={{ color: "green" }}>
-                        {message}
-                    </p>
-                )
-            }
-
-            {
-                errorMessage && (
-                    <p style={{ color: "red" }}>
-                        {errorMessage}
-                    </p>
-                )
-            }
-
-            {
-                (
-                    (!editingId && canCreateUser)
-                    || (editingId && canEditUser)
-                ) && (
-                    <>
-                        <h2>
-                            {
-                                editingId
-                                    ? "Editar Usuario"
-                                    : "Nuevo Usuario"
-                            }
-                        </h2>
-
-                        <input
-                            type="text"
-                            placeholder="Nombre"
-                            value={name}
-                            onChange={(e) =>
-                                setName(e.target.value)
-                            }
-                        />
-
-                        <br />
-                        <br />
-
-                        <input
-                            type="email"
-                            placeholder="Correo"
-                            value={email}
-                            onChange={(e) =>
-                                setEmail(e.target.value)
-                            }
-                        />
-
-                        <br />
-                        <br />
-
-                        {
-                            !editingId && (
-                                <>
-                                    <input
-                                        type="password"
-                                        placeholder="Contraseña"
-                                        value={password}
-                                        onChange={(e) =>
-                                            setPassword(e.target.value)
-                                        }
-                                    />
-
-                                    <br />
-                                    <br />
-                                </>
-                            )
-                        }
-
-                        <select
-                            value={role}
-                            onChange={(e) =>
-                                setRole(e.target.value)
-                            }
-                        >
-                            <option value="ADMIN">ADMIN</option>
-                            <option value="SUPERVISOR">SUPERVISOR</option>
-                            <option value="EMPLOYEE">EMPLOYEE</option>
-                        </select>
-
-                        <br />
-                        <br />
-
-                        <button
-                            onClick={handleSaveUser}
-                            disabled={loading}
-                        >
-                            {
-                                editingId
-                                    ? "Actualizar Usuario"
-                                    : "Crear Usuario"
-                            }
-                        </button>
-
-                        {
-                            editingId && (
-                                <button
-                                    onClick={clearForm}
-                                    disabled={loading}
-                                >
-                                    Cancelar
-                                </button>
-                            )
-                        }
-
-                        <hr />
-                    </>
-                )
-            }
-
-            <input
-                type="text"
-                placeholder="Buscar usuario..."
-                value={search}
-                onChange={(e) =>
-                    setSearch(e.target.value)
-                }
+            <PageHeader
+                title="Usuarios"
+                subtitle="Administra usuarios, roles y estado de acceso"
             />
 
+            <AlertMessage
+    type="success"
+    message={message}
+/>
+
+<AlertMessage
+    type="error"
+    message={errorMessage}
+/>
+
+            <UserForm
+    canCreateUser={canCreateUser}
+    canEditUser={canEditUser}
+    editingId={editingId}
+    name={name}
+    setName={setName}
+    email={email}
+    setEmail={setEmail}
+    password={password}
+    setPassword={setPassword}
+    role={role}
+    setRole={setRole}
+    loading={loading}
+    handleSaveUser={handleSaveUser}
+    clearForm={clearForm}
+/>
+
+           <TableToolbar>
+
+    <SearchInput
+        value={search}
+        onChange={setSearch}
+        placeholder="Buscar usuario..."
+    />
+
+    <ShowInactiveCheckbox
+        checked={showInactive}
+        onChange={setShowInactive}
+    />
+
+    <FilterSelect
+        label="Rol"
+        value={roleFilter}
+        onChange={setRoleFilter}
+        options={roleFilterOptions}
+    />
+
+    <FilterSelect
+        label="Ordenar por"
+        value={sortOption}
+        onChange={setSortOption}
+        options={userSortOptions}
+    />
+
+    <FilterSelect
+        label="Prioridad de estado"
+        value={statusOrder}
+        onChange={setStatusOrder}
+        options={statusOrderOptions}
+    />
+
+</TableToolbar>
+
             <br />
             <br />
 
-            <label>
+            <UserTable
+    users={sortedUsers}
+    loading={loading}
+    currentUser={currentUser}
+    showUserActions={showUserActions}
+    canEditUser={canEditUser}
+    canChangeUserStatus={canChangeUserStatus}
+    handleEditUser={handleEditUser}
+    handleDisableUser={handleDisableUser}
+    handleEnableUser={handleEnableUser}
+/>
 
-                <input
-                    type="checkbox"
-                    checked={showInactive}
-                    onChange={() =>
-                        setShowInactive(!showInactive)
-                    }
-                />
 
-                Mostrar inactivos
-
-            </label>
-
-            <br />
-            <br />
-
-            <table border="1">
-
-                <thead>
-
-                    <tr>
-                        <th>ID</th>
-                        <th>Nombre</th>
-                        <th>Email</th>
-                        <th>Rol</th>
-                        <th>Activo</th>
-                        <th>Creado</th>
-                        <th>Actualizado</th>
-                      {
-                            showUserActions && (
-                                <th>Acciones</th>
-                            )
-                        }
-                    </tr>
-
-                </thead>
-
-                <tbody>
-
-                    {
-                        filteredUsers.length === 0 ? (
-
-                            <tr>
-                                <td colSpan={showUserActions ? 8 : 7}>
-                                    No hay usuarios para mostrar
-                                </td>
-                            </tr>
-
-                        ) : (
-
-                            filteredUsers.map(user => (
-
-                                <tr key={user.id}>
-
-                                    <td>
-                                        {user.id}
-                                    </td>
-
-                                    <td>
-                                        {user.name}
-                                    </td>
-
-                                    <td>
-                                        {user.email}
-                                    </td>
-
-                                    <td>
-                                        {user.role}
-                                    </td>
-
-                                    <td>
-                                        {
-                                            user.active
-                                                ? "Sí"
-                                                : "No"
-                                        }
-                                    </td>
-
-                                    <td>
-                                        {
-                                            formatDate(
-                                                user.createdAt
-                                            )
-                                        }
-                                    </td>
-
-                                    <td>
-                                        {
-                                            formatDate(
-                                                user.updatedAt
-                                            )
-                                        }
-                                    </td>
-
-                                    {
-                                        showUserActions && (
-
-                                            <td>
-                                        {
-    canEditUser && user.active ? (
-
-        <button
-            onClick={() =>
-                handleEditUser(user)
-            }
-            disabled={loading}
-        >
-            Editar
-        </button>
-
-    ) : !user.active && canEditUser ? (
-
-        <span>
-            Reactivar para editar
-        </span>
-
-    ) : null
-}
-
-                                      {
-    canChangeUserStatus && (
-
-        user.active ? (
-
-            user.email !== currentUser?.email && (
-
-                <button
-                    onClick={() =>
-                        handleDisableUser(user.id)
-                    }
-                    disabled={loading}
-                >
-                    Desactivar
-                </button>
-            )
-
-        ) : (
-
-            <button
-                onClick={() =>
-                    handleEnableUser(user.id)
-                }
-                disabled={loading}
-            >
-                Reactivar
-            </button>
-        )
-    )
-}
-
-                                            </td>
-                                        )
-                                    }
-
-                                </tr>
-                            ))
-                        )
-                    }
-
-                </tbody>
-
-            </table>
+            <ConfirmDialog
+                isOpen={confirmDialog.isOpen}
+                title={confirmDialog.title}
+                message={confirmDialog.message}
+                confirmText={confirmDialog.confirmText}
+                variant={confirmDialog.variant}
+                loading={loading}
+                onConfirm={handleConfirmDialog}
+                onCancel={closeConfirmDialog}
+            />
 
         </div>
     );
